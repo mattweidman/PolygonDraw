@@ -40,5 +40,20 @@ namespace PolygonDraw
         {
             return new Vector2(p.x / f, p.y / f);
         }
+
+        public override bool Equals(object otherObj)
+        {
+            if (!(otherObj is Vector2 other))
+            {
+                return false;
+            }
+
+            return FloatHelpers.FloatEquals(this.x, other.x) && FloatHelpers.FloatEquals(this.y, other.y);
+        }
+
+        public override string ToString()
+        {
+            return $"<{this.x}, {this.y}>";
+        }
     }
 }

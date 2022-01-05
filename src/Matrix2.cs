@@ -46,5 +46,21 @@ namespace PolygonDraw
         {
             return new Vector2(this.f1 * v.x + this.f2 * v.y, this.f3 * v.x + this.f4 * v.y);
         }
+
+        public override bool Equals(object otherObj)
+        {
+            if (!(otherObj is Matrix2 other))
+            {
+                return false;
+            }
+
+            return FloatHelpers.FloatEquals(this.f1, other.f1) && FloatHelpers.FloatEquals(this.f2, other.f2)
+                && FloatHelpers.FloatEquals(this.f3, other.f3) && FloatHelpers.FloatEquals(this.f4, other.f4);
+        }
+
+        public override string ToString()
+        {
+            return $"[{this.f1}, {this.f2}; {this.f3}, {this.f4}]";
+        }
     }
 }
