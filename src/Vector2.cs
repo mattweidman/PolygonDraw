@@ -1,3 +1,5 @@
+using System;
+
 namespace PolygonDraw
 {
     public class Vector2
@@ -49,6 +51,11 @@ namespace PolygonDraw
             }
 
             return FloatHelpers.FloatEquals(this.x, other.x) && FloatHelpers.FloatEquals(this.y, other.y);
+        }
+
+        public override int GetHashCode()
+        {
+            return Tuple.Create(this.x, this.y).GetHashCode();
         }
 
         public override string ToString()

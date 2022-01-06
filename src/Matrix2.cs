@@ -1,3 +1,5 @@
+using System;
+
 namespace PolygonDraw
 {
     public class Matrix2
@@ -56,6 +58,11 @@ namespace PolygonDraw
 
             return FloatHelpers.FloatEquals(this.f1, other.f1) && FloatHelpers.FloatEquals(this.f2, other.f2)
                 && FloatHelpers.FloatEquals(this.f3, other.f3) && FloatHelpers.FloatEquals(this.f4, other.f4);
+        }
+
+        public override int GetHashCode()
+        {
+            return Tuple.Create(this.f1, this.f2, this.f3, this.f4).GetHashCode();
         }
 
         public override string ToString()
