@@ -36,7 +36,7 @@ namespace PolygonDraw
         {
             float det = this.Determinant();
 
-            if (FloatHelpers.FloatEquals(det, 0))
+            if (FloatHelpers.Eq(det, 0))
             {
                 return null;
             }
@@ -56,8 +56,8 @@ namespace PolygonDraw
                 return false;
             }
 
-            return FloatHelpers.FloatEquals(this.f1, other.f1) && FloatHelpers.FloatEquals(this.f2, other.f2)
-                && FloatHelpers.FloatEquals(this.f3, other.f3) && FloatHelpers.FloatEquals(this.f4, other.f4);
+            return FloatHelpers.Eq(this.f1, other.f1) && FloatHelpers.Eq(this.f2, other.f2)
+                && FloatHelpers.Eq(this.f3, other.f3) && FloatHelpers.Eq(this.f4, other.f4);
         }
 
         public override int GetHashCode()

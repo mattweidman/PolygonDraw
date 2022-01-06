@@ -23,7 +23,7 @@ namespace PolygonDraw
             Matrix2 dMat = new Matrix2(d1.x, -d2.x, d1.y, -d2.y);
 
             float determinant = dMat.Determinant();
-            if (FloatHelpers.FloatEquals(determinant, 0))
+            if (FloatHelpers.Eq(determinant, 0))
             {
                 return null;
             }
@@ -33,16 +33,24 @@ namespace PolygonDraw
             float t1 = tParam.x;
             float t2 = tParam.y;
 
-            bool anEndpointOverlaps = FloatHelpers.FloatEquals(t1, 0) || FloatHelpers.FloatEquals(t1, 1) 
-                || FloatHelpers.FloatEquals(t2, 0) || FloatHelpers.FloatEquals(t2, 1);
-            
-            if ((!anEndpointOverlaps && t1 > 0 && t1 < 1 && t2 > 0 && t2 < 1) ||
-                (includeEndpoints && anEndpointOverlaps))
+            bool intersects;
+            if (includeEndpoints)
             {
-                return (1 - t1) * this.p1 + t1 * this.p2;
+                intersects = FloatHelpers.Gte(t1, 0) && FloatHelpers.Lte(t1, 1)
+                    && FloatHelpers.Gte(t2, 0) && FloatHelpers.Lte(t2, 1);
+            }
+            else
+            {
+                intersects = FloatHelpers.Gt(t1, 0) && FloatHelpers.Lt(t1, 1)
+                    && FloatHelpers.Gt(t2, 0) && FloatHelpers.Lt(t2, 1);
             }
 
-            return null;
+            return intersects ? (1 - t1) * this.p1 + t1 * this.p2 : null;
+        }
+
+        public override string ToString()
+        {
+            return $"{this.p1}-{this.p2}";
         }
     }
 }

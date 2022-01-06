@@ -50,7 +50,7 @@ namespace PolygonDraw
                 return false;
             }
 
-            return FloatHelpers.FloatEquals(this.x, other.x) && FloatHelpers.FloatEquals(this.y, other.y);
+            return FloatHelpers.Eq(this.x, other.x) && FloatHelpers.Eq(this.y, other.y);
         }
 
         public override int GetHashCode()
