@@ -1,5 +1,5 @@
-using PolygonDraw;
 using NUnit.Framework;
+using PolygonDraw;
 
 namespace PolygonDrawTests
 {
@@ -103,6 +103,16 @@ namespace PolygonDrawTests
             Vector2 intersection = segment1.GetIntersection(segment2, true);
 
             PolygonDrawAssert.AreEqual(new Vector2(1, 0), intersection);
+        }
+
+        [Test]
+        public void GetIntersection_HoriAngleSkew()
+        {
+            LineSegment segment1 = new LineSegment(new Vector2(0, 3), new Vector2(2, 3));
+            LineSegment segment2 = new LineSegment(new Vector2(3, 5), new Vector2(4, 3));
+            Vector2 intersection = segment1.GetIntersection(segment2, true);
+
+            Assert.IsNull(intersection);
         }
     }
 }

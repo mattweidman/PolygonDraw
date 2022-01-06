@@ -1,6 +1,6 @@
-using System;
-using PolygonDraw;
 using NUnit.Framework;
+using PolygonDraw;
+using System;
 
 namespace PolygonDrawTests
 {
