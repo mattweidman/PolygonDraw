@@ -25,6 +25,13 @@ namespace PolygonDraw
                 return false;
             }
 
+            // Not in view if segment goes outside of polygon.
+            if (this.BeginsOutside(vIndex1, this.vertices[vIndex2]) 
+                || this.BeginsOutside(vIndex2, this.vertices[vIndex1]))
+            {
+                return false;
+            }
+
             LineSegment segment = new LineSegment(vertices[vIndex1], vertices[vIndex2]);
 
             for (int i = 0; i < this.vertices.Count; i++)
@@ -49,6 +56,20 @@ namespace PolygonDraw
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Returns whether the line from this.vertices[vIndex] to point begins
+        /// outside of the polygon.
+        /// </summary>
+        public bool BeginsOutside(int vIndex, Vector2 point)
+        {
+            Vector2 vertex = this.vertices[vIndex];
+            Vector2 pointDir = point - vertex;
+            Vector2 d1 = this.vertices[(vIndex + 1) % this.vertices.Count] - vertex;
+            Vector2 d2 = this.vertices[(vIndex + this.vertices.Count - 1) % this.vertices.Count] - vertex;
+
+            return !pointDir.IsBetween(d1, d2);
         }
     }
 }

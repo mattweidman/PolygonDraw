@@ -62,5 +62,32 @@ namespace PolygonDraw
         {
             return $"<{this.x}, {this.y}>";
         }
+
+        /// <summary>
+        /// Let d1, d2, and this be direction vectors. Returns whether this
+        /// vector is between the angle formed from d1 to d2 in the clockwise
+        /// direction.
+        /// </summary>
+        public bool IsBetween(Vector2 d1, Vector2 d2)
+        {
+            return d1.Angle(d2) > d1.Angle(this);
+        }
+
+        /// <summary>
+        /// Returns the clockwise angle from this vector to another vector.
+        /// </summary>
+        public float Angle(Vector2 other)
+        {
+            float dot = this.x * other.x + this.y * other.y;
+            float det = this.y * other.x - this.x * other.y;
+            float angle = MathF.Atan2(det, dot);
+
+            if (angle < 0)
+            {
+                angle += MathF.PI * 2;
+            }
+
+            return angle;
+        }
     }
 }

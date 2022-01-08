@@ -16,6 +16,15 @@ namespace PolygonDrawTests
             ObjectsAreEqual(expected, observed);
         }
 
+        public static void AreEqual(float expected, float observed)
+        {
+            if (!FloatHelpers.Eq(expected, observed))
+            {
+                Console.WriteLine($"FAIL: expected {expected}, found {observed}.");
+                Assert.Fail();
+            }
+        }
+
         private static void ObjectsAreEqual(object expected, object observed)
         {
             if (!expected.Equals(observed))
