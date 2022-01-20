@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,6 +8,39 @@ namespace PolygonDraw
     {
         public Triangle(Vector2 p1, Vector2 p2, Vector2 p3) : base (new List<Vector2>() { p1, p2, p3 })
         {
+        }
+
+        /// <summary>
+        /// Returns whether a point is contained inside the triangle.
+        /// </summary>
+        /// <param name="point">Point in question.</param>
+        /// <param name="includeEdges">If true, return true if point is on an edge 
+        /// of this triangle. Else, return false in that case.</param>
+        public bool ContainsPoint(Vector2 point, bool includeEdges = false)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2 t1 = this.vertices[i];
+                Vector2 t2 = this.vertices[(i + 1) % 3];
+                float angle = (t2 - t1).Angle(point - t1);
+
+                if (includeEdges)
+                {
+                    if (FloatHelpers.Gt(angle, MathF.PI) || FloatHelpers.Lt(angle, 0))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (FloatHelpers.Gte(angle, MathF.PI) || FloatHelpers.Lte(angle, 0))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -44,8 +78,9 @@ namespace PolygonDraw
         }
 
         /// <summary>
-        /// Cover this triangle by a mask triangle. Return polygons that cover the
-        /// area of this triangle that are not covered by the mask.
+        /// Construct a graph describing for each point of interest (vertices and intersection
+        /// points) what point would come next clockwise if part of a polygon. Used for
+        /// MaskToPolygon().
         /// </summary>
         public TriangleIntersectionGraph MaskToIntersectionGraph(Triangle mask)
         {
@@ -121,7 +156,7 @@ namespace PolygonDraw
                     // Extract just the indices
                     .Select(pair => pair.Item2.Value);
 
-                // Created ordered list of vertices on this side
+                // Create ordered list of vertices on this side
                 List<int> sidePoints = new List<int>() { (j + 1) % 3 + 3 };
                 sidePoints.AddRange(sideIntersections);
                 sidePoints.Add(j + 3);
@@ -136,6 +171,65 @@ namespace PolygonDraw
             }
 
             return new TriangleIntersectionGraph(pointsOfInterest.ToArray(), baseEdges, maskEdges);
+        }
+
+        /// <summary>
+        /// Cover this triangle by a mask triangle. Return polygons that cover the
+        /// area of this triangle that are not covered by the mask.
+        /// </summary>
+        public List<Polygon> MaskToPolygons(Triangle mask)
+        {
+            TriangleIntersectionGraph graph = this.MaskToIntersectionGraph(mask);
+
+            List<Polygon> polygons = new List<Polygon>();
+
+            bool[] baseVerticesVisited = new bool[3];
+
+            for (int i = 0; i < 3; i++)
+            {
+                // Skip if covered by mask
+                if (mask.ContainsPoint(this.vertices[i]))
+                {
+                    continue;
+                }
+
+                // Skip if already visited this point
+                if (baseVerticesVisited[i])
+                {
+                    continue;
+                }
+
+                List<Vector2> vertices = new List<Vector2>() { graph.allPoints[i] };
+                
+                // DFS to create polygon
+                int vIndex = graph.baseEdges[i].Value;
+                bool onBaseTriangle = true;
+                while (vIndex != i)
+                {
+                    vertices.Add(graph.allPoints[vIndex]);
+
+                    // Keep track of base vertices we have visited
+                    if (vIndex < 3)
+                    {
+                        baseVerticesVisited[vIndex] = true;
+                    }
+
+                    // If we hit an intersection point, swap between base/mask
+                    if (vIndex >= 6)
+                    {
+                        onBaseTriangle = !onBaseTriangle;
+                    }
+
+                    // Jump to next vertex in graph
+                    vIndex = onBaseTriangle
+                        ? graph.baseEdges[vIndex].Value
+                        : graph.maskEdges[vIndex].Value;
+                }
+
+                polygons.Add(new Polygon(vertices));
+            }
+
+            return polygons;
         }
     }
 }

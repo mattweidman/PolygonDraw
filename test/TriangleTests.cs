@@ -5,6 +5,57 @@ namespace PolygonDrawTests
 {
     public class TriangleTests
     {
+        #region ContainsPoint
+
+        [Test]
+        public void ContainsPoint_RightTriangle_BottomLeftCorner()
+        {
+            Triangle t = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
+
+            Assert.IsTrue(t.ContainsPoint(new Vector2(1, 1)));
+            Assert.IsTrue(t.ContainsPoint(new Vector2(1, 1), true));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(3, 3)));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(-1, -1), true));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(0, 2)));
+            Assert.IsTrue(t.ContainsPoint(new Vector2(0, 2), true));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(3, 1)));
+            Assert.IsTrue(t.ContainsPoint(new Vector2(3, 1), true));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(0, 5)));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(0, 5), true));
+        }
+
+        [Test]
+        public void ContainsPoint_RightTriangle_TopRightCorner()
+        {
+            Triangle t = new Triangle(new Vector2(0, 4), new Vector2(4, 4), new Vector2(4, 0));
+
+            Assert.IsTrue(t.ContainsPoint(new Vector2(3, 3)));
+            Assert.IsTrue(t.ContainsPoint(new Vector2(3, 3), true));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(5, -1)));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(5, 2), true));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(4, 4)));
+            Assert.IsTrue(t.ContainsPoint(new Vector2(4, 4), true));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(2, 2)));
+            Assert.IsTrue(t.ContainsPoint(new Vector2(2, 2), true));
+        }
+
+        [Test]
+        public void ContainsPoint_NonRightTriangle()
+        {
+            Triangle t = new Triangle(new Vector2(0, 1), new Vector2(3, 0), new Vector2(-2, -2));
+
+            Assert.IsTrue(t.ContainsPoint(new Vector2(0, 0)));
+            Assert.IsTrue(t.ContainsPoint(new Vector2(1, 0), true));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(1, -2)));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(-1, 0), true));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(3, 0)));
+            Assert.IsTrue(t.ContainsPoint(new Vector2(0, 1), true));
+            Assert.IsFalse(t.ContainsPoint(new Vector2(0, -1.2f)));
+            Assert.IsTrue(t.ContainsPoint(new Vector2(0, -1.2f), true));
+        }
+
+        #endregion
+
         #region GetIntersections
 
         [Test]
