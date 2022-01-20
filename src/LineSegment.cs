@@ -13,7 +13,7 @@ namespace PolygonDraw
 
         /// <summary>
         /// Find the intersection of two line segments. If the line segments do
-        /// not overlap, return null.  If includeEndpoints is true, will return an 
+        /// not overlap, return null. If includeEndpoints is true, will return an 
         /// intersection if it is at an endpoint.
         /// </summary>
         public Vector2 GetIntersection(LineSegment otherLine, bool includeEndpoints = false)

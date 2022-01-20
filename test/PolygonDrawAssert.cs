@@ -48,7 +48,8 @@ namespace PolygonDrawTests
 
             if (!areEqual)
             {
-                throw new AssertionException($"FAIL: expected {ListToString(expected)}, found {ListToString(observed)}");
+                throw new AssertionException(
+                    $"FAIL: expected {ListToString(expected)}, found {ListToString(observed)}");
             }
         }
 
@@ -76,13 +77,69 @@ namespace PolygonDrawTests
 
             if (!areEqual)
             {
-                throw new AssertionException($"FAIL: expected {ListToString(expected)}, found {ListToString(observed)}");
+                throw new AssertionException(
+                    $"FAIL: expected {ListToString(expected)}, found {ListToString(observed)}");
+            }
+        }
+
+        public static void Array2DsEqual<T>(T[][] expected, T[][] observed)
+        {
+            bool areEqual = true;
+
+            if (expected.Length != observed.Length)
+            {
+                areEqual = false;
+            }
+            else
+            {
+                for (int i = 0; i < expected.Length; i++)
+                {
+                    if (expected[i].Length != observed[i].Length)
+                    {
+                        areEqual = false;
+                        break;
+                    }
+
+                    for (int j = 0; j < expected[i].Length; j++)
+                    {
+                        T exp = expected[i][j];
+                        T obs = observed[i][j];
+
+                        if (exp == null && obs == null)
+                        {
+                            continue;
+                        }
+
+                        if (exp == null || obs == null || !exp.Equals(obs))
+                        {
+                            areEqual = false;
+                            break;
+                        }
+                    }
+
+                    if (!areEqual)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (!areEqual)
+            {
+                throw new AssertionException(
+                    $"FAIL: expected {Array2DToString(expected)}, found {Array2DToString(observed)}");
             }
         }
 
         private static string ListToString<T>(List<T> objs)
         {
             return string.Join(",", objs);
+        }
+
+        private static string Array2DToString<T>(T[][] arr)
+        {
+            IEnumerable<string> rowStrings = arr.Select(row => $"[{string.Join(",", row)}]");
+            return $"[{string.Join(",", rowStrings)}]";
         }
     }
 }
