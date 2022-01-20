@@ -43,6 +43,11 @@ namespace PolygonDraw
             return new Vector2(p.x / f, p.y / f);
         }
 
+        public float Magnitude()
+        {
+            return MathF.Sqrt(this.x * this.x + this.y * this.y);
+        }
+
         public override bool Equals(object otherObj)
         {
             if (!(otherObj is Vector2 other))
