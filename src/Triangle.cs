@@ -111,7 +111,7 @@ namespace PolygonDraw
             for (int i = 0; i < 3; i++)
             {
                 // Don't start on base vertices covered by the mask.
-                if (mask.ContainsPoint(this.vertices[i]))
+                if (mask.ContainsPoint(this.vertices[i], true))
                 {
                     allCorners[i].isStarter = false;
                 }
