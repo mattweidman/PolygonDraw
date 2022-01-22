@@ -57,6 +57,52 @@ namespace PolygonDrawTests
 
         #endregion
 
+        #region ContainsTriangle
+
+        [Test]
+        public void ContainsTriangle()
+        {
+            Triangle t = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
+
+            // All inside
+            Assert.IsTrue(t.ContainsTriangle(
+                new Triangle(new Vector2(1, 1), new Vector2(1, 2), new Vector2(2, 1))));
+
+            // All or some outside
+            Assert.IsFalse(t.ContainsTriangle(
+                new Triangle(new Vector2(4, 4), new Vector2(4, 3), new Vector2(3, 4))));
+            Assert.IsFalse(t.ContainsTriangle(
+                new Triangle(new Vector2(1, 1), new Vector2(1, 4), new Vector2(2, 1))));
+            Assert.IsFalse(t.ContainsTriangle(
+                new Triangle(new Vector2(1, 3), new Vector2(4, 4), new Vector2(2, 2))));
+            Assert.IsFalse(t.ContainsTriangle(
+                new Triangle(new Vector2(1, 3), new Vector2(4, 4), new Vector2(2, 2)), true));
+            
+            // On vertex
+            Assert.IsFalse(t.ContainsTriangle(
+                new Triangle(new Vector2(0, 0), new Vector2(1, 2), new Vector2(2, 1))));
+            Assert.IsTrue(t.ContainsTriangle(
+                new Triangle(new Vector2(0, 0), new Vector2(1, 2), new Vector2(2, 1)), true));
+            
+            // On edge - don't include edges
+            Assert.IsFalse(t.ContainsTriangle(
+                new Triangle(new Vector2(0, 1), new Vector2(1, 2), new Vector2(2, 1))));
+            Assert.IsFalse(t.ContainsTriangle(
+                new Triangle(new Vector2(1, 0), new Vector2(0, 1), new Vector2(2, 2))));
+            Assert.IsFalse(t.ContainsTriangle(
+                new Triangle(new Vector2(1, 1), new Vector2(1, 3), new Vector2(2, 2))));
+            
+            // On edge - include edges
+            Assert.IsTrue(t.ContainsTriangle(
+                new Triangle(new Vector2(0, 1), new Vector2(1, 2), new Vector2(2, 1)), true));
+            Assert.IsTrue(t.ContainsTriangle(
+                new Triangle(new Vector2(1, 0), new Vector2(0, 1), new Vector2(2, 2)), true));
+            Assert.IsTrue(t.ContainsTriangle(
+                new Triangle(new Vector2(1, 1), new Vector2(1, 3), new Vector2(2, 2)), true));
+        }
+
+        #endregion
+
         #region MaskToPolygons
 
         [Test]
@@ -521,6 +567,46 @@ namespace PolygonDrawTests
                 {
                     new Vector2(0, 0), new Vector2(0, 4), new Vector2(1, 3), new Vector2(1, 1),
                     new Vector2(2, 2), new Vector2(4, 0)
+                })
+            };
+
+            List<Polygon> observed = t1.MaskToPolygons(t2);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void MaskToPolygons_RightTriangleContainsMask()
+        {
+            Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
+            Triangle t2 = new Triangle(new Vector2(1, 1), new Vector2(1, 2), new Vector2(2, 1));
+
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0), new Vector2(0, 0),
+                    new Vector2(1, 1), new Vector2(2, 1), new Vector2(1, 2), new Vector2(1, 1)
+                })
+            };
+
+            List<Polygon> observed = t1.MaskToPolygons(t2);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void MaskToPolygons_InnerTriangleFirstVertexHidden()
+        {
+            Triangle t1 = new Triangle(new Vector2(4, 4), new Vector2(8, 0), new Vector2(0, 0));
+            Triangle t2 = new Triangle(new Vector2(4, 1), new Vector2(3, 2), new Vector2(5, 2));
+
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(4, 4), new Vector2(8, 0), new Vector2(0, 0), new Vector2(4, 4),
+                    new Vector2(3, 2), new Vector2(4, 1), new Vector2(5, 2), new Vector2(3, 2)
                 })
             };
 

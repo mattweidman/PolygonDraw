@@ -386,7 +386,7 @@ namespace PolygonDrawTests
         }
 
         [Test]
-        public void DivideIntoTriangles_HoleTouchesFVertex()
+        public void DivideIntoTriangles_HoleTouchesFirstVertex()
         {
             Polygon polygon = new Polygon(new List<Vector2>()
             {
@@ -402,6 +402,58 @@ namespace PolygonDrawTests
                 new Triangle(new Vector2(0, 4), new Vector2(2, 1), new Vector2(1, 2)),
                 new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(1, 2)),
                 new Triangle(new Vector2(4, 0), new Vector2(0, 0), new Vector2(2, 1)),
+            };
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void DivideIntoTriangles_InnerRightTriangle()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0), new Vector2(0, 0),
+                new Vector2(1, 1), new Vector2(2, 1), new Vector2(1, 2), new Vector2(1, 1)
+            });
+
+            List<Triangle> observed = polygon.DivideIntoTriangles();
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 0), new Vector2(1, 2), new Vector2(1, 1)),
+                new Triangle(new Vector2(4, 0), new Vector2(1, 1), new Vector2(2, 1)),
+                new Triangle(new Vector2(0, 4), new Vector2(2, 1), new Vector2(1, 2)),
+                new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(1, 2)),
+                new Triangle(new Vector2(0, 4), new Vector2(4, 0), new Vector2(2, 1)),
+                new Triangle(new Vector2(4, 0), new Vector2(0, 0), new Vector2(1, 1)),
+            };
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void DivideIntoTriangles_AlignedVerticesShouldBlock()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0),
+                new Vector2(0, 4),
+                new Vector2(4, 4), // Should not connect to (0, 0)
+                new Vector2(4, 3),
+                new Vector2(3, 3), // Should not connect to (0, 0)
+                new Vector2(1, 1), // Should connect to (0, 0)
+                new Vector2(1, 0)
+            });
+
+            List<Triangle> observed = polygon.DivideIntoTriangles();
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 0), new Vector2(1, 1), new Vector2(1, 0)),
+                new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(1, 1)),
+                new Triangle(new Vector2(0, 4), new Vector2(3, 3), new Vector2(1, 1)),
+                new Triangle(new Vector2(0, 4), new Vector2(4, 3), new Vector2(3, 3)),
+                new Triangle(new Vector2(0, 4), new Vector2(4, 4), new Vector2(4, 3)),
             };
 
             PolygonDrawAssert.ListsContainSame(expected, observed);

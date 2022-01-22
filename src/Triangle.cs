@@ -44,11 +44,28 @@ namespace PolygonDraw
         }
 
         /// <summary>
+        /// Returns whether another triangle is contained inside this triangle.
+        /// </summary>
+        /// <param name="other">Other triangle.</param>
+        /// <param name="includeEdges">If true, return true if triangle's points are
+        /// inside or on an edge. If false, return true only if points are inside.</param>
+        public bool ContainsTriangle(Triangle other, bool includeEdges = false)
+        {
+            return other.vertices.All(v => this.ContainsPoint(v, includeEdges));
+        }
+
+        /// <summary>
         /// Cover this triangle by a mask triangle. Return polygons that cover the
         /// area of this triangle that are not covered by the mask.
         /// </summary>
         public List<Polygon> MaskToPolygons(Triangle mask)
         {
+            // Special case where mask is entirely contained by base
+            if (this.ContainsTriangle(mask))
+            {
+                return new List<Polygon>() { this.CreateInnerMaskPolygon(mask) };
+            }
+
             List<IntersectionGraphNode> starterNodes = this.MaskToIntersectionGraph(mask);
 
             List<Polygon> polygons = new List<Polygon>();
@@ -172,6 +189,9 @@ namespace PolygonDraw
             return allCorners.Where(v => v.isStarter).ToList();
         }
 
+        /// <summary>
+        /// Compute a (this edge, mask edge) -> intersection node mapping.
+        /// </summary>
         private Dictionary<(int, int), IntersectionGraphNode> GetEdgeEdgeIntersections(Triangle mask)
         {
             var nodes = new Dictionary<(int, int), IntersectionGraphNode>();
@@ -254,6 +274,31 @@ namespace PolygonDraw
 
             return targetDir1.IsBetween(boundDir1, boundDir2) ||
                 targetDir2.IsBetween(boundDir1, boundDir2);
+        }
+
+        /// <summary>
+        /// If mask is entirely contained inside base triangle, combine them into one polygon.
+        /// </summary>
+        private Polygon CreateInnerMaskPolygon(Triangle mask)
+        {
+            // Find which vertex of mask is closest to first vertex in this triangle.
+            int closestMaskIndex = mask.vertices
+                .Select((v, i) => (v, i))
+                .OrderBy(pair => (pair.v - this.vertices[0]).Magnitude())
+                .First().i;
+            
+            // Construct list of vertices.
+            List<Vector2> polygonVertices = new List<Vector2>();
+            polygonVertices.AddRange(this.vertices);
+            polygonVertices.Add(this.vertices[0]);
+
+            for (int i = 0; i < 3; i++)
+            {
+                polygonVertices.Add(mask.vertices[(3 - i + closestMaskIndex) % 3]);
+            }
+            polygonVertices.Add(mask.vertices[closestMaskIndex]);
+
+            return new Polygon(polygonVertices);
         }
 
         /// <summary>
