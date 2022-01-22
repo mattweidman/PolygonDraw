@@ -48,6 +48,40 @@ namespace PolygonDraw
             return intersects ? (1 - t1) * this.p1 + t1 * this.p2 : null;
         }
 
+        /// <summary>
+        /// Whether a point should be considered "on" this line segment.
+        /// </summary>
+        public bool IntersectsPoint(Vector2 point, bool includeEndpoints = false)
+        {
+            Vector2 lineDir = (this.p2 - this.p1);
+            Vector2 unitDir = lineDir / lineDir.Magnitude();
+            float projectionLength = (point - p1).Dot(unitDir);
+
+            // If the projection of point on line is not within bounds, no intersection.
+            if (includeEndpoints)
+            {
+                if (FloatHelpers.Lt(projectionLength, 0) || 
+                    FloatHelpers.Gt(projectionLength, (p2 - p1).Magnitude()))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (FloatHelpers.Lte(projectionLength, 0) || 
+                    FloatHelpers.Gte(projectionLength, (p2 - p1).Magnitude()))
+                {
+                    return false;
+                }
+            }
+
+            // If projection is within bounds, depends on perpendicular distance.
+            Vector2 projectionPoint = this.p1 + projectionLength * unitDir;
+            float perpendicularDist = (point - projectionPoint).Magnitude();
+
+            return FloatHelpers.Eq(0, perpendicularDist);
+        }
+
         public override string ToString()
         {
             return $"{this.p1}-{this.p2}";

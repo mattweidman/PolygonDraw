@@ -114,5 +114,53 @@ namespace PolygonDrawTests
 
             Assert.IsNull(intersection);
         }
+
+        [Test]
+        public void IntersectsPoint_Horizontal()
+        {
+            LineSegment ls = new LineSegment(new Vector2(-1, 1), new Vector2(3, 1));
+
+            Assert.IsTrue(ls.IntersectsPoint(new Vector2(0, 1)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(-1, 1)));
+            Assert.IsTrue(ls.IntersectsPoint(new Vector2(-1, 1), true));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(3, 1)));
+            Assert.IsTrue(ls.IntersectsPoint(new Vector2(3, 1), true));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(-1, 1)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(4, 1)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(0, 0)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(0, 4)));
+        }
+
+        [Test]
+        public void IntersectsPoint_Vertical()
+        {
+            LineSegment ls = new LineSegment(new Vector2(-1, 1), new Vector2(-1, 5));
+
+            Assert.IsTrue(ls.IntersectsPoint(new Vector2(-1, 3)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(-1, 1)));
+            Assert.IsTrue(ls.IntersectsPoint(new Vector2(-1, 1), true));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(-1, 5)));
+            Assert.IsTrue(ls.IntersectsPoint(new Vector2(-1, 5), true));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(-1, 0)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(-1, 6)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(2, 4)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(-3, -5)));
+        }
+
+        [Test]
+        public void IntersectsPoint_Diagonal()
+        {
+            LineSegment ls = new LineSegment(new Vector2(0, 0), new Vector2(2, 2));
+
+            Assert.IsTrue(ls.IntersectsPoint(new Vector2(1, 1)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(0, 0)));
+            Assert.IsTrue(ls.IntersectsPoint(new Vector2(0, 0), true));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(2, 2)));
+            Assert.IsTrue(ls.IntersectsPoint(new Vector2(2, 2), true));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(-1, -1)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(5, 5)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(3, 1)));
+            Assert.IsFalse(ls.IntersectsPoint(new Vector2(4, -2)));
+        }
     }
 }
