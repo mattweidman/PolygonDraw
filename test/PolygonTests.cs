@@ -340,6 +340,73 @@ namespace PolygonDrawTests
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
+        [Test]
+        public void DivideIntoTriangles_HoleTouchesOneEdge()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(4, 4), new Vector2(8, 0), new Vector2(4, 0),
+                new Vector2(5, 2), new Vector2(3, 2), new Vector2(4, 0)
+            });
+
+            List<Triangle> observed = polygon.DivideIntoTriangles();
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 0), new Vector2(3, 2), new Vector2(4, 0)),
+                new Triangle(new Vector2(4, 4), new Vector2(8, 0), new Vector2(5, 2)),
+                new Triangle(new Vector2(8, 0), new Vector2(4, 0), new Vector2(5, 2)),
+                new Triangle(new Vector2(0, 0), new Vector2(4, 4), new Vector2(3, 2)),
+                new Triangle(new Vector2(4, 4), new Vector2(5, 2), new Vector2(3, 2)),
+            };
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void DivideIntoTriangles_HoleTouchesOneVertex()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 4), new Vector2(4, 0), new Vector2(0, 0), new Vector2(2, 1),
+                new Vector2(1, 2), new Vector2(0, 0)
+            });
+
+            List<Triangle> observed = polygon.DivideIntoTriangles();
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 4), new Vector2(4, 0), new Vector2(2, 1)),
+                new Triangle(new Vector2(0, 4), new Vector2(2, 1), new Vector2(1, 2)),
+                new Triangle(new Vector2(0, 4), new Vector2(1, 2), new Vector2(0, 0)),
+                new Triangle(new Vector2(4, 0), new Vector2(0, 0), new Vector2(2, 1)),
+            };
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void DivideIntoTriangles_HoleTouchesFVertex()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0), new Vector2(0, 0),
+                new Vector2(2, 1), new Vector2(1, 2)
+            });
+
+            List<Triangle> observed = polygon.DivideIntoTriangles();
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 4), new Vector2(4, 0), new Vector2(2, 1)),
+                new Triangle(new Vector2(0, 4), new Vector2(2, 1), new Vector2(1, 2)),
+                new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(1, 2)),
+                new Triangle(new Vector2(4, 0), new Vector2(0, 0), new Vector2(2, 1)),
+            };
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
         #endregion
     }
 }
