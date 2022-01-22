@@ -133,7 +133,7 @@ namespace PolygonDrawTests
 
         private static string ListToString<T>(List<T> objs)
         {
-            return string.Join(",", objs);
+            return $"[{string.Join(",", objs)}]";
         }
 
         private static string Array2DToString<T>(T[][] arr)

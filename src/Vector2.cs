@@ -75,7 +75,8 @@ namespace PolygonDraw
         /// </summary>
         public bool IsBetween(Vector2 d1, Vector2 d2)
         {
-            return d1.Angle(d2) > d1.Angle(this);
+            float thisAngle = d1.Angle(this);
+            return FloatHelpers.Gt(d1.Angle(d2), thisAngle) && FloatHelpers.Gt(thisAngle, 0);
         }
 
         /// <summary>
@@ -93,6 +94,11 @@ namespace PolygonDraw
             }
 
             return angle;
+        }
+
+        public float Dot(Vector2 other)
+        {
+            return this.x * other.x + this.y * other.y;
         }
     }
 }

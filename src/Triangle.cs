@@ -44,37 +44,56 @@ namespace PolygonDraw
         }
 
         /// <summary>
-        /// Finds intersection points of the sides of two triangles. Returns 2D array mat
-        /// where mat[i][j], if non-null, is an intersection between the side (i -> i+1) 
-        /// of this triangle and the side (j -> j+1) of the other triangle.
+        /// Cover this triangle by a mask triangle. Return polygons that cover the
+        /// area of this triangle that are not covered by the mask.
         /// </summary>
-        public Vector2[][] GetIntersections(Triangle other)
+        public List<Polygon> MaskToPolygons(Triangle mask)
         {
-            Vector2[][] intersectionPoints = new Vector2[3][];
+            List<IntersectionGraphNode> starterNodes = this.MaskToIntersectionGraph(mask);
 
-            for (int i = 0; i < 3; i ++)
+            List<Polygon> polygons = new List<Polygon>();
+
+            HashSet<IntersectionGraphNode> visited = new HashSet<IntersectionGraphNode>();
+
+            foreach (IntersectionGraphNode starterNode in starterNodes)
             {
-                intersectionPoints[i] = new Vector2[3];
-
-                LineSegment thisLineSegment = new LineSegment(
-                    this.vertices[i],
-                    this.vertices[(i + 1) % 3]);
-
-                for (int j = 0; j < 3; j++)
+                // Skip if already visited this point
+                if (visited.Contains(starterNode))
                 {
-                    LineSegment otherLineSegment = new LineSegment(
-                        other.vertices[j],
-                        other.vertices[(j + 1) % 3]);
-                    
-                    Vector2 intersection = thisLineSegment.GetIntersection(otherLineSegment);
-                    if (intersection != null)
-                    {
-                        intersectionPoints[i][j] = intersection;
-                    }
+                    continue;
                 }
+
+                // DFS to create polygon
+                List<Vector2> vertices = new List<Vector2>() { starterNode.point };
+                IntersectionGraphNode currentNode = starterNode.baseNext;
+                bool onBaseTriangle = true;
+                while (currentNode != starterNode)
+                {
+                    // Add point to polygon
+                    vertices.Add(currentNode.point);
+
+                    // Keep track of starter nodes we have visited
+                    if (currentNode.isStarter)
+                    {
+                        visited.Add(currentNode);
+                    }
+
+                    // If we hit an intersection point, swap between base/mask
+                    if (currentNode.IsSwappable())
+                    {
+                        onBaseTriangle = !onBaseTriangle;
+                    }
+
+                    // Jump to next vertex in graph
+                    currentNode = onBaseTriangle
+                        ? currentNode.baseNext
+                        : currentNode.maskNext;
+                }
+
+                polygons.Add(new Polygon(vertices));
             }
 
-            return intersectionPoints;
+            return polygons;
         }
 
         /// <summary>
@@ -82,154 +101,184 @@ namespace PolygonDraw
         /// points) what point would come next clockwise if part of a polygon. Used for
         /// MaskToPolygon().
         /// </summary>
-        public TriangleIntersectionGraph MaskToIntersectionGraph(Triangle mask)
+        private List<IntersectionGraphNode> MaskToIntersectionGraph(Triangle mask)
         {
-            // Construct a mapping of int -> point so that making an adjacency list is easier
-            List<Vector2> pointsOfInterest = new List<Vector2>();
-            pointsOfInterest.AddRange(this.vertices);
-            pointsOfInterest.AddRange(mask.vertices);
+            List<IntersectionGraphNode> allCorners = new List<IntersectionGraphNode>();
+            allCorners.AddRange(this.vertices.Select(v => new IntersectionGraphNode(v, true)));
+            allCorners.AddRange(mask.vertices.Select(v => new IntersectionGraphNode(v)));
 
-            // Find intersection points between the triangles.
-            Vector2[][] allIntersectionPoints = this.GetIntersections(mask);
-
-            // Put all intersections into the points of interest list and record their indices.
-            int?[][] intersectionIndices = new int?[allIntersectionPoints.Length][];
-            for (int i = 0; i < allIntersectionPoints.Length; i++)
+            // Deal with vertex-vertex intersections.
+            for (int i = 0; i < 3; i++)
             {
-                intersectionIndices[i] = new int?[allIntersectionPoints[i].Length];
-                for (int j = 0; j < allIntersectionPoints[i].Length; j++)
+                // Don't start on base vertices covered by the mask.
+                if (mask.ContainsPoint(this.vertices[i]))
                 {
-                    if (allIntersectionPoints[i][j] != null)
+                    allCorners[i].isStarter = false;
+                }
+
+                for (int j = 0; j < 3; j++)
+                {
+                    if (this.vertices[i].Equals(mask.vertices[j]))
                     {
-                        intersectionIndices[i][j] = pointsOfInterest.Count;
-                        pointsOfInterest.Add(allIntersectionPoints[i][j]);
+                        // Vertices should be the same instance if one of them is an
+                        // intersection point. The vertex is an intersection point if
+                        // the two triangles overlap at that point.
+                        if (AnEdgeIsBetween(this.vertices[i], this.vertices[(i + 1) % 3],
+                            this.vertices[(i + 2) % 3], mask.vertices[(j + 1) % 3],
+                            mask.vertices[(j + 2) % 3]) || 
+                            AnEdgeIsBetween(this.vertices[i], mask.vertices[(j + 1) % 3],
+                            mask.vertices[(j + 2) % 3], this.vertices[(i + 1) % 3],
+                            this.vertices[(i + 2) % 3]))
+                        {
+                            allCorners[i] = allCorners[j + 3];
+                        }
                     }
                 }
             }
 
-            // These two arrays make up the adjacency list describing the graph.
-            // baseEdges[i] = j or maskEdges[i] = j indicate an edge from i to j.
-            // There are two arrays because intersection points have two outgoing edges
-            // and because we want to switch between the two types of edges.
-            int?[] baseEdges = new int?[pointsOfInterest.Count];
-            int?[] maskEdges = new int?[pointsOfInterest.Count];
+            Dictionary<(int, int), IntersectionGraphNode> edgeEdgeIntersections =
+                this.GetEdgeEdgeIntersections(mask);
 
-            // Create base edges
-            for (int i = 0; i < 3; i ++)
+            // Find intersections with base edges.
+            for (int i = 0; i < 3; i++)
             {
-                IEnumerable<int> sideIntersections = allIntersectionPoints[i]
-                    // Pair with indices in pointsOfInterest
-                    .Select((ip, j) => (ip, intersectionIndices[i][j]))
-                    // Remove null elements
-                    .Where(pair => pair.Item1 != null)
-                    // Sort by proximity to first vertex
-                    .OrderBy(pair => (pair.Item1 - this.vertices[i]).Magnitude())
-                    // Extract just the indices
-                    .Select(pair => pair.Item2.Value);
+                List<IntersectionGraphNode> edgeNodes = mask.GetIntersectionsOnLine(
+                    allCorners[i],
+                    allCorners[(i + 1) % 3],
+                    j => allCorners[j + 3],
+                    j => edgeEdgeIntersections.GetValueOrDefault((i, j)));
 
-                // Created ordered list of vertices on this side
-                List<int> sidePoints = new List<int>() { i };
-                sidePoints.AddRange(sideIntersections);
-                sidePoints.Add((i + 1) % 3);
-
-                // Add vertices to adjacency list
-                for (int sideInd = 0; sideInd < sidePoints.Count - 1; sideInd++)
+                for (int k = 0; k < edgeNodes.Count - 1; k++)
                 {
-                    int start = sidePoints[sideInd];
-                    int next = sidePoints[sideInd + 1];
-                    baseEdges[start] = next;
+                    edgeNodes[k].baseNext = edgeNodes[k + 1];
                 }
             }
 
-            // Create mask edges
+            // Find intersections with mask edges.
             for (int j = 0; j < 3; j++)
             {
-                IEnumerable<int> sideIntersections = allIntersectionPoints
-                    // Extract column j
-                    .Select(row => row[j])
-                    // Pair with indices in pointsOfInterest
-                    .Select((ip, i) => (ip, intersectionIndices[i][j]))
-                    // Remove null elements
-                    .Where(pair => pair.Item1 != null)
-                    // Sort by proximity to first vertex
-                    .OrderByDescending(pair => (pair.Item1 - mask.vertices[j]).Magnitude())
-                    // Extract just the indices
-                    .Select(pair => pair.Item2.Value);
+                List<IntersectionGraphNode> edgeNodes = this.GetIntersectionsOnLine(
+                    allCorners[j + 3],
+                    allCorners[(j + 1) % 3 + 3],
+                    i => allCorners[i],
+                    i => edgeEdgeIntersections.GetValueOrDefault((i, j)));
 
-                // Create ordered list of vertices on this side
-                List<int> sidePoints = new List<int>() { (j + 1) % 3 + 3 };
-                sidePoints.AddRange(sideIntersections);
-                sidePoints.Add(j + 3);
-
-                // Add vertices to adjacency list
-                for (int sideInd = 0; sideInd < sidePoints.Count - 1; sideInd++)
+                for (int k = 1; k < edgeNodes.Count; k++)
                 {
-                    int start = sidePoints[sideInd];
-                    int next = sidePoints[sideInd + 1];
-                    maskEdges[start] = next;
+                    edgeNodes[k].maskNext = edgeNodes[k - 1];
                 }
             }
 
-            return new TriangleIntersectionGraph(pointsOfInterest.ToArray(), baseEdges, maskEdges);
+            return allCorners.Where(v => v.isStarter).ToList();
         }
 
-        /// <summary>
-        /// Cover this triangle by a mask triangle. Return polygons that cover the
-        /// area of this triangle that are not covered by the mask.
-        /// </summary>
-        public List<Polygon> MaskToPolygons(Triangle mask)
+        private Dictionary<(int, int), IntersectionGraphNode> GetEdgeEdgeIntersections(Triangle mask)
         {
-            TriangleIntersectionGraph graph = this.MaskToIntersectionGraph(mask);
-
-            List<Polygon> polygons = new List<Polygon>();
-
-            bool[] baseVerticesVisited = new bool[3];
+            var nodes = new Dictionary<(int, int), IntersectionGraphNode>();
 
             for (int i = 0; i < 3; i++)
             {
-                // Skip if covered by mask
-                if (mask.ContainsPoint(this.vertices[i]))
-                {
-                    continue;
-                }
-
-                // Skip if already visited this point
-                if (baseVerticesVisited[i])
-                {
-                    continue;
-                }
-
-                List<Vector2> vertices = new List<Vector2>() { graph.allPoints[i] };
+                LineSegment thisLineSegment =
+                    new LineSegment(this.vertices[i], this.vertices[(i + 1) % 3]);
                 
-                // DFS to create polygon
-                int vIndex = graph.baseEdges[i].Value;
-                bool onBaseTriangle = true;
-                while (vIndex != i)
+                for (int j = 0; j < 3; j++)
                 {
-                    vertices.Add(graph.allPoints[vIndex]);
-
-                    // Keep track of base vertices we have visited
-                    if (vIndex < 3)
+                    LineSegment maskLineSegment =
+                        new LineSegment(mask.vertices[j], mask.vertices[(j + 1) % 3]);
+                    
+                    Vector2 intersection = thisLineSegment.GetIntersection(maskLineSegment);
+                    if (intersection != null)
                     {
-                        baseVerticesVisited[vIndex] = true;
+                        nodes[(i, j)] = new IntersectionGraphNode(intersection);
                     }
-
-                    // If we hit an intersection point, swap between base/mask
-                    if (vIndex >= 6)
-                    {
-                        onBaseTriangle = !onBaseTriangle;
-                    }
-
-                    // Jump to next vertex in graph
-                    vIndex = onBaseTriangle
-                        ? graph.baseEdges[vIndex].Value
-                        : graph.maskEdges[vIndex].Value;
                 }
-
-                polygons.Add(new Polygon(vertices));
             }
 
-            return polygons;
+            return nodes;
+        }
+
+        /// <summary>
+        /// Find points on this triangle that intersect a line on another triangle.
+        /// </summary>
+        private List<IntersectionGraphNode> GetIntersectionsOnLine(
+            IntersectionGraphNode endpoint1,
+            IntersectionGraphNode endpoint2,
+            Func<int, IntersectionGraphNode> getNode,
+            Func<int, IntersectionGraphNode> getExistingIntersection)
+        {
+            List<IntersectionGraphNode> edgeNodes = new List<IntersectionGraphNode>()
+            {
+                endpoint1,
+                endpoint2
+            };
+
+            LineSegment otherLineSegment = new LineSegment(endpoint1.point, endpoint2.point);
+
+            for (int j = 0; j < 3; j++)
+            {
+                // Edge-edge intersection
+                IntersectionGraphNode existingIntersection = getExistingIntersection(j);
+                if (existingIntersection != null)
+                {
+                    edgeNodes.Add(existingIntersection);
+                }
+
+                // Edge-vertex intersection
+                if (otherLineSegment.IntersectsPoint(this.vertices[j]))
+                {
+                    // Only intersect if one of the edges is bounded by the other triangle.
+                    if (AnEdgeIsBetween(this.vertices[j], endpoint2.point, endpoint1.point,
+                        this.vertices[(j + 1) % 3], this.vertices[(j + 2) % 3]))
+                    {
+                        IntersectionGraphNode otherNode = getNode(j);
+                        otherNode.isStarter = false;
+                        edgeNodes.Add(otherNode);
+                    }
+                }
+            }
+
+            return edgeNodes.OrderBy(n => (n.point - endpoint1.point).Magnitude()).ToList();
+        }
+
+        /// <summary>
+        /// Whether (target1 - center) or (target2 - center) is between the clockwise
+        /// bounds of (bound1 - center) and (bound2 - center).
+        /// </summary>
+        private bool AnEdgeIsBetween(Vector2 center, Vector2 bound1, Vector2 bound2,
+            Vector2 target1, Vector2 target2)
+        {
+            Vector2 boundDir1 = bound1 - center;
+            Vector2 boundDir2 = bound2 - center;
+            Vector2 targetDir1 = target1 - center;
+            Vector2 targetDir2 = target2 - center;
+
+            return targetDir1.IsBetween(boundDir1, boundDir2) ||
+                targetDir2.IsBetween(boundDir1, boundDir2);
+        }
+
+        /// <summary>
+        /// Describes a node in a graph produced by intersecting two triangles.
+        /// </summary>
+        public class IntersectionGraphNode
+        {
+            public Vector2 point;
+
+            public bool isStarter = false;
+
+            public IntersectionGraphNode baseNext = null;
+
+            public IntersectionGraphNode maskNext = null;
+
+            public IntersectionGraphNode(Vector2 point, bool isStarter = false)
+            {
+                this.point = point;
+                this.isStarter = isStarter;
+            }
+
+            public bool IsSwappable()
+            {
+                return baseNext != null && maskNext != null;
+            }
         }
     }
 }

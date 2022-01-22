@@ -12,7 +12,9 @@ namespace PolygonDraw
         {
             if (vertices.Count < 3)
             {
-                throw new ArgumentException("Cannot create a polygon with less than 3 vertices.");
+                throw new ArgumentException(
+                    $"Cannot create a polygon [{string.Join(",", vertices)}] "
+                    + "with less than 3 vertices.");
             }
 
             this.vertices = vertices;
