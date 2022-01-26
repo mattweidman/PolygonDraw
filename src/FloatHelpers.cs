@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace PolygonDraw
 {
@@ -44,6 +45,35 @@ namespace PolygonDraw
         public static bool Lte(float a, float b)
         {
             return a < b || Eq(a, b);
+        }
+
+        /// <summary>
+        /// Finds the index of the value in a sequence that maps to the highest value
+        /// according to a mapping function.
+        /// </summary>
+        public static int ArgMax<T>(this IList<T> list, Func<T, float> map)
+        {
+            if (list.Count == 0)
+            {
+                throw new ArgumentException("Cannot find the minimum in a list of length 0.");
+            }
+
+            int maxIndex = 0;
+            float maxValue = map(list[0]);
+
+            for (int i = 1; i < list.Count; i++)
+            {
+                T key = list[i];
+                float value = map(key);
+
+                if (FloatHelpers.Gt(value, maxValue))
+                {
+                    maxIndex = i;
+                    maxValue = value;
+                }
+            }
+
+            return maxIndex;
         }
     }
 }
