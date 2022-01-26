@@ -183,6 +183,178 @@ namespace PolygonDraw
             return $"Polygon[{string.Join(",", this.vertices)}]";
         }
 
+        #region Sweep-Line Triangulation
+
+        /// <summary>
+        /// Assuming this polygon is y-monotone, divide it into triangles that cover 
+        /// the same area.
+        /// </summary>
+        public List<Triangle> MonotoneTriangulate()
+        {
+            int vertexMaxIndex = this.vertices.ArgMax(v => v.y);
+            int vertexMinIndex = this.vertices.ArgMin(v => v.y);
+
+            // Sort points by y-coordinate
+            List<MonotonePolygonVertex> sortedPoints = new List<MonotonePolygonVertex>()
+            {
+                new MonotonePolygonVertex(this.vertices[vertexMaxIndex], MonotoneChain.Top)
+            };
+            int leftIndex = (vertexMaxIndex + this.vertices.Count - 1) % this.vertices.Count;
+            int rightIndex = (vertexMaxIndex + 1) % this.vertices.Count;
+            while (leftIndex != vertexMinIndex || rightIndex != vertexMinIndex)
+            {
+                // Add the higher one to the list each time
+                if (FloatHelpers.Gt(this.vertices[leftIndex].y, this.vertices[rightIndex].y))
+                {
+                    sortedPoints.Add(new MonotonePolygonVertex(
+                        this.vertices[leftIndex],
+                        MonotoneChain.LeftChain));
+                    leftIndex = (leftIndex + this.vertices.Count - 1) % this.vertices.Count;
+                }
+                else
+                {
+                    sortedPoints.Add(new MonotonePolygonVertex(
+                        this.vertices[rightIndex],
+                        MonotoneChain.RightChain));
+                    rightIndex = (rightIndex + 1) % this.vertices.Count;
+                }
+            }
+            sortedPoints.Add(new MonotonePolygonVertex(
+                this.vertices[vertexMinIndex],
+                MonotoneChain.Bottom));
+
+            // Move from top to bottom, keeping a stack of vertices that still need triangles.
+            List<Triangle> triangles = new List<Triangle>();
+            Stack<MonotonePolygonVertex> stack = new Stack<MonotonePolygonVertex>();
+            MonotoneChain lastPosition = MonotoneChain.Top;
+            for (int i = 0; i < sortedPoints.Count; i++)
+            {
+                MonotonePolygonVertex currentVertex = sortedPoints[i];
+                if (i < 2)
+                {
+                    // First two points can't be matched with anything.
+                    stack.Push(currentVertex);
+                }
+                else if (currentVertex.position != lastPosition)
+                {
+                    // If we jumped across the polygon, connect vertex to everything in stack.
+                    MonotonePolygonVertex previousVertex = stack.Pop();
+                    MonotonePolygonVertex lastVertex = previousVertex;
+
+                    while (stack.Count > 0)
+                    {
+                        MonotonePolygonVertex higherVertex = stack.Pop();
+                        triangles.Add(GenerateTriangle(currentVertex, previousVertex, higherVertex));
+                        previousVertex = higherVertex;
+                    }
+
+                    stack.Push(lastVertex);
+                    stack.Push(currentVertex);
+                }
+                else
+                {
+                    // If we are on the same chain, connect to everything until we
+                    // reach a vertex that isn't reachable.
+                    MonotonePolygonVertex previousVertex = stack.Pop();
+
+                    while (stack.Count > 0)
+                    {
+                        MonotonePolygonVertex higherVertex = stack.Peek();
+
+                        // If higherVertex isn't in view, break.
+                        if (!NewPointIsInView(currentVertex, previousVertex, higherVertex))
+                        {
+                            break;
+                        }
+
+                        stack.Pop();
+                        triangles.Add(GenerateTriangle(currentVertex, previousVertex, higherVertex));
+                        previousVertex = higherVertex;
+                    }
+
+                    stack.Push(previousVertex);
+                    stack.Push(currentVertex);
+                }
+
+                lastPosition = currentVertex.position;
+            }
+
+            return triangles;
+        }
+
+        /// <summary>
+        /// Takes 3 vertices and combines them into a triangle.
+        /// </summary>
+        private static Triangle GenerateTriangle(
+            MonotonePolygonVertex p1,
+            MonotonePolygonVertex p2,
+            MonotonePolygonVertex p3)
+        {
+            Vector2 dir2 = p2.point - p1.point;
+            Vector2 dir3 = p3.point - p1.point;
+            float angle = dir2.Angle(dir3);
+
+            if (FloatHelpers.Lt(angle, MathF.PI))
+            {
+                return new Triangle(p1.point, p2.point, p3.point);
+            }
+            else
+            {
+                return new Triangle(p1.point, p3.point, p2.point);
+            }
+        }
+
+        /// <summary>
+        /// Returns whether p3 is in view of p1, assuming there is already a
+        /// triangle stretching from p1 to p2.
+        /// </summary>
+        private static bool NewPointIsInView(
+            MonotonePolygonVertex p1,
+            MonotonePolygonVertex p2,
+            MonotonePolygonVertex p3)
+        {
+            Vector2 dir2 = p2.point - p1.point;
+            Vector2 dir3 = p3.point - p1.point;
+            float angle = dir2.Angle(dir3);
+
+            if (p1.position == MonotoneChain.LeftChain)
+            {
+                return FloatHelpers.Lt(angle, MathF.PI);
+            }
+            else
+            {
+                return FloatHelpers.Gt(angle, MathF.PI);
+            }
+        }
+
+        /// <summary>
+        /// Helper class for MonotoneTriangulate.
+        /// </summary>
+        private class MonotonePolygonVertex
+        {
+            public Vector2 point;
+            public MonotoneChain position;
+
+            public MonotonePolygonVertex(Vector2 v, MonotoneChain mc)
+            {
+                this.point = v;
+                this.position = mc;
+            }
+        }
+
+        /// <summary>
+        /// Describes where in a y-monotone polygon a particular vertex is.
+        /// </summary>
+        private enum MonotoneChain
+        {
+            Top,
+            Bottom,
+            LeftChain,
+            RightChain
+        }
+
+        #endregion
+
         /// <summary>
         /// Whether the indices of two vertices in this polygon are next to each other.
         /// </summary>
