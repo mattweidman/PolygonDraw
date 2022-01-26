@@ -204,7 +204,9 @@ namespace PolygonDraw
             while (leftIndex != vertexMinIndex || rightIndex != vertexMinIndex)
             {
                 // Add the higher one to the list each time
-                if (FloatHelpers.Gt(this.vertices[leftIndex].y, this.vertices[rightIndex].y))
+                if (FloatHelpers.Gt(this.vertices[leftIndex].y, this.vertices[rightIndex].y) ||
+                    (FloatHelpers.Eq(this.vertices[leftIndex].y, this.vertices[rightIndex].y) &&
+                    rightIndex == vertexMinIndex))
                 {
                     sortedPoints.Add(new MonotonePolygonVertex(
                         this.vertices[leftIndex],
