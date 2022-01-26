@@ -75,5 +75,14 @@ namespace PolygonDraw
 
             return maxIndex;
         }
+
+        /// <summary>
+        /// Finds the index of the value in a sequence that maps to the lowest value
+        /// according to a mapping function.
+        /// </summary>
+        public static int ArgMin<T>(this IList<T> list, Func<T, float> map)
+        {
+            return list.ArgMax(x => -map(x));
+        }
     }
 }
