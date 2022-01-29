@@ -5,20 +5,99 @@ namespace PolygonDraw
     /// <summary>
     /// Red-black tree of line segments. Stores line segments so they are sorted
     /// horizontally. Assumes no lines intersecting.
+    /// Following https://www.cs.cornell.edu/courses/cs3110/2009sp/lectures/lec11.html
     /// </summary>
     public class LineSegmentTree
     {
         private Node root;
-
+        
         public void Insert(LineSegment lineSegment)
         {
-            if (this.root == null)
+            Vector2 higherPoint = FloatHelpers.Gt(lineSegment.p1.y, lineSegment.p2.y)
+                ? lineSegment.p1 : lineSegment.p2;
+
+            Node bubbledUpNode = this.InsertRecursive(higherPoint, lineSegment, this.root);
+
+            // Root must be black.
+            bubbledUpNode.isRed = false;
+            this.root = bubbledUpNode;
+        }
+
+        private Node InsertRecursive(Vector2 higherPoint, LineSegment newLineSegment, Node node)
+        {
+            if (node == null)
             {
-                this.root = new Node(lineSegment, false);
-                return;
+                return new Node(newLineSegment, true);
             }
 
-            // TODO
+            if (PointIsLeftOfLineSegment(higherPoint, node.lineSegment))
+            {
+                node.left = this.InsertRecursive(higherPoint, newLineSegment, node.left);
+
+                if (node.left.isRed && (node.left.left != null && node.left.left.isRed))
+                {
+                    Node newRoot = node.left;
+                    Node newLeft = node.left.left;
+                    Node newRight = node;
+
+                    newRight.left = newRoot.right;
+                    newRoot.right = newRight;
+
+                    newLeft.isRed = false;
+
+                    return newRoot;
+                }
+                else if (node.left.isRed && (node.left.right != null && node.left.right.isRed))
+                {
+                    Node newRoot = node.left.right;
+                    Node newLeft = node.left;
+                    Node newRight = node;
+
+                    newLeft.right = newRoot.left;
+                    newRight.left = newRoot.right;
+                    newRoot.left = newLeft;
+                    newRoot.right = newRight;
+
+                    newLeft.isRed = false;
+
+                    return newRoot;
+                }
+            }
+            else
+            {
+                node.right = this.InsertRecursive(higherPoint, newLineSegment, node.right);
+
+                if (node.right.isRed && (node.right.left != null && node.right.left.isRed))
+                {
+                    Node newRoot = node.right.left;
+                    Node newLeft = node;
+                    Node newRight = node.right;
+
+                    newRight.left = newRoot.right;
+                    newLeft.right = newRoot.left;
+                    newRoot.left = newLeft;
+                    newRoot.right = newRight;
+
+                    newRight.isRed = false;
+
+                    return newRoot;
+                }
+                else if (node.right.isRed && (node.right.right != null && node.right.right.isRed))
+                {
+                    Node newRoot = node.right;
+                    Node newLeft = node;
+                    Node newRight = node.right.right;
+
+                    newLeft.right = newRoot.left;
+                    newRoot.left = newLeft;
+
+                    newRight.isRed = false;
+
+                    return newRoot;
+                }
+            }
+
+            return node;
         }
 
         public void CheckInvariants()
