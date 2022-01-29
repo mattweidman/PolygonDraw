@@ -60,14 +60,14 @@ namespace PolygonDraw
             }
 
             // Left should be lower.
-            if (node.left != null && !this.PointIsLeftOfLineSegment(node.left.GetHighPoint(), node.lineSegment))
+            if (node.left != null && !PointIsLeftOfLineSegment(node.left.GetHighPoint(), node.lineSegment))
             {
                 throw new InvariantFailedException(
                     $"Node {node} has a left child {node.left} that is not to its left.");
             }
 
             // Right should be higher.
-            if (node.right != null && this.PointIsLeftOfLineSegment(node.right.GetHighPoint(), node.lineSegment))
+            if (node.right != null && PointIsLeftOfLineSegment(node.right.GetHighPoint(), node.lineSegment))
             {
                 throw new InvariantFailedException(
                     $"Node {node} has a right child {node.right} that is not to its right.");
@@ -89,49 +89,27 @@ namespace PolygonDraw
         /// <summary>
         /// Whether a point can be considered "left" of a line.
         /// </summary>
-        private bool PointIsLeftOfLineSegment(Vector2 point, LineSegment lineSegment)
+        private static bool PointIsLeftOfLineSegment(Vector2 point, LineSegment lineSegment)
         {
-            // Vector2 epLow, epHigh;
-            // if (FloatHelpers.Lt(lineSegment.p1.y, lineSegment.p2.y))
-            // {
-            //     epLow = lineSegment.p1;
-            //     epHigh = lineSegment.p2;
-            // }
-            // else
-            // {
-            //     epLow = lineSegment.p2;
-            //     epHigh = lineSegment.p1;
-            // }
+            LineSegment.HorizontalPosition pos = lineSegment.GetRelativeHorizontalPosition(point);
 
-            // if (FloatHelpers.Lt(point.y, epLow.y) || FloatHelpers.Gt(point.y, epHigh.y))
-            // {
-            //     throw new ArgumentException(
-            //         $"Point {point} is not within the y-coordinate range of line segment {lineSegment}.");
-            // }
-
-            // if (lineSegment.IntersectsPoint(point))
-            // {
-            //     throw new ArgumentException($"Point {point} can not be on line segment {lineSegment}.");
-            // }
-
-            // if (FloatHelpers.Lt(point.x, epLow.x) && FloatHelpers.Lt(point.x, epHigh.x))
-            // {
-            //     return true;
-            // }
-
-            // if (FloatHelpers.Gt(point.x, epLow.x) && FloatHelpers.Gt(point.x, epHigh.x))
-            // {
-            //     return false;
-            // }
-
-            if (FloatHelpers.Eq(lineSegment.p1.x, lineSegment.p2.x))
+            if (pos == LineSegment.HorizontalPosition.LEFT)
             {
-                return FloatHelpers.Lt(point.x, MathF.Min(lineSegment.p1.x, lineSegment.p2.x));
+                return true;
             }
-
-            return FloatHelpers.Lt(
-                (point.x - lineSegment.p1.x) * (lineSegment.p2.y - lineSegment.p1.y),
-                (point.y - lineSegment.p1.y) * (lineSegment.p2.x - lineSegment.p1.x));
+            else if (pos == LineSegment.HorizontalPosition.RIGHT)
+            {
+                return false;
+            }
+            else if (pos == LineSegment.HorizontalPosition.INTERSECTING)
+            {
+                throw new ArgumentException($"Point {point} cannot be on line segment {lineSegment}.");
+            }
+            else
+            {
+                throw new ArgumentException(
+                    $"Point {point} is not within the y-coordinate range of line segment {lineSegment}.");
+            }
         }
 
         private class Node

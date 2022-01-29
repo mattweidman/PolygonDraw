@@ -162,5 +162,237 @@ namespace PolygonDrawTests
             Assert.IsFalse(ls.IntersectsPoint(new Vector2(3, 1)));
             Assert.IsFalse(ls.IntersectsPoint(new Vector2(4, -2)));
         }
+
+        #region GetRelativeHorizontalPosition
+
+        [Test]
+        public void GetRelativeHorizontalPosition_UpRight()
+        {
+            LineSegment ls = new LineSegment(new Vector2(0, 0), new Vector2(2, 2));
+
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(0.5f, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 1.5f)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(-1, 0)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1.5f, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 0.5f)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(3, 2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, 0)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(2, 2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(5, 3)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(-4, -1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(-1, -1)));
+        }
+
+        [Test]
+        public void GetRelativeHorizontalPosition_UpLeft()
+        {
+            LineSegment ls = new LineSegment(new Vector2(2, 0), new Vector2(0, 2));
+
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(0.5f, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 0.5f)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(-1, 0)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1.5f, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 1.5f)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(3, 2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(2, 0)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, 2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(5, 3)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(-4, -1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(3, -1)));
+        }
+
+        [Test]
+        public void GetRelativeHorizontalPosition_DownRight()
+        {
+            LineSegment ls = new LineSegment(new Vector2(0, 2), new Vector2(2, 0));
+
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(0.5f, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 0.5f)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(-1, 0)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1.5f, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 1.5f)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(3, 2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(2, 0)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, 2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(5, 3)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(-4, -1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(3, -1)));
+        }
+
+        [Test]
+        public void GetRelativeHorizontalPosition_DownLeft()
+        {
+            LineSegment ls = new LineSegment(new Vector2(2, 2), new Vector2(0, 0));
+
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(0.5f, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 1.5f)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(-1, 0)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1.5f, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 0.5f)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(3, 2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, 0)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(2, 2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(5, 3)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(-4, -1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(-1, -1)));
+        }
+
+        [Test]
+        public void GetRelativeHorizontalPosition_Horizontal()
+        {
+            LineSegment ls = new LineSegment(new Vector2(-1, 1), new Vector2(1, 1));
+
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(-2, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(-1, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(2, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, 2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, 0)));
+        }
+
+        [Test]
+        public void GetRelativeHorizontalPosition_Vertical()
+        {
+            LineSegment ls = new LineSegment(new Vector2(0, -1), new Vector2(0, 1));
+
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, -2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, -1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, 0)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.INTERSECTING,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, 1)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.NOT_ALIGNED,
+                ls.GetRelativeHorizontalPosition(new Vector2(0, 2)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.LEFT,
+                ls.GetRelativeHorizontalPosition(new Vector2(-1, 0)));
+            Assert.AreEqual(
+                LineSegment.HorizontalPosition.RIGHT,
+                ls.GetRelativeHorizontalPosition(new Vector2(1, 0)));
+        }
+
+        #endregion
     }
 }

@@ -86,5 +86,65 @@ namespace PolygonDraw
         {
             return $"{this.p1}-{this.p2}";
         }
+
+        /// <summary>
+        /// Return whether a point can be considered left, right, or on a line.
+        /// If point is within the y-range of this line segment, return left, right, or
+        /// intersecting depending on its x-corodinate.
+        /// If this line segment is horizontal, return whether point is left/right
+        /// of the line if it has the same x-coordinate as the line segment.
+        /// If point is not within the y-range of this line segment, return not aligned.
+        /// </summary>
+        public HorizontalPosition GetRelativeHorizontalPosition(Vector2 point)
+        {
+            bool p1Lower = FloatHelpers.Lt(this.p1.y, this.p2.y);
+            Vector2 pLow = p1Lower ? this.p1 : this.p2;
+            Vector2 pHigh = p1Lower ? this.p2 : this.p1;
+
+            if (FloatHelpers.Lt(point.y, pLow.y) || FloatHelpers.Gt(point.y, pHigh.y))
+            {
+                return HorizontalPosition.NOT_ALIGNED;
+            }
+
+            if (FloatHelpers.Eq(this.p1.y, this.p2.y))
+            {
+                if (FloatHelpers.Lt(point.x, this.p1.x) && FloatHelpers.Lt(point.x, this.p2.x))
+                {
+                    return HorizontalPosition.LEFT;
+                }
+                else if (FloatHelpers.Gt(point.x, this.p1.x) && FloatHelpers.Gt(point.x, this.p2.x))
+                {
+                    return HorizontalPosition.RIGHT;
+                }
+                else
+                {
+                    return HorizontalPosition.INTERSECTING;
+                }
+            }
+
+            float lhs = (point.x - pLow.x) * (pHigh.y - pLow.y);
+            float rhs = (point.y - pLow.y) * (pHigh.x - pLow.x);
+
+            if (FloatHelpers.Lt(lhs, rhs))
+            {
+                return HorizontalPosition.LEFT;
+            }
+            else if (FloatHelpers.Gt(lhs, rhs))
+            {
+                return HorizontalPosition.RIGHT;
+            }
+            else
+            {
+                return HorizontalPosition.INTERSECTING;
+            }
+        }
+
+        public enum HorizontalPosition
+        {
+            LEFT,
+            RIGHT,
+            INTERSECTING,
+            NOT_ALIGNED
+        }
     }
 }
