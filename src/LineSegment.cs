@@ -1,3 +1,5 @@
+using System;
+
 namespace PolygonDraw
 {
     public class LineSegment
@@ -97,9 +99,8 @@ namespace PolygonDraw
         /// </summary>
         public HorizontalPosition GetRelativeHorizontalPosition(Vector2 point)
         {
-            bool p1Lower = FloatHelpers.Lt(this.p1.y, this.p2.y);
-            Vector2 pLow = p1Lower ? this.p1 : this.p2;
-            Vector2 pHigh = p1Lower ? this.p2 : this.p1;
+            Vector2 pLow = this.GetLowerPoint();
+            Vector2 pHigh = this.GetHigherPoint();
 
             if (FloatHelpers.Lt(point.y, pLow.y) || FloatHelpers.Gt(point.y, pHigh.y))
             {
@@ -145,6 +146,51 @@ namespace PolygonDraw
             RIGHT,
             INTERSECTING,
             NOT_ALIGNED
+        }
+
+        /// <summary>
+        /// The point with higher y-coordinate.
+        /// </summary>
+        public Vector2 GetHigherPoint()
+        {
+            return FloatHelpers.Gt(this.p1.y, this.p2.y) ? this.p1 : this.p2;
+        }
+
+        /// <summary>
+        /// The point with lower y-coordinate.
+        /// </summary>
+        public Vector2 GetLowerPoint()
+        {
+            return FloatHelpers.Gt(this.p1.y, this.p2.y) ? this.p2 : this.p1;
+        }
+
+        /// <summary>
+        /// The point with lower x-coordinate.
+        /// </summary>
+        public Vector2 GetLeftPoint()
+        {
+            return FloatHelpers.Gt(this.p1.x, this.p2.x) ? this.p2 : this.p1;
+        }
+
+        /// <summary>
+        /// The point with higher x-coordinate.
+        /// </summary>
+        public Vector2 GetRightPoint()
+        {
+            return FloatHelpers.Gt(this.p1.x, this.p2.x) ? this.p1 : this.p2;
+        }
+
+        /// <summary>
+        /// The point that intersects this line at a certain y-coordinate.
+        /// Null if y is not in range.
+        /// </summary>
+        public Vector2 GetPointAtY(float y)
+        {
+            float minX = MathF.Min(this.p1.x, this.p2.x) - 1;
+            float maxX = MathF.Max(this.p1.x, this.p2.x) + 1;
+            LineSegment compareSegment = new LineSegment(new Vector2(minX, y), new Vector2(maxX, y));
+
+            return this.GetIntersection(compareSegment, true);
         }
     }
 }

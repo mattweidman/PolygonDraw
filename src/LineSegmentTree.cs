@@ -13,8 +13,7 @@ namespace PolygonDraw
         
         public void Insert(LineSegment lineSegment)
         {
-            Vector2 higherPoint = FloatHelpers.Gt(lineSegment.p1.y, lineSegment.p2.y)
-                ? lineSegment.p1 : lineSegment.p2;
+            Vector2 higherPoint = lineSegment.GetHigherPoint();
 
             Node bubbledUpNode = this.InsertRecursive(higherPoint, lineSegment, this.root);
 
@@ -139,14 +138,14 @@ namespace PolygonDraw
             }
 
             // Left should be lower.
-            if (node.left != null && !PointIsLeftOfLineSegment(node.left.GetHighPoint(), node.lineSegment))
+            if (node.left != null && !LineIsLeftOfLineSegment(node.left.lineSegment, node.lineSegment))
             {
                 throw new InvariantFailedException(
                     $"Node {node} has a left child {node.left} that is not to its left.");
             }
 
             // Right should be higher.
-            if (node.right != null && PointIsLeftOfLineSegment(node.right.GetHighPoint(), node.lineSegment))
+            if (node.right != null && LineIsLeftOfLineSegment(node.right.lineSegment, node.lineSegment))
             {
                 throw new InvariantFailedException(
                     $"Node {node} has a right child {node.right} that is not to its right.");
@@ -191,6 +190,26 @@ namespace PolygonDraw
             }
         }
 
+        /// <summary>
+        /// Whether ls1 should be considered left of ls2.
+        /// </summary>
+        private static bool LineIsLeftOfLineSegment(LineSegment ls1, LineSegment ls2)
+        {
+            Vector2 ls1Max = ls1.GetHigherPoint();
+            Vector2 ls2Max = ls2.GetHigherPoint();
+            float compareLevel = MathF.Min(ls1Max.y, ls2Max.y);
+
+            Vector2 ls1Point = FloatHelpers.Eq(ls1.p1.y, ls1.p2.y)
+                ? ls1.p1 : ls1.GetPointAtY(compareLevel);
+
+            if (ls1Point == null)
+            {
+                throw new InvalidOperationException($"Line {ls1} does not have a point at y={compareLevel}.");
+            }
+
+            return PointIsLeftOfLineSegment(ls1Point, ls2);
+        }
+
         private class Node
         {
             public LineSegment lineSegment;
@@ -207,7 +226,8 @@ namespace PolygonDraw
 
             public Vector2 GetHighPoint()
             {
-                return lineSegment.p1.y > lineSegment.p2.y ? lineSegment.p1 : lineSegment.p2;
+                return FloatHelpers.Gt(lineSegment.p1.y, lineSegment.p2.y)
+                    ? lineSegment.p1 : lineSegment.p2;
             }
 
             public override string ToString()
