@@ -11,6 +11,9 @@ namespace PolygonDraw
     {
         private Node root;
         
+        /// <summary>
+        /// Insert a new line segment into the tree.
+        /// </summary>
         public void Insert(LineSegment lineSegment)
         {
             Vector2 higherPoint = lineSegment.GetHigherPoint();
@@ -97,6 +100,40 @@ namespace PolygonDraw
             }
 
             return node;
+        }
+
+        /// <summary>
+        /// Get the line segment to the left of point. If point is to the left
+        /// of all line segments in this tree, return null.
+        /// </summary>
+        public LineSegment GetLineSegmentToTheLeft(Vector2 point)
+        {
+            return GetLineSegmentToTheLeftRecursive(point, this.root);
+        }
+
+        private LineSegment GetLineSegmentToTheLeftRecursive(Vector2 point, Node node)
+        {
+            if (node == null)
+            {
+                return null;
+            }
+
+            LineSegment leftmostSegment = null;
+            if (PointIsLeftOfLineSegment(point, node.lineSegment))
+            {
+                leftmostSegment = GetLineSegmentToTheLeftRecursive(point, node.left);
+            }
+            else
+            {
+                leftmostSegment = GetLineSegmentToTheLeftRecursive(point, node.right);
+
+                if (leftmostSegment == null)
+                {
+                    leftmostSegment = node.lineSegment;
+                }
+            }
+
+            return leftmostSegment;
         }
 
         public void CheckInvariants()
@@ -222,12 +259,6 @@ namespace PolygonDraw
             {
                 this.lineSegment = lineSegment;
                 this.isRed = isRed;
-            }
-
-            public Vector2 GetHighPoint()
-            {
-                return FloatHelpers.Gt(lineSegment.p1.y, lineSegment.p2.y)
-                    ? lineSegment.p1 : lineSegment.p2;
             }
 
             public override string ToString()
