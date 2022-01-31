@@ -363,45 +363,100 @@ namespace PolygonDraw
             }
             else if (node.right != null && node.right.isDoubleBlack)
             {
-                // if (node.left == null)
-                // {
-                //     throw new InvariantFailedException(
-                //         $"Invariant failed: node.right={node.right}, but node.left=null.");
-                // }
-                // else if (node.left.isRed)
-                // {
-                //     // Case 1
-                //     Node newRoot = node.left;
-                //     newRoot.isRed = false;
-                //     Node newLeft = node.left.left;
+                if (node.left == null)
+                {
+                    throw new InvariantFailedException(
+                        $"Invariant failed: node.right={node.right}, but node.left=null.");
+                }
+                else if (node.left.isRed)
+                {
+                    // Case 1
+                    Node newRoot = node.left;
+                    newRoot.isRed = false;
+                    Node newLeft = node.left.left;
 
-                //     // Use other cases to construct the left
-                //     Node preliminaryNewRight = node;
-                //     preliminaryNewRight.isRed = true;
-                //     Node newRightLeft = node.left.right;
-                //     Node newRightRight = node.right;
-                //     preliminaryNewRight.left = newRightLeft;
-                //     preliminaryNewRight.right = newRightRight;
-                //     Node newRight = RotateForDoubleBlack(preliminaryNewRight);
+                    // Use other cases to construct the left
+                    Node preliminaryNewRight = node;
+                    preliminaryNewRight.isRed = true;
+                    Node newRightLeft = node.left.right;
+                    Node newRightRight = node.right;
+                    preliminaryNewRight.left = newRightLeft;
+                    preliminaryNewRight.right = newRightRight;
+                    Node newRight = RotateForDoubleBlack(preliminaryNewRight);
 
-                //     newRoot.left = newLeft;
-                //     newRoot.right = newRight;
-                //     return newRoot;
-                // }
-                // else if (Node.IsNullOrBlack(node.left.left) && Node.IsNullOrBlack(node.left.right))
-                // {
-                //     // Case 2
-                //     node.color = node.isRed ? NodeColor.BLACK : NodeColor.DOUBLE_BLACK;
-                //     node.left.color = NodeColor.BLACK;
-                //     node.right.color = NodeColor.RED;
-                // }
+                    newRoot.left = newLeft;
+                    newRoot.right = newRight;
+                    return newRoot;
+                }
+                else if (Node.IsNullOrBlack(node.left.left) && Node.IsNullOrBlack(node.left.right))
+                {
+                    // Case 2
+                    node.color = node.isRed ? NodeColor.BLACK : NodeColor.DOUBLE_BLACK;
+                    node.left.color = NodeColor.RED;
 
-                // Temporarily reverse the next two rows so we can use the same logic
-                // as if the double black is on the left
-                node.ReverseNextTwoRows();
-                Node newRoot = RotateForDoubleBlack(node);
-                newRoot.ReverseNextTwoRows();
-                return newRoot;
+                    if (node.right.lineSegment == null)
+                    {
+                        node.right = null;
+                    }
+                    else
+                    {
+                        node.right.color = NodeColor.BLACK;
+                    }
+
+                    return node;
+                }
+                else if (Node.IsNullOrBlack(node.left.left) && !Node.IsNullOrBlack(node.left.right))
+                {
+                    // Case 3
+                    Node newLeft = node.left.right;
+                    newLeft.isRed = false;
+                    Node newLeftLeft = node.left;
+                    newLeftLeft.isRed = true;
+                    Node newLeftLeftLeft = node.left.left; // could be null
+                    Node newLeftLeftRight = node.left.right.left; // could be null
+
+                    node.left = newLeft;
+                    newLeft.left = newLeftLeft;
+                    newLeftLeft.left = newLeftLeftLeft;
+                    newLeftLeft.right = newLeftLeftRight;
+
+                    return RotateForDoubleBlack(node);
+                }
+                else if (!Node.IsNullOrBlack(node.left.left))
+                {
+                    // Case 4
+                    Node newRoot = node.left;
+                    newRoot.color = node.color;
+                    Node newLeft = node.left.left;
+                    newLeft.color = NodeColor.BLACK;
+                    Node newRight = node;
+                    newRoot.color = NodeColor.BLACK;
+                    Node newRightLeft = node.left.right;
+                    
+                    Node newRightRight = node.right;
+                    if (node.right.lineSegment == null)
+                    {
+                        newRightRight = null;
+                    }
+                    else
+                    {
+                        newRightRight = node.right;
+                        newRightRight.color = NodeColor.BLACK;
+                    }
+
+                    newRoot.left = newLeft;
+                    newRoot.right = newRight;
+                    newRight.left = newRightLeft;
+                    newRight.right = newRightRight;
+                    
+                    return newRoot;
+                }
+                else
+                {
+                    throw new InvariantFailedException(
+                        $"Invalid structure while deleting at {node}."
+                        + $"node.left={node.left}, node.right={node.right}.");
+                }
             }
             else
             {

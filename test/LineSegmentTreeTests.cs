@@ -379,6 +379,18 @@ namespace PolygonDrawTests
             TestRemoveForNNodes(50, 7, 7);
         }
 
+        [Test]
+        public void Remove_100Nodes_RemoveIncreasing()
+        {
+            TestRemoveForNNodes(100, 0, 1);
+        }
+
+        [Test]
+        public void Remove_100Nodes_RemoveDecreasing()
+        {
+            TestRemoveForNNodes(100, 99, 99);
+        }
+
         private static void TestRemoveSimple(int[] xCoordinates, int[] removalOrder)
         {
             LineSegment[] lineSegments = xCoordinates
