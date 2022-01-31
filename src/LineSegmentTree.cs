@@ -17,25 +17,23 @@ namespace PolygonDraw
         /// </summary>
         public void Insert(LineSegment lineSegment)
         {
-            Vector2 higherPoint = lineSegment.GetHigherPoint();
-
-            Node bubbledUpNode = this.InsertRecursive(higherPoint, lineSegment, this.root);
+            Node bubbledUpNode = this.InsertRecursive(lineSegment, this.root);
 
             // Root must be black.
             bubbledUpNode.isRed = false;
             this.root = bubbledUpNode;
         }
 
-        private Node InsertRecursive(Vector2 higherPoint, LineSegment newLineSegment, Node node)
+        private Node InsertRecursive(LineSegment newLineSegment, Node node)
         {
             if (node == null)
             {
                 return new Node(newLineSegment, true);
             }
 
-            if (PointIsLeftOfLineSegment(higherPoint, node.lineSegment))
+            if (LineIsLeftOfLineSegment(newLineSegment, node.lineSegment))
             {
-                node.left = this.InsertRecursive(higherPoint, newLineSegment, node.left);
+                node.left = this.InsertRecursive(newLineSegment, node.left);
 
                 if (node.left.isRed && (node.left.left != null && node.left.left.isRed))
                 {
@@ -68,7 +66,7 @@ namespace PolygonDraw
             }
             else
             {
-                node.right = this.InsertRecursive(higherPoint, newLineSegment, node.right);
+                node.right = this.InsertRecursive(newLineSegment, node.right);
 
                 if (node.right.isRed && (node.right.left != null && node.right.left.isRed))
                 {
@@ -151,7 +149,7 @@ namespace PolygonDraw
             }
 
             Vector2 lowerPoint = lineSegment.GetLowerPoint();
-            Node newRoot = this.RemoveRecursive(lowerPoint, lineSegment, this.root);
+            Node newRoot = this.RemoveRecursive(lineSegment, this.root);
 
             if (newRoot == null || newRoot.lineSegment == null)
             {
@@ -169,7 +167,7 @@ namespace PolygonDraw
         }
 
         private Node RemoveRecursive(
-            Vector2 comparePoint, LineSegment lineSegment, Node node, Node nodeToSwap = null)
+            LineSegment lineSegment, Node node, Node nodeToSwap = null)
         {
             if (node == null)
             {
@@ -243,17 +241,17 @@ namespace PolygonDraw
             else
             {
                 // If we haven't found a node to swap with, keep searching.
-                goLeft = PointIsLeftOfLineSegment(comparePoint, node.lineSegment);
+                goLeft = LineIsLeftOfLineSegment(lineSegment, node.lineSegment, false);
             }
 
             // Recurse
             if (goLeft)
             {
-                node.left = RemoveRecursive(comparePoint, lineSegment, node.left, nodeToSwap);
+                node.left = RemoveRecursive(lineSegment, node.left, nodeToSwap);
             }
             else
             {
-                node.right = RemoveRecursive(comparePoint, lineSegment, node.right, nodeToSwap);
+                node.right = RemoveRecursive(lineSegment, node.right, nodeToSwap);
             }
 
             return RotateForDoubleBlack(node);
@@ -558,6 +556,10 @@ namespace PolygonDraw
             {
                 return false;
             }
+            else if (pos == LineSegment.HorizontalPosition.INTERSECTING_AT_ENDPOINT)
+            {
+                throw new ArgumentException($"Point {point} cannot be an endpoint of {lineSegment}.");
+            }
             else if (pos == LineSegment.HorizontalPosition.INTERSECTING)
             {
                 throw new ArgumentException($"Point {point} cannot be on line segment {lineSegment}.");
@@ -572,11 +574,13 @@ namespace PolygonDraw
         /// <summary>
         /// Whether ls1 should be considered left of ls2.
         /// </summary>
-        private static bool LineIsLeftOfLineSegment(LineSegment ls1, LineSegment ls2)
+        /// <param name="compareTops">If true, compares at the y-coordinate of the top of the
+        /// lower segment. If false, compares at the bottom of the higher segment.</param>
+        private static bool LineIsLeftOfLineSegment(LineSegment ls1, LineSegment ls2, bool compareTops = true)
         {
-            Vector2 ls1Max = ls1.GetHigherPoint();
-            Vector2 ls2Max = ls2.GetHigherPoint();
-            float compareLevel = MathF.Min(ls1Max.y, ls2Max.y);
+            float compareLevel = compareTops
+                ? MathF.Min(ls1.GetHigherPoint().y, ls2.GetHigherPoint().y)
+                : MathF.Max(ls1.GetLowerPoint().y, ls2.GetLowerPoint().y);
 
             Vector2 ls1Point = FloatHelpers.Eq(ls1.p1.y, ls1.p2.y)
                 ? ls1.p1 : ls1.GetPointAtY(compareLevel);
@@ -586,7 +590,30 @@ namespace PolygonDraw
                 throw new InvalidOperationException($"Line {ls1} does not have a point at y={compareLevel}.");
             }
 
-            return PointIsLeftOfLineSegment(ls1Point, ls2);
+            LineSegment.HorizontalPosition pos = ls2.GetRelativeHorizontalPosition(ls1Point);
+
+            if (pos == LineSegment.HorizontalPosition.LEFT)
+            {
+                return true;
+            }
+            else if (pos == LineSegment.HorizontalPosition.RIGHT)
+            {
+                return false;
+            }
+            else if (pos == LineSegment.HorizontalPosition.INTERSECTING_AT_ENDPOINT)
+            {
+                Vector2 other1 = ls1Point.Equals(ls1.p1) ? ls1.p2 : ls1.p1;
+                Vector2 other2 = ls1Point.Equals(ls2.p1) ? ls2.p2 : ls2.p1;
+                return FloatHelpers.Lt(other1.x, other2.x);
+            }
+            else if (pos == LineSegment.HorizontalPosition.INTERSECTING)
+            {
+                throw new ArgumentException($"Segments {ls1} and {ls2} intersect at {ls1Point}.");
+            }
+            else
+            {
+                throw new ArgumentException($"Segments {ls1} and {ls2} do not share vertical range.");
+            }
         }
 
         private class Node

@@ -99,6 +99,11 @@ namespace PolygonDraw
         /// </summary>
         public HorizontalPosition GetRelativeHorizontalPosition(Vector2 point)
         {
+            if (point.Equals(this.p1) || point.Equals(this.p2))
+            {
+                return HorizontalPosition.INTERSECTING_AT_ENDPOINT;
+            }
+
             Vector2 pLow = this.GetLowerPoint();
             Vector2 pHigh = this.GetHigherPoint();
 
@@ -145,6 +150,7 @@ namespace PolygonDraw
             LEFT,
             RIGHT,
             INTERSECTING,
+            INTERSECTING_AT_ENDPOINT,
             NOT_ALIGNED
         }
 
