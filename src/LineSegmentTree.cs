@@ -6,6 +6,7 @@ namespace PolygonDraw
     /// Red-black tree of line segments. Stores line segments so they are sorted
     /// horizontally. Assumes no lines intersecting.
     /// Following https://www.cs.cornell.edu/courses/cs3110/2009sp/lectures/lec11.html
+    /// and https://www.cs.cornell.edu/courses/cs312/2004fa/lectures/lecture11.htm#deletion
     /// </summary>
     public class LineSegmentTree
     {
@@ -136,6 +137,280 @@ namespace PolygonDraw
             return leftmostSegment;
         }
 
+        #region Remove
+
+        /// <summary>
+        /// Remove a line segment from the tree.
+        /// </summary>
+        public void Remove(LineSegment lineSegment)
+        {
+            // Can't remove from empty tree
+            if (this.root == null)
+            {
+                throw new ArgumentException($"Can't remove {lineSegment} from empty tree.");
+            }
+
+            Vector2 lowerPoint = lineSegment.GetLowerPoint();
+            Node newRoot = this.RemoveRecursive(lowerPoint, lineSegment, this.root);
+
+            if (newRoot == null || newRoot.lineSegment == null)
+            {
+                this.root = null;
+            }
+            else
+            {
+                if (newRoot.isDoubleBlack)
+                {
+                    newRoot.color = NodeColor.BLACK;
+                }
+
+                this.root = newRoot;
+            }
+        }
+
+        private Node RemoveRecursive(
+            Vector2 comparePoint, LineSegment lineSegment, Node node, Node nodeToSwap = null)
+        {
+            if (node == null)
+            {
+                throw new ArgumentException($"Line segment {lineSegment} not found in tree.");
+            }
+
+            // Stop when we get to the bottom and we have found a match
+            if ((node.left == null || node.right == null) && 
+                ((nodeToSwap != null && node.left == null) || lineSegment.Equals(node.lineSegment)))
+            {
+                if (nodeToSwap != null)
+                {
+                    // Swap values if found
+                    node.SwapValuesWith(nodeToSwap);
+                }
+
+                // Remove this node
+                Node nodeToReturn;
+                if (node.left != null)
+                {
+                    nodeToReturn = node.left;
+                }
+                else if (node.right != null)
+                {
+                    nodeToReturn = node.right;
+                }
+                else
+                {
+                    nodeToReturn = null;
+                }
+
+                if (!node.isRed)
+                {
+                    // Convert to black or double-black to maintain black path length
+                    if (nodeToReturn == null)
+                    {
+                        return new Node(null, NodeColor.DOUBLE_BLACK);
+                    }
+                    else if (nodeToReturn.isRed)
+                    {
+                        nodeToReturn.color = NodeColor.BLACK;
+                        return nodeToReturn;
+                    }
+                    else
+                    {
+                        nodeToReturn.color = NodeColor.DOUBLE_BLACK;
+                        return nodeToReturn;
+                    }
+                }
+                else
+                {
+                    return nodeToReturn;
+                }
+            }
+
+            // Choose whether to search left or right
+            bool goLeft;
+            if (nodeToSwap != null)
+            {
+                // If we found a node to swap already, find the leftmost node because
+                // it will be the lowest node to the right of the swapped node.
+                goLeft = true;
+            }
+            else if (lineSegment.Equals(node.lineSegment))
+            {
+                // If this node is the one we want to swap, go right once
+                // before traversing left the rest of the path.
+                nodeToSwap = node;
+                goLeft = false;
+            }
+            else
+            {
+                // If we haven't found a node to swap with, keep searching.
+                goLeft = PointIsLeftOfLineSegment(comparePoint, node.lineSegment);
+            }
+
+            // Recurse
+            if (goLeft)
+            {
+                node.left = RemoveRecursive(comparePoint, lineSegment, node.left, nodeToSwap);
+            }
+            else
+            {
+                node.right = RemoveRecursive(comparePoint, lineSegment, node.right, nodeToSwap);
+            }
+
+            return RotateForDoubleBlack(node);
+        }
+
+        // See https://www.cs.cornell.edu/courses/cs312/2004fa/lectures/lecture11.htm#deletion
+        private static Node RotateForDoubleBlack(Node node)
+        {
+            if (node.left != null && node.left.isDoubleBlack)
+            {
+                if (node.right == null)
+                {
+                    throw new InvariantFailedException(
+                        $"Invariant failed: node.left={node.left}, but node.right=null.");
+                }
+                else if (node.right.isRed)
+                {
+                    // Case 1
+                    Node newRoot = node.right;
+                    newRoot.isRed = false;
+                    Node newRight = node.right.right;
+
+                    // Use other cases to construct the left
+                    Node preliminaryNewLeft = node;
+                    preliminaryNewLeft.isRed = true;
+                    Node newLeftLeft = node.left;
+                    Node newLeftRight = node.right.left;
+                    preliminaryNewLeft.left = newLeftLeft;
+                    preliminaryNewLeft.right = newLeftRight;
+                    Node newLeft = RotateForDoubleBlack(preliminaryNewLeft);
+
+                    newRoot.left = newLeft;
+                    newRoot.right = newRight;
+                    return newRoot;
+                }
+                else if (Node.IsNullOrBlack(node.right.left) && Node.IsNullOrBlack(node.right.right))
+                {
+                    // Case 2
+                    node.color = node.isRed ? NodeColor.BLACK : NodeColor.DOUBLE_BLACK;
+                    node.right.color = NodeColor.RED;
+
+                    if (node.left.lineSegment == null)
+                    {
+                        // Make node.left null if empty
+                        node.left = null;
+                    }
+                    else
+                    {
+                        node.left.color = NodeColor.BLACK;
+                    }
+
+                    return node;
+                }
+                else if (!Node.IsNullOrBlack(node.right.left) && Node.IsNullOrBlack(node.right.right))
+                {
+                    // Case 3
+                    Node newRight = node.right.left;
+                    newRight.isRed = false;
+                    Node newRightRight = node.right;
+                    newRightRight.isRed = true;
+                    Node newRightRightRight = node.right.right; // could be null
+                    Node newRightRightLeft = node.right.left.right; // could be null
+
+                    node.right = newRight;
+                    newRight.right = newRightRight;
+                    newRightRight.left = newRightRightLeft;
+                    newRightRight.right = newRightRightRight;
+
+                    return RotateForDoubleBlack(node);
+                }
+                else if (!Node.IsNullOrBlack(node.right.right))
+                {
+                    // Case 4
+                    Node newRoot = node.right;
+                    newRoot.color = node.color;
+                    Node newLeft = node;
+                    newLeft.color = NodeColor.BLACK;
+                    Node newRight = node.right.right;
+                    newRight.color = NodeColor.BLACK;
+                    Node newLeftRight = node.right.left;
+
+                    Node newLeftLeft;
+                    if (node.left.lineSegment == null)
+                    {
+                        // Make (what was) node.left null if empty
+                        newLeftLeft = null;
+                    }
+                    else
+                    {
+                        newLeftLeft = node.left;
+                        newLeftLeft.color = NodeColor.BLACK;
+                    }
+
+                    newRoot.left = newLeft;
+                    newRoot.right = newRight;
+                    newLeft.left = newLeftLeft;
+                    newLeft.right = newLeftRight;
+
+                    return newRoot;
+                }
+                else
+                {
+                    throw new InvariantFailedException(
+                        $"Invalid structure while deleting at {node}."
+                        + $"node.left={node.left}, node.right={node.right}.");
+                }
+            }
+            else if (node.right != null && node.right.isDoubleBlack)
+            {
+                // if (node.left == null)
+                // {
+                //     throw new InvariantFailedException(
+                //         $"Invariant failed: node.right={node.right}, but node.left=null.");
+                // }
+                // else if (node.left.isRed)
+                // {
+                //     // Case 1
+                //     Node newRoot = node.left;
+                //     newRoot.isRed = false;
+                //     Node newLeft = node.left.left;
+
+                //     // Use other cases to construct the left
+                //     Node preliminaryNewRight = node;
+                //     preliminaryNewRight.isRed = true;
+                //     Node newRightLeft = node.left.right;
+                //     Node newRightRight = node.right;
+                //     preliminaryNewRight.left = newRightLeft;
+                //     preliminaryNewRight.right = newRightRight;
+                //     Node newRight = RotateForDoubleBlack(preliminaryNewRight);
+
+                //     newRoot.left = newLeft;
+                //     newRoot.right = newRight;
+                //     return newRoot;
+                // }
+                // else if (Node.IsNullOrBlack(node.left.left) && Node.IsNullOrBlack(node.left.right))
+                // {
+                //     // Case 2
+                //     node.color = node.isRed ? NodeColor.BLACK : NodeColor.DOUBLE_BLACK;
+                //     node.left.color = NodeColor.BLACK;
+                //     node.right.color = NodeColor.RED;
+                // }
+
+                // Temporarily reverse the next two rows so we can use the same logic
+                // as if the double black is on the left
+                node.ReverseNextTwoRows();
+                Node newRoot = RotateForDoubleBlack(node);
+                newRoot.ReverseNextTwoRows();
+                return newRoot;
+            }
+            else
+            {
+                return node;
+            }
+        }
+
+        #endregion
+
         public void CheckInvariants()
         {
             if (this.root == null)
@@ -159,6 +434,18 @@ namespace PolygonDraw
             if (node == null)
             {
                 return 1;
+            }
+
+            // No double-black nodes.
+            if (node.color == NodeColor.DOUBLE_BLACK)
+            {
+                throw new InvariantFailedException($"{node} is double-black.");
+            }
+
+            // No null line segments.
+            if (node.lineSegment == null)
+            {
+                throw new InvariantFailedException($"{node} has a null line segment.");
             }
 
             // Red nodes cannot have red children.
@@ -251,7 +538,15 @@ namespace PolygonDraw
         {
             public LineSegment lineSegment;
 
-            public bool isRed;
+            public NodeColor color;
+
+            public bool isRed
+            {
+                get { return color == NodeColor.RED; }
+                set { this.color = value ? NodeColor.RED : NodeColor.BLACK; }
+            }
+
+            public bool isDoubleBlack => this.color == NodeColor.DOUBLE_BLACK;
 
             public Node left, right;
 
@@ -261,10 +556,66 @@ namespace PolygonDraw
                 this.isRed = isRed;
             }
 
+            public Node(LineSegment lineSegment, NodeColor color)
+            {
+                this.lineSegment = lineSegment;
+                this.color = color;
+            }
+
             public override string ToString()
             {
-                return $"Node({this.lineSegment}, isRed={isRed})";
+                return $"Node({this.lineSegment}, color={color})";
             }
+
+            public void SwapValuesWith(Node other)
+            {
+                LineSegment temp = this.lineSegment;
+                this.lineSegment = other.lineSegment;
+                other.lineSegment = temp;
+            }
+
+            /// <summary>
+            /// Convenience method that returns true if a node is null or colored black.
+            /// </summary>
+            public static bool IsNullOrBlack(Node node)
+            {
+                return node == null || !node.isRed;
+            }
+
+            /// <summary>
+            /// Swap positions of left and right.
+            /// </summary>
+            public void ReverseNextRow()
+            {
+                Node temp = this.left;
+                this.left = this.right;
+                this.right = temp;
+            }
+
+            /// <summary>
+            /// Reverse order of nodes in next row and the one below it.
+            /// </summary>
+            public void ReverseNextTwoRows()
+            {
+                this.ReverseNextRow();
+
+                if (this.left != null)
+                {
+                    this.left.ReverseNextRow();
+                }
+
+                if (this.right != null)
+                {
+                    this.right.ReverseNextRow();
+                }
+            }
+        }
+
+        private enum NodeColor
+        {
+            RED,
+            BLACK,
+            DOUBLE_BLACK
         }
 
         public class InvariantFailedException : Exception

@@ -1,6 +1,8 @@
 using NUnit.Framework;
 using PolygonDraw;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PolygonDrawTests
 {
@@ -203,6 +205,215 @@ namespace PolygonDrawTests
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(-1, 0)));
             Assert.AreEqual(lineSegments[0], lsTree.GetLineSegmentToTheLeft(new Vector2(2, 0)));
             Assert.AreEqual(lineSegments[1], lsTree.GetLineSegmentToTheLeft(new Vector2(5, 0)));
+        }
+
+        #endregion
+
+        #region Remove
+
+        [Test]
+        public void Remove_OneNode()
+        {
+            TestRemoveSimple(new int[] {0}, new int[] {0});
+        }
+
+        [Test]
+        public void Remove_TwoNodes_RemoveRoot()
+        {
+            TestRemoveSimple(new int[] {0, 1}, new int[] {0, 1});
+        }
+
+        [Test]
+        public void Remove_TwoNodes_RemoveLeft()
+        {
+            TestRemoveSimple(new int[] {0, -1}, new int[] {1, 0});
+        }
+
+        [Test]
+        public void Remove_TwoNodes_RemoveRight()
+        {
+            TestRemoveSimple(new int[] {0, 1}, new int[] {1, 0});
+        }
+
+        [Test]
+        public void Remove_ThreeNodes_RemoveLeftFirst()
+        {
+            TestRemoveSimple(new int[] {0, -1, 1}, new int[] {1, 2, 0});
+        }
+
+        [Test]
+        public void Remove_ThreeNodes_RemoveRightFirst()
+        {
+            TestRemoveSimple(new int[] {0, -1, 1}, new int[] {2, 1, 0});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertLeftLeft_RemoveLeftLeft()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 1}, new int[] {3, 2, 1, 0});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertLeftLeft_RemoveLeft()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 1}, new int[] {2, 3, 1, 0});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertLeftLeft_RemoveRight()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 1}, new int[] {0, 1, 2, 3});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertLeftRight_RemoveLeftRight()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 4}, new int[] {3, 2, 0, 1});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertLeftRight_RemoveLeft()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 4}, new int[] {2, 3, 0, 1});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertLeftRight_RemoveRight()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 4}, new int[] {0, 1, 2, 3});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertRightLeft_RemoveRightLeft()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 6}, new int[] {3, 2, 1, 0});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertRightLeft_RemoveRight()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 6}, new int[] {0, 3, 2, 1});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertRightLeft_RemoveLeft()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 6}, new int[] {2, 0, 1, 3});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertRightRight_RemoveRightRight()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 8}, new int[] {3, 0, 2, 1});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertRightRight_RemoveRight()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 8}, new int[] {0, 3, 1, 2});
+        }
+
+        [Test]
+        public void Remove_FourNodes_InsertRightRight_RemoveLeft()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 8}, new int[] {2, 1, 3, 0});
+        }
+
+        [Test]
+        public void Remove_FiveNodes_LeftFilled_RemoveBottom()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 2, 4}, new int[] {3, 4});
+        }
+
+        [Test]
+        public void Remove_FiveNodes_LeftFilled_RemoveRight()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 2, 4}, new int[] {0});
+        }
+
+        [Test]
+        public void Remove_FiveNodes_RightFilled_RemoveBottom()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 6, 8}, new int[] {3, 4});
+        }
+
+        [Test]
+        public void Remove_FiveNodes_RightFilled_RemoveLeft()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 6, 8}, new int[] {2});
+        }
+
+        [Test]
+        public void Remove_FiveNodes_OuterFilled()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 2, 8}, new int[] {3, 4});
+        }
+
+        [Test]
+        public void Remove_FiveNodes_InnerFilled()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 4, 6}, new int[] {3, 4});
+        }
+
+        [Test]
+        public void Remove_FillThreeRows_RemoveRightThenRoot()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 2, 4, 6, 8}, new int[] {0, 1, 3, 5, 2, 4, 6});
+        }
+
+        [Test]
+        public void Remove_FillThreeRows_RemoveRootThenRight()
+        {
+            TestRemoveSimple(new int[] {7, 5, 3, 2, 4, 6, 8}, new int[] {1, 0, 2, 3, 4, 5, 6});
+        }
+
+        [Test]
+        public void Remove_15Nodes()
+        {
+            TestRemoveForNNodes(15, 7, 7);
+        }
+
+        [Test]
+        public void Remove_50Nodes()
+        {
+            TestRemoveForNNodes(50, 7, 7);
+        }
+
+        private static void TestRemoveSimple(int[] xCoordinates, int[] removalOrder)
+        {
+            LineSegment[] lineSegments = xCoordinates
+                .Select(x => new LineSegment(new Vector2(x, 0), new Vector2(x, 1)))
+                .ToArray();
+
+            LineSegmentTree lsTree = new LineSegmentTree();
+            foreach (LineSegment ls in lineSegments)
+            {
+                lsTree.Insert(ls);
+            }
+
+            foreach (int idx in removalOrder)
+            {
+                try
+                {
+                    lsTree.Remove(lineSegments[idx]);
+                    lsTree.CheckInvariants();
+                }
+                catch (Exception)
+                {
+                    Console.Error.WriteLine(
+                        "TestRemoveSimple: Failed while removing "
+                        + $"line segment {lineSegments[idx]}, idx={idx}.");
+                    
+                    throw;
+                }
+            }
+        }
+
+        private static void TestRemoveForNNodes(int n, int firstRemoved, int indexJump)
+        {
+            int[] xCoords = new int[n].Select((_, i) => i).ToArray();
+            int[] removalOrder = xCoords.Select((_, i) => (firstRemoved + i * indexJump) % n).ToArray();
+            TestRemoveSimple(xCoords, removalOrder);
         }
 
         #endregion
