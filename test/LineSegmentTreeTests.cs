@@ -391,6 +391,31 @@ namespace PolygonDrawTests
             TestRemoveForNNodes(100, 99, 99);
         }
 
+        [Test]
+        public void Remove_Horizontal()
+        {
+            LineSegment[] lineSegments = new LineSegment[]
+            {
+                new LineSegment(new Vector2(0, 0), new Vector2(1, 0)),
+                new LineSegment(new Vector2(2, 0), new Vector2(3, 0)),
+                new LineSegment(new Vector2(4, 0), new Vector2(5, 0)),
+            };
+
+            LineSegmentTree lsTree = new LineSegmentTree();
+            foreach (LineSegment ls in lineSegments)
+            {
+                lsTree.Insert(ls);
+                lsTree.CheckInvariants();
+            }
+
+            lsTree.Remove(lineSegments[0]);
+            lsTree.CheckInvariants();
+            lsTree.Remove(lineSegments[1]);
+            lsTree.CheckInvariants();
+            lsTree.Remove(lineSegments[2]);
+            lsTree.CheckInvariants();
+        }
+
         private static void TestRemoveSimple(int[] xCoordinates, int[] removalOrder)
         {
             LineSegment[] lineSegments = xCoordinates
@@ -551,6 +576,7 @@ namespace PolygonDrawTests
             // y=3
             lsTree.Remove(lineSegments[2]);
             lsTree.CheckInvariants();
+
             lsTree.Insert(lineSegments[1]);
             lsTree.CheckInvariants();
             lsTree.Insert(lineSegments[4]);
@@ -567,6 +593,7 @@ namespace PolygonDrawTests
             lsTree.CheckInvariants();
             lsTree.Remove(lineSegments[4]);
             lsTree.CheckInvariants();
+
             lsTree.Insert(lineSegments[10]);
             lsTree.CheckInvariants();
             lsTree.Insert(lineSegments[5]);
@@ -575,6 +602,7 @@ namespace PolygonDrawTests
             // y=1
             lsTree.Remove(lineSegments[10]);
             lsTree.CheckInvariants();
+
             lsTree.Insert(lineSegments[9]);
             lsTree.CheckInvariants();
             lsTree.Insert(lineSegments[8]);
@@ -592,6 +620,87 @@ namespace PolygonDrawTests
             lsTree.Remove(lineSegments[7]);
             lsTree.CheckInvariants();
             lsTree.Remove(lineSegments[6]);
+            lsTree.CheckInvariants();
+        }
+
+        [Test]
+        public void InsertAndRemove_Arrow()
+        {
+            LineSegment[] lineSegments = new LineSegment[]
+            {
+                new LineSegment(new Vector2(0, 2), new Vector2(2, 4)),
+                new LineSegment(new Vector2(2, 4), new Vector2(4, 2)),
+                new LineSegment(new Vector2(4, 2), new Vector2(3, 2)),
+                new LineSegment(new Vector2(3, 2), new Vector2(3, 0)),
+                new LineSegment(new Vector2(3, 0), new Vector2(1, 0)),
+                new LineSegment(new Vector2(1, 0), new Vector2(1, 2)),
+                new LineSegment(new Vector2(1, 2), new Vector2(0, 2)),
+            };
+
+            LineSegmentTree lsTree = new LineSegmentTree();
+
+            // y=4
+            lsTree.Insert(lineSegments[0]);
+            lsTree.CheckInvariants();
+            lsTree.Insert(lineSegments[1]);
+            lsTree.CheckInvariants();
+
+            // y=2
+            lsTree.Remove(lineSegments[0]);
+            lsTree.CheckInvariants();
+            lsTree.Remove(lineSegments[1]);
+            lsTree.CheckInvariants();
+
+            lsTree.Insert(lineSegments[2]);
+            lsTree.CheckInvariants();
+            lsTree.Insert(lineSegments[3]);
+            lsTree.CheckInvariants();
+            lsTree.Insert(lineSegments[5]);
+            lsTree.CheckInvariants();
+            lsTree.Insert(lineSegments[6]);
+            lsTree.CheckInvariants();
+
+            lsTree.Remove(lineSegments[2]);
+            lsTree.CheckInvariants();
+            lsTree.Remove(lineSegments[6]);
+            lsTree.CheckInvariants();
+
+            // y=0
+            lsTree.Remove(lineSegments[3]);
+            lsTree.CheckInvariants();
+            lsTree.Remove(lineSegments[5]);
+            lsTree.CheckInvariants();
+
+            lsTree.Insert(lineSegments[4]);
+            lsTree.CheckInvariants();
+
+            lsTree.Remove(lineSegments[4]);
+            lsTree.CheckInvariants();
+        }
+
+        [Test]
+        public void InsertAndRemove_AngleDown()
+        {
+            LineSegment[] lineSegments = new LineSegment[]
+            {
+                new LineSegment(new Vector2(3, 3), new Vector2(0, 0)),
+                new LineSegment(new Vector2(3, 3), new Vector2(1, 2)),
+            };
+
+            LineSegmentTree lsTree = new LineSegmentTree();
+
+            lsTree.Insert(lineSegments[0]);
+            lsTree.CheckInvariants();
+            lsTree.Insert(lineSegments[1]);
+            lsTree.CheckInvariants();
+
+            Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(2, 3)));
+            Assert.AreEqual(lineSegments[0], lsTree.GetLineSegmentToTheLeft(new Vector2(1.5f, 2)));
+            Assert.AreEqual(lineSegments[0], lsTree.GetLineSegmentToTheLeft(new Vector2(3, 2.5f)));
+
+            lsTree.Remove(lineSegments[0]);
+            lsTree.CheckInvariants();
+            lsTree.Remove(lineSegments[1]);
             lsTree.CheckInvariants();
         }
     }
