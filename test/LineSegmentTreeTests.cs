@@ -576,6 +576,8 @@ namespace PolygonDrawTests
             // y=3
             lsTree.Remove(lineSegments[2]);
             lsTree.CheckInvariants();
+            lsTree.Remove(lineSegments[3]);
+            lsTree.CheckInvariants();
 
             lsTree.Insert(lineSegments[1]);
             lsTree.CheckInvariants();
@@ -589,8 +591,6 @@ namespace PolygonDrawTests
             lsTree.CheckInvariants();
             lsTree.Remove(lineSegments[11]);
             lsTree.CheckInvariants();
-            lsTree.Remove(lineSegments[3]);
-            lsTree.CheckInvariants();
             lsTree.Remove(lineSegments[4]);
             lsTree.CheckInvariants();
 
@@ -601,6 +601,8 @@ namespace PolygonDrawTests
 
             // y=1
             lsTree.Remove(lineSegments[10]);
+            lsTree.CheckInvariants();
+            lsTree.Remove(lineSegments[5]);
             lsTree.CheckInvariants();
 
             lsTree.Insert(lineSegments[9]);
@@ -695,8 +697,34 @@ namespace PolygonDrawTests
             lsTree.CheckInvariants();
 
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(2, 3)));
-            Assert.AreEqual(lineSegments[0], lsTree.GetLineSegmentToTheLeft(new Vector2(1.5f, 2)));
+            Assert.AreEqual(lineSegments[1], lsTree.GetLineSegmentToTheLeft(new Vector2(1.5f, 2)));
             Assert.AreEqual(lineSegments[0], lsTree.GetLineSegmentToTheLeft(new Vector2(3, 2.5f)));
+
+            lsTree.Remove(lineSegments[0]);
+            lsTree.CheckInvariants();
+            lsTree.Remove(lineSegments[1]);
+            lsTree.CheckInvariants();
+        }
+
+        [Test]
+        public void InsertAndRemove_AngleUp()
+        {
+            LineSegment[] lineSegments = new LineSegment[]
+            {
+                new LineSegment(new Vector2(3, 3), new Vector2(0, 0)),
+                new LineSegment(new Vector2(0, 0), new Vector2(2, 1)),
+            };
+
+            LineSegmentTree lsTree = new LineSegmentTree();
+
+            lsTree.Insert(lineSegments[0]);
+            lsTree.CheckInvariants();
+            lsTree.Insert(lineSegments[1]);
+            lsTree.CheckInvariants();
+
+            Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(1, 2)));
+            Assert.AreEqual(lineSegments[0], lsTree.GetLineSegmentToTheLeft(new Vector2(1.5f, 1)));
+            Assert.AreEqual(lineSegments[1], lsTree.GetLineSegmentToTheLeft(new Vector2(2, 0.5f)));
 
             lsTree.Remove(lineSegments[0]);
             lsTree.CheckInvariants();

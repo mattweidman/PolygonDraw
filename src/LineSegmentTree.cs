@@ -613,7 +613,23 @@ namespace PolygonDraw
                     throw new ArgumentException($"Segments {ls1} and {ls2} are equal.");
                 }
 
-                return FloatHelpers.Lt(other1.x, other2.x);
+                bool other1AboveHori = FloatHelpers.Gt(other1.y, ls1Point.y);
+                bool other2AboveHori = FloatHelpers.Gt(other2.y, ls1Point.y);
+
+                if (other1AboveHori != other2AboveHori)
+                {
+                    LineSegment higherSegment = other1AboveHori ? ls1 : ls2;
+                    LineSegment lowerSegment = other1AboveHori ? ls2 : ls1;
+                    throw new ArgumentException(
+                        $"Segment {higherSegment} needs to be removed before {lowerSegment} is added.");
+                }
+
+                float other1Angle = new Vector2(-1, 0).Angle(other1 - ls1Point);
+                float other2Angle = new Vector2(-1, 0).Angle(other2 - ls1Point);
+
+                return other1AboveHori
+                    ? FloatHelpers.Lt(other1Angle, other2Angle)
+                    : FloatHelpers.Lt(other2Angle, other1Angle);
             }
             else if (pos == LineSegment.HorizontalPosition.INTERSECTING)
             {
