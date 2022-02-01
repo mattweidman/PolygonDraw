@@ -602,9 +602,6 @@ namespace PolygonDraw
             }
             else if (pos == LineSegment.HorizontalPosition.INTERSECTING_AT_ENDPOINT)
             {
-                // TODO: This isn't totally right. What if both ls1 and ls2 are pointing
-                // left, and ls2 goes farther left, but it's below ls1? ls2 should be
-                // considered to the right, but here it would be to the left.
                 Vector2 other1 = ls1Point.Equals(ls1.p1) ? ls1.p2 : ls1.p1;
                 Vector2 other2 = ls1Point.Equals(ls2.p1) ? ls2.p2 : ls2.p1;
 
