@@ -13,11 +13,11 @@ namespace PolygonDrawTests
         [Test]
         public void Insert_Decreasing()
         {
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
             for (int i = 10; i >= 1; i--)
             {
-                lsTree.Insert(new LineSegment(new Vector2(i, i), new Vector2(i, 0)));
+                lsTree.Insert(new LineSegment(new Vector2(i, i), new Vector2(i, 0)), 0);
                 lsTree.CheckInvariants();
             }
         }
@@ -25,11 +25,11 @@ namespace PolygonDrawTests
         [Test]
         public void Insert_Increasing()
         {
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
             for (int i = 10; i >= 1; i--)
             {
-                lsTree.Insert(new LineSegment(new Vector2(10 - i, i), new Vector2(10 - i, 0)));
+                lsTree.Insert(new LineSegment(new Vector2(10 - i, i), new Vector2(10 - i, 0)), 0);
                 lsTree.CheckInvariants();
             }
         }
@@ -37,7 +37,7 @@ namespace PolygonDrawTests
         [Test]
         public void Insert_Middles()
         {
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
             int[] xCoordsToAdd = new int[] {10, 1, 5, 3, 2, 7, 8, 9, 4};
 
@@ -46,7 +46,7 @@ namespace PolygonDrawTests
                 int xCoord = xCoordsToAdd[i];
                 lsTree.Insert(new LineSegment(
                     new Vector2(xCoord, xCoordsToAdd.Length + 1 - i),
-                    new Vector2(xCoord, 0)));
+                    new Vector2(xCoord, 0)), 0);
                 lsTree.CheckInvariants();
             }
         }
@@ -54,31 +54,31 @@ namespace PolygonDrawTests
         [Test]
         public void Insert_Horizontal()
         {
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
-            lsTree.Insert(new LineSegment(new Vector2(2, 0), new Vector2(3, 0)));
+            lsTree.Insert(new LineSegment(new Vector2(2, 0), new Vector2(3, 0)), 0);
             lsTree.CheckInvariants();
 
-            lsTree.Insert(new LineSegment(new Vector2(0, 0), new Vector2(1, 0)));
+            lsTree.Insert(new LineSegment(new Vector2(0, 0), new Vector2(1, 0)), 0);
             lsTree.CheckInvariants();
 
-            lsTree.Insert(new LineSegment(new Vector2(4, 0), new Vector2(5, 0)));
+            lsTree.Insert(new LineSegment(new Vector2(4, 0), new Vector2(5, 0)), 0);
             lsTree.CheckInvariants();
 
-            lsTree.Insert(new LineSegment(new Vector2(6, 0), new Vector2(7, 0)));
+            lsTree.Insert(new LineSegment(new Vector2(6, 0), new Vector2(7, 0)), 0);
             lsTree.CheckInvariants();
 
-            lsTree.Insert(new LineSegment(new Vector2(-1, 0), new Vector2(-1, -1)));
+            lsTree.Insert(new LineSegment(new Vector2(-1, 0), new Vector2(-1, -1)), 0);
             lsTree.CheckInvariants();
 
-            lsTree.Insert(new LineSegment(new Vector2(-3, 0), new Vector2(-2, 0)));
+            lsTree.Insert(new LineSegment(new Vector2(-3, 0), new Vector2(-2, 0)), 0);
             lsTree.CheckInvariants();
         }
 
         [Test]
         public void Insert_Diagonals()
         {
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
             LineSegment[] linesToAdd = new LineSegment[]
             {
@@ -91,7 +91,7 @@ namespace PolygonDrawTests
 
             foreach (LineSegment line in linesToAdd)
             {
-                lsTree.Insert(line);
+                lsTree.Insert(line, 0);
                 lsTree.CheckInvariants();
             }
         }
@@ -110,10 +110,10 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(4, 10), new Vector2(4, 0)),
             };
             
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
             foreach (LineSegment ls in lineSegments)
             {
-                lsTree.Insert(ls);
+                lsTree.Insert(ls, 0);
             }
 
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(-1, 8)));
@@ -132,10 +132,10 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(5, 5), new Vector2(8, 8)),
             };
             
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
             foreach (LineSegment ls in lineSegments)
             {
-                lsTree.Insert(ls);
+                lsTree.Insert(ls, 0);
             }
 
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(1, 6)));
@@ -153,10 +153,10 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(2, 8), new Vector2(10, 0)),
             };
             
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
             foreach (LineSegment ls in lineSegments)
             {
-                lsTree.Insert(ls);
+                lsTree.Insert(ls, 0);
             }
 
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(0, 7)));
@@ -171,13 +171,13 @@ namespace PolygonDrawTests
         public void GetLineSegmentToTheLeft_DeepTree()
         {
             int numSegments = 15;
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
             List<LineSegment> segments = new List<LineSegment>();
             for (int i = 0; i <= numSegments; i++)
             {
                 LineSegment ls = new LineSegment(new Vector2(i, 0), new Vector2(i, 10));
                 segments.Add(ls);
-                lsTree.Insert(ls);
+                lsTree.Insert(ls, 0);
             }
 
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(-1, 5)));
@@ -196,10 +196,10 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(3, 0), new Vector2(4, 0)),
             };
             
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
             foreach (LineSegment ls in lineSegments)
             {
-                lsTree.Insert(ls);
+                lsTree.Insert(ls, 0);
             }
 
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(-1, 0)));
@@ -401,10 +401,10 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(4, 0), new Vector2(5, 0)),
             };
 
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
             foreach (LineSegment ls in lineSegments)
             {
-                lsTree.Insert(ls);
+                lsTree.Insert(ls, 0);
                 lsTree.CheckInvariants();
             }
 
@@ -422,10 +422,10 @@ namespace PolygonDrawTests
                 .Select(x => new LineSegment(new Vector2(x, 0), new Vector2(x, 1)))
                 .ToArray();
 
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
             foreach (LineSegment ls in lineSegments)
             {
-                lsTree.Insert(ls);
+                lsTree.Insert(ls, 0);
             }
 
             foreach (int idx in removalOrder)
@@ -465,13 +465,13 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(2, -1), new Vector2(2, 3)),
             };
 
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
-            lsTree.Insert(lineSegments[0]);
+            lsTree.Insert(lineSegments[0], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[1]);
+            lsTree.Insert(lineSegments[1], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[2]);
+            lsTree.Insert(lineSegments[2], 0);
             lsTree.CheckInvariants();
 
             lsTree.Remove(lineSegments[1]);
@@ -491,11 +491,11 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(3, 3), new Vector2(6, 0)),
             };
 
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
-            lsTree.Insert(lineSegments[0]);
+            lsTree.Insert(lineSegments[0], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[1]);
+            lsTree.Insert(lineSegments[1], 0);
             lsTree.CheckInvariants();
 
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(0, 1)));
@@ -521,11 +521,11 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(3, 0), new Vector2(6, 3)),
             };
 
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
-            lsTree.Insert(lineSegments[0]);
+            lsTree.Insert(lineSegments[0], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[1]);
+            lsTree.Insert(lineSegments[1], 0);
             lsTree.CheckInvariants();
 
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(0, 2)));
@@ -561,16 +561,16 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(0, 2), new Vector2(2, 4)),
             };
 
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
             // y=4
-            lsTree.Insert(lineSegments[0]);
+            lsTree.Insert(lineSegments[0], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[2]);
+            lsTree.Insert(lineSegments[2], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[11]);
+            lsTree.Insert(lineSegments[11], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[3]);
+            lsTree.Insert(lineSegments[3], 0);
             lsTree.CheckInvariants();
 
             // y=3
@@ -579,9 +579,9 @@ namespace PolygonDrawTests
             lsTree.Remove(lineSegments[3]);
             lsTree.CheckInvariants();
 
-            lsTree.Insert(lineSegments[1]);
+            lsTree.Insert(lineSegments[1], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[4]);
+            lsTree.Insert(lineSegments[4], 0);
             lsTree.CheckInvariants();
 
             // y=2
@@ -594,9 +594,9 @@ namespace PolygonDrawTests
             lsTree.Remove(lineSegments[4]);
             lsTree.CheckInvariants();
 
-            lsTree.Insert(lineSegments[10]);
+            lsTree.Insert(lineSegments[10], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[5]);
+            lsTree.Insert(lineSegments[5], 0);
             lsTree.CheckInvariants();
 
             // y=1
@@ -605,13 +605,13 @@ namespace PolygonDrawTests
             lsTree.Remove(lineSegments[5]);
             lsTree.CheckInvariants();
 
-            lsTree.Insert(lineSegments[9]);
+            lsTree.Insert(lineSegments[9], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[8]);
+            lsTree.Insert(lineSegments[8], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[7]);
+            lsTree.Insert(lineSegments[7], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[6]);
+            lsTree.Insert(lineSegments[6], 0);
             lsTree.CheckInvariants();
 
             // y=0
@@ -639,12 +639,12 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(1, 2), new Vector2(0, 2)),
             };
 
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
             // y=4
-            lsTree.Insert(lineSegments[0]);
+            lsTree.Insert(lineSegments[0], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[1]);
+            lsTree.Insert(lineSegments[1], 0);
             lsTree.CheckInvariants();
 
             // y=2
@@ -653,13 +653,13 @@ namespace PolygonDrawTests
             lsTree.Remove(lineSegments[1]);
             lsTree.CheckInvariants();
 
-            lsTree.Insert(lineSegments[2]);
+            lsTree.Insert(lineSegments[2], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[3]);
+            lsTree.Insert(lineSegments[3], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[5]);
+            lsTree.Insert(lineSegments[5], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[6]);
+            lsTree.Insert(lineSegments[6], 0);
             lsTree.CheckInvariants();
 
             lsTree.Remove(lineSegments[2]);
@@ -673,7 +673,7 @@ namespace PolygonDrawTests
             lsTree.Remove(lineSegments[5]);
             lsTree.CheckInvariants();
 
-            lsTree.Insert(lineSegments[4]);
+            lsTree.Insert(lineSegments[4], 0);
             lsTree.CheckInvariants();
 
             lsTree.Remove(lineSegments[4]);
@@ -689,11 +689,11 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(3, 3), new Vector2(1, 2)),
             };
 
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
-            lsTree.Insert(lineSegments[0]);
+            lsTree.Insert(lineSegments[0], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[1]);
+            lsTree.Insert(lineSegments[1], 0);
             lsTree.CheckInvariants();
 
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(2, 3)));
@@ -715,11 +715,11 @@ namespace PolygonDrawTests
                 new LineSegment(new Vector2(0, 0), new Vector2(2, 1)),
             };
 
-            LineSegmentTree lsTree = new LineSegmentTree();
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
 
-            lsTree.Insert(lineSegments[0]);
+            lsTree.Insert(lineSegments[0], 0);
             lsTree.CheckInvariants();
-            lsTree.Insert(lineSegments[1]);
+            lsTree.Insert(lineSegments[1], 0);
             lsTree.CheckInvariants();
 
             Assert.IsNull(lsTree.GetLineSegmentToTheLeft(new Vector2(1, 2)));

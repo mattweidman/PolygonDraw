@@ -8,32 +8,33 @@ namespace PolygonDraw
     /// Following https://www.cs.cornell.edu/courses/cs3110/2009sp/lectures/lec11.html
     /// and https://www.cs.cornell.edu/courses/cs312/2004fa/lectures/lecture11.htm#deletion
     /// </summary>
-    public class LineSegmentTree
+    /// <typeparam name="TMetadata">Type of metadata to associate with line segments.</typeparam>
+    public class LineSegmentTree<TMetadata>
     {
         private Node root;
         
         /// <summary>
         /// Insert a new line segment into the tree.
         /// </summary>
-        public void Insert(LineSegment lineSegment)
+        public void Insert(LineSegment lineSegment, TMetadata metadata)
         {
-            Node bubbledUpNode = this.InsertRecursive(lineSegment, this.root);
+            Node bubbledUpNode = this.InsertRecursive(lineSegment, this.root, metadata);
 
             // Root must be black.
             bubbledUpNode.isRed = false;
             this.root = bubbledUpNode;
         }
 
-        private Node InsertRecursive(LineSegment newLineSegment, Node node)
+        private Node InsertRecursive(LineSegment newLineSegment, Node node, TMetadata metadata)
         {
             if (node == null)
             {
-                return new Node(newLineSegment, true);
+                return new Node(newLineSegment, metadata, true);
             }
 
             if (LineIsLeftOfLineSegment(newLineSegment, node.lineSegment))
             {
-                node.left = this.InsertRecursive(newLineSegment, node.left);
+                node.left = this.InsertRecursive(newLineSegment, node.left, metadata);
 
                 if (node.left.isRed && (node.left.left != null && node.left.left.isRed))
                 {
@@ -66,7 +67,7 @@ namespace PolygonDraw
             }
             else
             {
-                node.right = this.InsertRecursive(newLineSegment, node.right);
+                node.right = this.InsertRecursive(newLineSegment, node.right, metadata);
 
                 if (node.right.isRed && (node.right.left != null && node.right.left.isRed))
                 {
@@ -654,9 +655,12 @@ namespace PolygonDraw
 
             public Node left, right;
 
-            public Node(LineSegment lineSegment, bool isRed)
+            public TMetadata metadata;
+
+            public Node(LineSegment lineSegment, TMetadata metadata, bool isRed)
             {
                 this.lineSegment = lineSegment;
+                this.metadata = metadata;
                 this.isRed = isRed;
             }
 
