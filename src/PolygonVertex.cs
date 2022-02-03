@@ -3,7 +3,11 @@ using System;
 namespace PolygonDraw
 {
     /// <summary>
-    /// Describes a vertex in a polygon to be used for triangulation.
+    /// Describes a reference to a vertex in a polygon to be used for triangulation. The
+    /// raw state of a PolygonVertex only consists of 3 things: a reference to the polygon
+    /// the vertex is in, the index of the vertex in the polygon, and whether the polygon
+    /// is a hole. PolygonVertex objects are hashed and compared only using the polygon
+    /// reference and the vertex index.
     /// </summary>
     public class PolygonVertex
     {
@@ -13,13 +17,21 @@ namespace PolygonDraw
 
         public readonly bool isHole;
 
+        public int prevVertexIndex => (this.vertexIndex + this.vertexCount - 1) % this.vertexCount;
+
+        public int nextVertexIndex => (this.vertexIndex + 1) % this.vertexCount;
+
         public Vector2 vertex => this.polygon.vertices[this.vertexIndex];
 
-        public Vector2 prevVertex =>
-            this.polygon.vertices[(this.vertexIndex + this.vertexCount - 1) % this.vertexCount];
+        public Vector2 prevVertex => this.polygon.vertices[prevVertexIndex];
         
-        public Vector2 nextVertex =>
-            this.polygon.vertices[(this.vertexIndex + 1) % this.vertexCount];
+        public Vector2 nextVertex => this.polygon.vertices[nextVertexIndex];
+
+        public PolygonVertex prevPolygonVertex =>
+            new PolygonVertex(this.polygon, this.prevVertexIndex, this.isHole);
+
+        public PolygonVertex nextPolygonVertex =>
+            new PolygonVertex(this.polygon, this.nextVertexIndex, this.isHole);
 
         public float x => this.vertex.x;
 

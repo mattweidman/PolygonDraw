@@ -198,5 +198,20 @@ namespace PolygonDraw
 
             return this.GetIntersection(compareSegment, true);
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is LineSegment other))
+            {
+                return false;
+            }
+
+            return this.p1.Equals(other.p1) && this.p2.Equals(other.p2);
+        }
+
+        public override int GetHashCode()
+        {
+            return (this.p1, this.p2).GetHashCode();
+        }
     }
 }

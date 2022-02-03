@@ -108,28 +108,37 @@ namespace PolygonDraw
         /// </summary>
         public LineSegment GetLineSegmentToTheLeft(Vector2 point)
         {
-            return GetLineSegmentToTheLeftRecursive(point, this.root);
+            return GetLineSegmentDataToTheLeft(point)?.lineSegment;
         }
 
-        private LineSegment GetLineSegmentToTheLeftRecursive(Vector2 point, Node node)
+        /// <summary>
+        /// Get the line segment to the left of point and associated metadata.
+        /// If point is to the left of all line segments in this tree, return null.
+        /// </summary>
+        public FetchedData GetLineSegmentDataToTheLeft(Vector2 point)
+        {
+            return GetLineSegmentDataToTheLeftRecursive(point, this.root);
+        }
+
+        private FetchedData GetLineSegmentDataToTheLeftRecursive(Vector2 point, Node node)
         {
             if (node == null)
             {
                 return null;
             }
 
-            LineSegment leftmostSegment = null;
+            FetchedData leftmostSegment = null;
             if (PointIsLeftOfLineSegment(point, node.lineSegment))
             {
-                leftmostSegment = GetLineSegmentToTheLeftRecursive(point, node.left);
+                leftmostSegment = GetLineSegmentDataToTheLeftRecursive(point, node.left);
             }
             else
             {
-                leftmostSegment = GetLineSegmentToTheLeftRecursive(point, node.right);
+                leftmostSegment = GetLineSegmentDataToTheLeftRecursive(point, node.right);
 
                 if (leftmostSegment == null)
                 {
-                    leftmostSegment = node.lineSegment;
+                    leftmostSegment = new FetchedData(node.lineSegment, node.metadata);
                 }
             }
 
@@ -729,6 +738,19 @@ namespace PolygonDraw
         public class InvariantFailedException : Exception
         {
             public InvariantFailedException(String message) : base(message) {}
+        }
+
+        public class FetchedData
+        {
+            public readonly LineSegment lineSegment;
+
+            public readonly TMetadata metadata;
+
+            public FetchedData(LineSegment lineSegment, TMetadata metadata)
+            {
+                this.lineSegment = lineSegment;
+                this.metadata = metadata;
+            }
         }
     }
 }
