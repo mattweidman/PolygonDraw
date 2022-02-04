@@ -39,7 +39,7 @@ namespace PolygonDraw
 
         private int vertexCount => this.polygon.vertices.Count;
 
-        public PolygonVertex(Polygon polygon, int vertexIndex, bool isHole)
+        public PolygonVertex(Polygon polygon, int vertexIndex, bool isHole = false)
         {
             this.polygon = polygon;
             this.vertexIndex = vertexIndex;

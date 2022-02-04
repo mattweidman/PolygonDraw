@@ -9,7 +9,18 @@ namespace PolygonDraw
     /// and https://cs.gmu.edu/~jmlien/teaching/09_fall_cs633/uploads/Main/lecture03.pdf
     /// </summary>
     public static class Triangulation
-    {   
+    {
+        /// <summary>
+        /// Find how to divide a polygon into y-monotone polygons. Return
+        /// a list of edges where polygons should be divided in order
+        /// to produce y-monotone polygons.
+        /// </summary>
+        /// <param name="polygons">Polygon to fill.</param>
+        public static List<PolygonEdge> GetYMonotonePolygonDivisions(Polygon polygon)
+        {
+            return GetYMonotonePolygonDivisions(new List<Polygon>() { polygon }, new List<Polygon>());
+        }
+
         /// <summary>
         /// Find how to divide polygons into y-monotone polygons. Return
         /// a list of edges where polygons should be divided in order
@@ -36,9 +47,15 @@ namespace PolygonDraw
                     .Reverse()
                     .Select((vertex, i) => new PolygonVertex(polygon, i, true)));
             
-            List<PolygonVertex> allVertices = polygonVertices
+            IEnumerable<PolygonVertex> allVertices = polygonVertices
                 .Concat(holeVertices)
-                .OrderByDescending(pv => pv.y)
+                .ToList();
+            
+            float xDiff = allVertices.Max(v => v.x) - allVertices.Min(v => v.x);
+            
+            // Sort by descending y, then increasing x
+            allVertices = allVertices
+                .OrderBy(pv => - pv.y * xDiff + pv.x)
                 .ToList();
             
             // Tree to store edges. Each PolygonVertex stored as metadata is a
@@ -88,9 +105,9 @@ namespace PolygonDraw
                     divisions.Add(new PolygonEdge(vertex, helper));
 
                     // Insert into status and record helpers.
-                    LineSegment newLine = new LineSegment(vertex.vertex, vertex.nextVertex);
-                    lineSegmentTree.Insert(newLine, vertex);
-                    helperMap[vertex] = vertex;
+                    LineSegment newLine = new LineSegment(vertex.prevVertex, vertex.vertex);
+                    lineSegmentTree.Insert(newLine, vertex.prevPolygonVertex);
+                    helperMap[vertex.prevPolygonVertex] = vertex;
                     helperMap[lsData.metadata] = vertex;
                 }
                 else if (vertexType == PolygonVertex.VertexType.MERGE)
