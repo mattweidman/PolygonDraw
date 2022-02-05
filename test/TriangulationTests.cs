@@ -272,5 +272,95 @@ namespace PolygonDrawTests
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
+
+        [Test]
+        public void GetYMonotonePolygonDivisions_SpikedTop()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(6, 2),
+                new Vector2(6, 0),
+                new Vector2(5, 1),
+                new Vector2(4, 0),
+                new Vector2(3, 1),
+                new Vector2(2, 0),
+                new Vector2(1, 1),
+                new Vector2(0, 0),
+                new Vector2(0, 2),
+            });
+
+            List<PolygonEdge> expected = new List<PolygonEdge>()
+            {
+                new PolygonEdge(new PolygonVertex(polygon, 6), new PolygonVertex(polygon, 8)),
+                new PolygonEdge(new PolygonVertex(polygon, 4), new PolygonVertex(polygon, 6)),
+                new PolygonEdge(new PolygonVertex(polygon, 2), new PolygonVertex(polygon, 4)),
+            };
+            List<PolygonEdge> observed = Triangulation.GetYMonotonePolygonDivisions(polygon);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void GetYMonotonePolygonDivisions_BottomAndTopCrenels()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(4, 0), // 0
+                new Vector2(4, 1),
+                new Vector2(3, 1),
+                new Vector2(3, 0),
+                new Vector2(2, 0),
+                new Vector2(2, 1), // 5
+                new Vector2(1, 1),
+                new Vector2(1, 0),
+                new Vector2(0, 0),
+                new Vector2(0, 2),
+                new Vector2(5, 2), // 10
+                new Vector2(5, 1),
+                new Vector2(6, 1),
+                new Vector2(6, 2),
+                new Vector2(7, 2),
+                new Vector2(7, 1), // 15
+                new Vector2(8, 1),
+                new Vector2(8, 2),
+                new Vector2(9, 2),
+                new Vector2(9, 0), // 19
+            });
+
+            List<PolygonEdge> expected = new List<PolygonEdge>()
+            {
+                new PolygonEdge(new PolygonVertex(polygon, 6), new PolygonVertex(polygon, 9)), // good
+                new PolygonEdge(new PolygonVertex(polygon, 2), new PolygonVertex(polygon, 5)), // good
+                new PolygonEdge(new PolygonVertex(polygon, 4), new PolygonVertex(polygon, 1)),
+                new PolygonEdge(new PolygonVertex(polygon, 15), new PolygonVertex(polygon, 12)),
+            };
+            List<PolygonEdge> observed = Triangulation.GetYMonotonePolygonDivisions(polygon);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void GetYMonotonePolygonDivisions_Tetris()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 2),
+                new Vector2(2, 2),
+                new Vector2(2, 1),
+                new Vector2(3, 1),
+                new Vector2(3, 0),
+                new Vector2(1, 0),
+                new Vector2(1, 1),
+                new Vector2(0, 1),
+            });
+
+            List<PolygonEdge> expected = new List<PolygonEdge>()
+            {
+                new PolygonEdge(new PolygonVertex(polygon, 5), new PolygonVertex(polygon, 2)),
+            };
+            List<PolygonEdge> observed = Triangulation.GetYMonotonePolygonDivisions(polygon);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
     }
 }

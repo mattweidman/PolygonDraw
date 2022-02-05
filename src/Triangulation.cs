@@ -160,7 +160,6 @@ namespace PolygonDraw
                 else if (vertexType == PolygonVertex.VertexType.EXTERIOR_LEFT)
                 {
                     // Connect to helper if it is a merge vertex.
-                    // TODO: helper could be not found for horizontal edges
                     PolygonVertex helper = helperMap[vertex];
                     if (helper.GetVertexType() == PolygonVertex.VertexType.MERGE)
                     {
@@ -182,7 +181,6 @@ namespace PolygonDraw
                     // Connect to the helper of the edge to the left if it is a merge vertex.
                     LineSegmentTree<PolygonVertex>.FetchedData lsData =
                         lineSegmentTree.GetLineSegmentDataToTheLeft(vertex.vertex);
-                    // TODO: helper could be not found for horizontal edges
                     PolygonVertex helper = helperMap[lsData.metadata];
                     if (helper.GetVertexType() == PolygonVertex.VertexType.MERGE)
                     {
