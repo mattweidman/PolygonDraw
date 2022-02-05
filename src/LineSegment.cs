@@ -112,7 +112,7 @@ namespace PolygonDraw
                 return HorizontalPosition.NOT_ALIGNED;
             }
 
-            if (FloatHelpers.Eq(this.p1.y, this.p2.y))
+            if (this.IsHorizontal())
             {
                 if (FloatHelpers.Lt(point.x, this.p1.x) && FloatHelpers.Lt(point.x, this.p2.x))
                 {
@@ -212,6 +212,11 @@ namespace PolygonDraw
         public override int GetHashCode()
         {
             return (this.p1, this.p2).GetHashCode();
+        }
+
+        public bool IsHorizontal()
+        {
+            return FloatHelpers.Eq(this.p1.y, this.p2.y);
         }
     }
 }

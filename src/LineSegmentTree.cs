@@ -592,8 +592,8 @@ namespace PolygonDraw
                 ? MathF.Min(ls1.GetHigherPoint().y, ls2.GetHigherPoint().y)
                 : MathF.Max(ls1.GetLowerPoint().y, ls2.GetLowerPoint().y);
 
-            Vector2 ls1Point = FloatHelpers.Eq(ls1.p1.y, ls1.p2.y)
-                ? ls1.p1 : ls1.GetPointAtY(compareLevel);
+            // ls1Point is a point along ls1 with a y-coordinate that is within ls2's vertical range.
+            Vector2 ls1Point = ls1.IsHorizontal() ? ls1.p1 : ls1.GetPointAtY(compareLevel);
 
             if (ls1Point == null)
             {

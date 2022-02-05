@@ -74,69 +74,88 @@ namespace PolygonDraw
                 PolygonVertex.VertexType vertexType = vertex.GetVertexType();
                 if (vertexType == PolygonVertex.VertexType.START)
                 {
-                    // Insert line segment into status and record its helper.
                     LineSegment prevLine = new LineSegment(vertex.prevVertex, vertex.vertex);
-                    PolygonVertex prevPolygonVertex = vertex.prevPolygonVertex;
-                    lineSegmentTree.Insert(prevLine, prevPolygonVertex);
-                    helperMap[prevPolygonVertex] = vertex;
+                    if (!prevLine.IsHorizontal())
+                    {
+                        // Insert line segment into status and record its helper.
+                        PolygonVertex prevPolygonVertex = vertex.prevPolygonVertex;
+                        lineSegmentTree.Insert(prevLine, prevPolygonVertex);
+                        helperMap[prevPolygonVertex] = vertex;
+                    }
                 }
                 else if (vertexType == PolygonVertex.VertexType.END)
                 {
-                    // Connect to merge vertex if needed.
-                    // TODO: helper could be not found for horizontal edges
-                    PolygonVertex helper = helperMap[vertex];
-                    if (helper.GetVertexType() == PolygonVertex.VertexType.MERGE)
+                    LineSegment nextLine = new LineSegment(vertex.vertex, vertex.nextVertex);
+                    if (!nextLine.IsHorizontal())
                     {
-                        divisions.Add(new PolygonEdge(vertex, helper));
-                    }
+                        // Connect to merge vertex if needed.
+                        PolygonVertex helper = helperMap[vertex];
+                        if (helper.GetVertexType() == PolygonVertex.VertexType.MERGE)
+                        {
+                            divisions.Add(new PolygonEdge(vertex, helper));
+                        }
 
-                    // Remove line segment from status.
-                    LineSegment lineSegment = new LineSegment(vertex.vertex, vertex.nextVertex);
-                    lineSegmentTree.Remove(lineSegment);
-                    helperMap.Remove(vertex);
+                        // Remove line segment from status.
+                        LineSegment lineSegment = new LineSegment(vertex.vertex, vertex.nextVertex);
+                        lineSegmentTree.Remove(lineSegment);
+                        helperMap.Remove(vertex);
+                    }
                 }
                 else if (vertexType == PolygonVertex.VertexType.SPLIT)
                 {
-                    // Add an edge to the helper of the edge to the left.
-                    LineSegmentTree<PolygonVertex>.FetchedData lsData =
-                        lineSegmentTree.GetLineSegmentDataToTheLeft(vertex.vertex);
-                    // TODO: helper could be not found for horizontal edges
-                    PolygonVertex helper = helperMap[lsData.metadata];
-                    divisions.Add(new PolygonEdge(vertex, helper));
+                    LineSegment nextLine = new LineSegment(vertex.vertex, vertex.nextVertex);
+                    if (!nextLine.IsHorizontal())
+                    {
+                        // Add an edge to the helper of the edge to the left.
+                        LineSegmentTree<PolygonVertex>.FetchedData lsData =
+                            lineSegmentTree.GetLineSegmentDataToTheLeft(vertex.vertex);
+                        PolygonVertex helper = helperMap[lsData.metadata];
+                        divisions.Add(new PolygonEdge(vertex, helper));
+                        helperMap[lsData.metadata] = vertex;
+                    }
 
-                    // Insert into status and record helpers.
-                    LineSegment newLine = new LineSegment(vertex.prevVertex, vertex.vertex);
-                    lineSegmentTree.Insert(newLine, vertex.prevPolygonVertex);
-                    helperMap[vertex.prevPolygonVertex] = vertex;
-                    helperMap[lsData.metadata] = vertex;
+                    LineSegment prevLine = new LineSegment(vertex.prevVertex, vertex.vertex);
+                    if (!prevLine.IsHorizontal())
+                    {
+                        // Insert into status and record helper.
+                        LineSegment newLine = new LineSegment(vertex.prevVertex, vertex.vertex);
+                        lineSegmentTree.Insert(newLine, vertex.prevPolygonVertex);
+                        helperMap[vertex.prevPolygonVertex] = vertex;
+                    }
                 }
                 else if (vertexType == PolygonVertex.VertexType.MERGE)
                 {
-                    // If the helper of the next edge is a merge vertex, connect it.
-                    // TODO: helper could be not found for horizontal edges
-                    PolygonVertex nextEdgeHelper = helperMap[vertex];
-                    if (nextEdgeHelper.GetVertexType() == PolygonVertex.VertexType.MERGE)
+                    LineSegment nextLine = new LineSegment(vertex.vertex, vertex.nextVertex);
+                    if (!nextLine.IsHorizontal())
                     {
-                        divisions.Add(new PolygonEdge(vertex, nextEdgeHelper));
+                        // If the helper of the next edge is a merge vertex, connect it.
+                        PolygonVertex nextEdgeHelper = helperMap[vertex];
+                        if (nextEdgeHelper.GetVertexType() == PolygonVertex.VertexType.MERGE)
+                        {
+                            divisions.Add(new PolygonEdge(vertex, nextEdgeHelper));
+                        }
+
+                        // Remove next edge from the status.
+                        LineSegment nextEdge = new LineSegment(vertex.vertex, vertex.nextVertex);
+                        lineSegmentTree.Remove(nextEdge);
+                        helperMap.Remove(vertex);
                     }
 
-                    // Remove next edge from the status.
-                    LineSegment nextEdge = new LineSegment(vertex.vertex, vertex.nextVertex);
-                    lineSegmentTree.Remove(nextEdge);
-                    helperMap.Remove(vertex);
-
-                    // Connect to the helper of the edge to the left if it's a merge vertex.
-                    LineSegmentTree<PolygonVertex>.FetchedData lsData =
-                        lineSegmentTree.GetLineSegmentDataToTheLeft(vertex.vertex);
-                    // TODO: helper could be not found for horizontal edges
-                    PolygonVertex leftEdgeHelper = helperMap[lsData.metadata];
-                    if (leftEdgeHelper.GetVertexType() == PolygonVertex.VertexType.MERGE)
+                    LineSegment prevLine = new LineSegment(vertex.prevVertex, vertex.vertex);
+                    if (!prevLine.IsHorizontal())
                     {
-                        divisions.Add(new PolygonEdge(vertex, leftEdgeHelper));
-                    }
+                        // Connect to the helper of the edge to the left if it's a merge vertex.
+                        LineSegmentTree<PolygonVertex>.FetchedData lsData =
+                            lineSegmentTree.GetLineSegmentDataToTheLeft(vertex.vertex);
+                        PolygonVertex leftEdgeHelper = helperMap[lsData.metadata];
+                        if (leftEdgeHelper.GetVertexType() == PolygonVertex.VertexType.MERGE)
+                        {
+                            divisions.Add(new PolygonEdge(vertex, leftEdgeHelper));
+                        }
 
-                    // Update the helper of the edge to the left.
-                    helperMap[lsData.metadata] = vertex;
+                        // Update the helper of the edge to the left.
+                        helperMap[lsData.metadata] = vertex;
+                    }
                 }
                 else if (vertexType == PolygonVertex.VertexType.EXTERIOR_LEFT)
                 {
