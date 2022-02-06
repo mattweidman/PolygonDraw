@@ -41,10 +41,6 @@ namespace PolygonDraw
             
             IEnumerable<PolygonVertex> holeVertices = holes
                 .SelectMany(polygon => polygon.vertices
-                    // convert to enumerable so we can use Reverse()
-                    .AsEnumerable()
-                    // holes should have opposite direction from polygons
-                    .Reverse()
                     .Select((vertex, i) => new PolygonVertex(polygon, i, true)));
             
             IEnumerable<PolygonVertex> allVertices = polygonVertices
@@ -154,7 +150,8 @@ namespace PolygonDraw
                         }
 
                         // Update the helper of the edge to the left.
-                        helperMap[lsData.metadata] = vertex;
+                        helperMap[lsData.metadata] = nextLine.IsHorizontal()
+                            ? vertex.nextPolygonVertex : vertex;
                     }
                 }
                 else if (vertexType == PolygonVertex.VertexType.EXTERIOR_LEFT)

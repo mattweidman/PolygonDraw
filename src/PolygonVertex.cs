@@ -17,9 +17,13 @@ namespace PolygonDraw
 
         public readonly bool isHole;
 
-        public int prevVertexIndex => (this.vertexIndex + this.vertexCount - 1) % this.vertexCount;
+        public int prevVertexIndex => this.isHole
+            ? (this.vertexIndex + 1) % this.vertexCount
+            : (this.vertexIndex + this.vertexCount - 1) % this.vertexCount;
 
-        public int nextVertexIndex => (this.vertexIndex + 1) % this.vertexCount;
+        public int nextVertexIndex => this.isHole
+            ? (this.vertexIndex + this.vertexCount - 1) % this.vertexCount
+            : (this.vertexIndex + 1) % this.vertexCount;
 
         public Vector2 vertex => this.polygon.vertices[this.vertexIndex];
 
