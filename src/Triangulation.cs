@@ -11,6 +11,130 @@ namespace PolygonDraw
     public static class Triangulation
     {
         /// <summary>
+        /// Divide a polygon into y-monotone polygons.
+        /// </summary>
+        /// <param name="polygons">List of polygons to fill.</param>
+        public static List<Polygon> GetYMonotonePolygons(Polygon polygon)
+        {
+            return GetYMonotonePolygons(new List<Polygon> { polygon }, new List<Polygon>());
+        }
+
+        /// <summary>
+        /// Divide polygons and holes into y-monotone polygons.
+        /// </summary>
+        /// <param name="polygons">List of polygons to fill.</param>
+        /// <param name="holes">Empty spaces within polygons that should
+        /// not be filled. It is assumed holes are contained entirely inside
+        /// polygons.</param>
+        public static List<Polygon> GetYMonotonePolygons(
+            List<Polygon> polygons,
+            List<Polygon> holes)
+        {
+            List<PolygonEdge> divisions = GetYMonotonePolygonDivisions(polygons, holes);
+            List<PolygonVertex> allVertices = PolygonsToPolygonVertices(polygons, false)
+                .Concat(PolygonsToPolygonVertices(holes, true))
+                .ToList();
+            Dictionary<PolygonVertex, List<PolygonVertex>> adjMap = GetDivisionsMap(divisions, allVertices);
+            HashSet<PolygonVertex> verticesVisited = new HashSet<PolygonVertex>();
+            List<Polygon> yMonotonePolygons = new List<Polygon>();
+
+            // Iterate over each unvisited vertex
+            foreach (PolygonVertex startPv in allVertices)
+            {
+                if (verticesVisited.Contains(startPv))
+                {
+                    continue;
+                }
+
+                verticesVisited.Add(startPv);
+
+                HashSet<PolygonEdge> edgesVisited = new HashSet<PolygonEdge>();
+                
+                // Initialize queue with edges from start vertex
+                Queue<PolygonEdge> edgesToTraverse = new Queue<PolygonEdge>();
+                foreach (PolygonVertex nextPv in adjMap[startPv])
+                {
+                    edgesToTraverse.Enqueue(new PolygonEdge(startPv, nextPv));
+                }
+
+                // BFS
+                while (edgesToTraverse.Any())
+                {
+                    PolygonEdge initialEdge = edgesToTraverse.Dequeue();
+
+                    if (edgesVisited.Contains(initialEdge))
+                    {
+                        continue;
+                    }
+
+                    List<PolygonVertex> yMonotoneVertices = new List<PolygonVertex>()
+                    {
+                        initialEdge.vertex1,
+                    };
+
+                    // Loop to create the smallest-possible polygon and add edges to queue
+                    PolygonEdge currentEdge = initialEdge;
+                    while (!currentEdge.vertex2.Equals(initialEdge.vertex1))
+                    {
+                        List<PolygonVertex> nextPvs = adjMap[currentEdge.vertex2]
+                            .Where(nextPv => !nextPv.Equals(currentEdge.vertex1))
+                            .ToList();
+
+                        // Add this vertex to the list
+                        yMonotoneVertices.Add(currentEdge.vertex2);
+
+                        // Visit the vertex
+                        verticesVisited.Add(currentEdge.vertex2);
+                        edgesVisited.Add(currentEdge);
+
+                        // Find the edge that makes the smallest possible polygon
+                        int rightmostPvIndex = nextPvs.ArgMax(pv => {
+                            Vector2 dir1 = currentEdge.vertex1.vertex - currentEdge.vertex2.vertex;
+                            Vector2 dir2 = pv.vertex - currentEdge.vertex2.vertex;
+                            return dir1.Angle(dir2);
+                        });
+
+                        // Add the rest of the edges to the queue for later
+                        foreach (PolygonVertex nextPv in nextPvs.Where((_, i) => i != rightmostPvIndex))
+                        {
+                            edgesToTraverse.Enqueue(new PolygonEdge(currentEdge.vertex2, nextPv));
+                        }
+
+                        // Move to the polygon-size-minimizing edge
+                        currentEdge = new PolygonEdge(currentEdge.vertex2, nextPvs[rightmostPvIndex]);
+                    }
+
+                    edgesVisited.Add(currentEdge);
+                    yMonotonePolygons.Add(new Polygon(yMonotoneVertices.Select(pv => pv.vertex).ToList()));
+                }
+            }
+
+            return yMonotonePolygons;
+        }
+
+        /// <summary>
+        /// Create adjacency map for polygon edges.
+        /// </summary>
+        private static Dictionary<PolygonVertex, List<PolygonVertex>> GetDivisionsMap(
+            List<PolygonEdge> divisions, List<PolygonVertex> allVertices)
+        {
+            var adjMap = new Dictionary<PolygonVertex, List<PolygonVertex>>();
+
+            foreach (PolygonVertex pv in allVertices)
+            {
+                adjMap[pv] = new List<PolygonVertex>() { pv.nextPolygonVertex };
+            }
+            
+            foreach (PolygonEdge edge in divisions)
+            {
+                adjMap[edge.vertex1].Add(edge.vertex2);
+                adjMap[edge.vertex2].Add(edge.vertex1);
+            }
+
+            return adjMap;
+        }
+
+        /// <summary>
         /// Find how to divide a polygon into y-monotone polygons. Return
         /// a list of edges where polygons should be divided in order
         /// to produce y-monotone polygons.
@@ -32,27 +156,14 @@ namespace PolygonDraw
         /// not be filled. It is assumed holes are contained entirely inside
         /// polygons.</param>
         public static List<PolygonEdge> GetYMonotonePolygonDivisions(
-            List<Polygon> polygons,
-            List<Polygon> holes)
+            List<Polygon> polygons, List<Polygon> holes)
         {
-            IEnumerable<PolygonVertex> polygonVertices = polygons
-                .SelectMany(polygon => polygon.vertices
-                    .Select((vertex, i) => new PolygonVertex(polygon, i, false)));
-            
-            IEnumerable<PolygonVertex> holeVertices = holes
-                .SelectMany(polygon => polygon.vertices
-                    .Select((vertex, i) => new PolygonVertex(polygon, i, true)));
-            
-            IEnumerable<PolygonVertex> allVertices = polygonVertices
-                .Concat(holeVertices)
-                .ToList();
-            
-            float xDiff = allVertices.Max(v => v.x) - allVertices.Min(v => v.x);
+            IEnumerable<PolygonVertex> allVertices = PolygonsToPolygonVertices(polygons, false)
+                .Concat(PolygonsToPolygonVertices(holes, true));
             
             // Sort by descending y, then increasing x
-            allVertices = allVertices
-                .OrderBy(pv => - pv.y * xDiff + pv.x)
-                .ToList();
+            float xDiff = allVertices.Max(v => v.x) - allVertices.Min(v => v.x);
+            allVertices = allVertices.OrderBy(pv => - pv.y * xDiff + pv.x).ToList();
             
             // Tree to store edges. Each PolygonVertex stored as metadata is a
             // the first vertex of the edge. We need to store it so that we can
@@ -190,6 +301,14 @@ namespace PolygonDraw
             }
 
             return divisions;
+        }
+
+        private static IEnumerable<PolygonVertex> PolygonsToPolygonVertices(
+            List<Polygon> polygons, bool isHole)
+        {
+            return polygons
+                .SelectMany(polygon => polygon.vertices
+                    .Select((vertex, i) => new PolygonVertex(polygon, i, isHole)));
         }
     }
 }

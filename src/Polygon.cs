@@ -162,9 +162,26 @@ namespace PolygonDraw
                 return false;
             }
 
-            for (int i = 0; i < this.vertices.Count; i++)
+            // Find index of vertex in other that equals the first vertex in this
+            int offset = 0;
+            bool foundMatch = false;
+            for (int i = 0; i < other.vertices.Count; i++)
             {
-                if (!this.vertices[i].Equals(other.vertices[i]))
+                if (other.vertices[i].Equals(this.vertices[0]))
+                {
+                    foundMatch = true;
+                    offset = i;
+                    break;
+                }
+            }
+            if (!foundMatch)
+            {
+                return false;
+            }
+
+            for (int i = 1; i < this.vertices.Count; i++)
+            {
+                if (!this.vertices[i].Equals(other.vertices[(i + offset) % other.vertices.Count]))
                 {
                     return false;
                 }
