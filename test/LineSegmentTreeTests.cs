@@ -416,6 +416,31 @@ namespace PolygonDrawTests
             lsTree.CheckInvariants();
         }
 
+        [Test]
+        public void Remove_SwapIncludesMetadata()
+        {
+            LineSegment[] lineSegments = new LineSegment[]
+            {
+                new LineSegment(new Vector2(0, 0), new Vector2(0, 5)),
+                new LineSegment(new Vector2(1, 4), new Vector2(2, 5)),
+                new LineSegment(new Vector2(3, 3), new Vector2(4, 5)),
+                new LineSegment(new Vector2(5, 4), new Vector2(6, 5)),
+            };
+
+            LineSegmentTree<int> lsTree = new LineSegmentTree<int>();
+            for (int i = 0; i < lineSegments.Count(); i++)
+            {
+                lsTree.Insert(lineSegments[i], i);
+                lsTree.CheckInvariants();
+            }
+
+            lsTree.Remove(new LineSegment(new Vector2(1, 4), new Vector2(2, 5)));
+            lsTree.CheckInvariants();
+
+            LineSegmentTree<int>.FetchedData lsData = lsTree.GetLineSegmentDataToTheLeft(new Vector2(4, 4));
+            Assert.AreEqual(2, lsData.metadata);
+        }
+
         private static void TestRemoveSimple(int[] xCoordinates, int[] removalOrder)
         {
             LineSegment[] lineSegments = xCoordinates

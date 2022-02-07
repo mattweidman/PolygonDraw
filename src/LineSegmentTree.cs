@@ -158,7 +158,6 @@ namespace PolygonDraw
                 throw new ArgumentException($"Can't remove {lineSegment} from empty tree.");
             }
 
-            Vector2 lowerPoint = lineSegment.GetLowerPoint();
             Node newRoot = this.RemoveRecursive(lineSegment, this.root);
 
             if (newRoot == null || newRoot.lineSegment == null)
@@ -686,9 +685,13 @@ namespace PolygonDraw
 
             public void SwapValuesWith(Node other)
             {
-                LineSegment temp = this.lineSegment;
+                LineSegment tempLine = this.lineSegment;
                 this.lineSegment = other.lineSegment;
-                other.lineSegment = temp;
+                other.lineSegment = tempLine;
+
+                TMetadata tempMetadata = this.metadata;
+                this.metadata = other.metadata;
+                other.metadata = tempMetadata;
             }
 
             /// <summary>
