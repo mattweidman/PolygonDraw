@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -105,7 +106,20 @@ namespace PolygonDraw
                     }
 
                     edgesVisited.Add(currentEdge);
-                    yMonotonePolygons.Add(new Polygon(yMonotoneVertices.Select(pv => pv.vertex).ToList()));
+                    yMonotonePolygons.Add(new Polygon(yMonotoneVertices
+                        .Select(pv => pv.vertex)
+                        .Where((v, i) => {
+                            // Remove vertices with a 180-degree angle
+                            int prevIndex = (i + yMonotoneVertices.Count() - 1) % yMonotoneVertices.Count();
+                            Vector2 prevDir = yMonotoneVertices[prevIndex].vertex - v;
+                            
+                            int nextIndex = (i + 1) % yMonotoneVertices.Count();
+                            Vector2 nextDir = yMonotoneVertices[nextIndex].vertex - v;
+
+                            float angle = nextDir.Angle(prevDir);
+                            return !FloatHelpers.Eq(angle, MathF.PI);
+                        })
+                        .ToList()));
                 }
             }
 

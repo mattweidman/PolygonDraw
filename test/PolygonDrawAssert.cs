@@ -12,8 +12,7 @@ namespace PolygonDrawTests
         {
             if (!FloatHelpers.Eq(expected, observed))
             {
-                Console.WriteLine($"FAIL: expected {expected}, found {observed}.");
-                Assert.Fail();
+                ThrowAssertion(expected, observed);
             }
         }
 
@@ -21,8 +20,7 @@ namespace PolygonDrawTests
         {
             if (!expected.Equals(observed))
             {
-                Console.WriteLine($"FAIL: expected {expected}, found {observed}.");
-                Assert.Fail();
+                ThrowAssertion(expected, observed);
             }
         }
 
@@ -48,8 +46,7 @@ namespace PolygonDrawTests
 
             if (!areEqual)
             {
-                throw new AssertionException(
-                    $"FAIL: expected {ListToString(expected)}, found {ListToString(observed)}");
+                ThrowAssertion(ListToString(expected), ListToString(observed));
             }
         }
 
@@ -77,8 +74,7 @@ namespace PolygonDrawTests
 
             if (!areEqual)
             {
-                throw new AssertionException(
-                    $"FAIL: expected {ListToString(expected)}, found {ListToString(observed)}");
+                ThrowAssertion(ListToString(expected), ListToString(observed));
             }
         }
 
@@ -126,8 +122,7 @@ namespace PolygonDrawTests
 
             if (!areEqual)
             {
-                throw new AssertionException(
-                    $"FAIL: expected {Array2DToString(expected)}, found {Array2DToString(observed)}");
+                ThrowAssertion(Array2DToString(expected), Array2DToString(observed));
             }
         }
 
@@ -140,6 +135,16 @@ namespace PolygonDrawTests
         {
             IEnumerable<string> rowStrings = arr.Select(row => $"[{string.Join(",", row)}]");
             return $"[{string.Join(",", rowStrings)}]";
+        }
+
+        private static string ExpectedFoundString(object expected, object observed)
+        {
+            return $"FAIL: expected\n{expected}\nfound\n{observed}";
+        }
+
+        private static void ThrowAssertion(object expected, object observed)
+        {
+            throw new AssertionException(ExpectedFoundString(expected, observed));
         }
     }
 }
