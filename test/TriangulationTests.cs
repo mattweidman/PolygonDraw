@@ -597,7 +597,7 @@ namespace PolygonDrawTests
                     new Vector2(0, 2),
                     new Vector2(2, 3),
                     new Vector2(4, 2),
-                })
+                }),
             };
 
             List<PolygonEdge> expected = new List<PolygonEdge>();
@@ -1140,6 +1140,219 @@ namespace PolygonDrawTests
                 }),
             };
             List<Polygon> observed = Triangulation.GetYMonotonePolygons(polygons, holes);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        #endregion
+
+        #region Triangulate
+
+        [Test]
+        public void Triangulate_Triangle()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0),
+                new Vector2(0, 4),
+                new Vector2(4, 4),
+            });
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 4))
+            };
+            List<Triangle> observed = Triangulation.Triangulate(polygon);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void Triangulate_SeparateTriangles()
+        {
+            List<Polygon> polygons = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0),
+                    new Vector2(1, 1),
+                    new Vector2(2, 0),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(4, 1),
+                    new Vector2(3, 0),
+                    new Vector2(2, 1),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 2),
+                    new Vector2(2, 3),
+                    new Vector2(4, 2),
+                }),
+            };
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 0), new Vector2(1, 1), new Vector2(2, 0)),
+                new Triangle(new Vector2(4, 1), new Vector2(3, 0), new Vector2(2, 1)),
+                new Triangle(new Vector2(0, 2), new Vector2(2, 3), new Vector2(4, 2)),
+            };
+            List<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void Triangulate_Square()
+        {
+            List<Polygon> polygons = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0),
+                    new Vector2(0, 2),
+                    new Vector2(2, 2),
+                    new Vector2(2, 0),
+                }),
+            };
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 0), new Vector2(0, 2), new Vector2(2, 0)),
+                new Triangle(new Vector2(2, 2), new Vector2(2, 0), new Vector2(0, 2)),
+            };
+            List<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void Triangulate_MergeVertex()
+        {
+            List<Polygon> polygons = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(2, 0),
+                    new Vector2(0, 4),
+                    new Vector2(1, 3),
+                    new Vector2(2, 4),
+                }),
+            };
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(2, 0), new Vector2(0, 4), new Vector2(1, 3)),
+                new Triangle(new Vector2(2, 0), new Vector2(1, 3), new Vector2(2, 4)),
+            };
+            List<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void Triangulate_SplitVertex()
+        {
+            List<Polygon> polygons = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0),
+                    new Vector2(1, 4),
+                    new Vector2(2, 0),
+                    new Vector2(1, 1),
+                }),
+            };
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 0), new Vector2(1, 4), new Vector2(1, 1)),
+                new Triangle(new Vector2(2, 0), new Vector2(1, 1), new Vector2(1, 4)),
+            };
+            List<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void Triangulate_VertexWithMultipleDivisions()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), // 0
+                new Vector2(0, 5),
+                new Vector2(1, 4),
+                new Vector2(2, 5),
+                new Vector2(3, 3),
+                new Vector2(4, 5), // 5
+                new Vector2(5, 4),
+                new Vector2(6, 5),
+                new Vector2(6, 0),
+                new Vector2(4, 2),
+                new Vector2(3, 0), // 10
+                new Vector2(2, 1),
+            });
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 0), new Vector2(0, 5), new Vector2(1, 4)),
+                new Triangle(new Vector2(0, 0), new Vector2(1, 4), new Vector2(4, 2)),
+                new Triangle(new Vector2(1, 4), new Vector2(3, 3), new Vector2(4, 2)),
+                new Triangle(new Vector2(1, 4), new Vector2(2, 5), new Vector2(3, 3)),
+                new Triangle(new Vector2(2, 1), new Vector2(4, 2), new Vector2(3, 0)),
+                new Triangle(new Vector2(3, 3), new Vector2(4, 5), new Vector2(5, 4)),
+                new Triangle(new Vector2(3, 3), new Vector2(5, 4), new Vector2(6, 0)),
+                new Triangle(new Vector2(5, 4), new Vector2(6, 5), new Vector2(6, 0)),
+            };
+            List<Triangle> observed = Triangulation.Triangulate(polygon);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void Triangulate_BottomAndTopCrenels()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(4, 0), // 0
+                new Vector2(4, 1),
+                new Vector2(3, 1),
+                new Vector2(3, 0),
+                new Vector2(2, 0),
+                new Vector2(2, 1), // 5
+                new Vector2(1, 1),
+                new Vector2(1, 0),
+                new Vector2(0, 0),
+                new Vector2(0, 2),
+                new Vector2(5, 2), // 10
+                new Vector2(5, 1),
+                new Vector2(6, 1),
+                new Vector2(6, 2),
+                new Vector2(7, 2),
+                new Vector2(7, 1), // 15
+                new Vector2(8, 1),
+                new Vector2(8, 2),
+                new Vector2(9, 2),
+                new Vector2(9, 0), // 19
+            });
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 0), new Vector2(1, 1), new Vector2(1, 0)),
+                new Triangle(new Vector2(0, 0), new Vector2(0, 2), new Vector2(1, 1)),
+                new Triangle(new Vector2(0, 2), new Vector2(5, 1), new Vector2(1, 1)),
+                new Triangle(new Vector2(0, 2), new Vector2(5, 2), new Vector2(5, 1)),
+                new Triangle(new Vector2(2, 0), new Vector2(2, 1), new Vector2(3, 1)),
+                new Triangle(new Vector2(2, 0), new Vector2(3, 1), new Vector2(3, 0)),
+                new Triangle(new Vector2(4, 0), new Vector2(4, 1), new Vector2(8, 1)),
+                new Triangle(new Vector2(6, 1), new Vector2(6, 2), new Vector2(7, 1)),
+                new Triangle(new Vector2(6, 2), new Vector2(7, 2), new Vector2(7, 1)),
+                new Triangle(new Vector2(4, 0), new Vector2(8, 1), new Vector2(9, 0)),
+                new Triangle(new Vector2(9, 0), new Vector2(8, 1), new Vector2(9, 2)),
+                new Triangle(new Vector2(8, 1), new Vector2(8, 2), new Vector2(9, 2)),
+            };
+            List<Triangle> observed = Triangulation.Triangulate(polygon);
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }

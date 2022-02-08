@@ -518,6 +518,32 @@ namespace PolygonDrawTests
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
+        [Test]
+        public void DivideIntoTriangles_BottomAndTopCrenelsSubshape()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 2),
+                new Vector2(5, 2),
+                new Vector2(5, 1),
+                new Vector2(8, 1),
+                new Vector2(4, 0),
+                new Vector2(4, 1),
+                new Vector2(1, 1),
+            });
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 2), new Vector2(5, 1), new Vector2(1, 1)),
+                new Triangle(new Vector2(0, 2), new Vector2(5, 2), new Vector2(5, 1)),
+                new Triangle(new Vector2(4, 0), new Vector2(4, 1), new Vector2(8, 1)),
+            };
+
+            List<Triangle> observed = polygon.MonotoneTriangulate();
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
         #endregion
     }
 }

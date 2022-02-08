@@ -12,6 +12,29 @@ namespace PolygonDraw
     public static class Triangulation
     {
         /// <summary>
+        /// Divide a polygon into triangles.
+        /// </summary>
+        /// <param name="polygons">List of polygons to fill.</param>
+        public static List<Triangle> Triangulate(Polygon polygon)
+        {
+            return Triangulate(new List<Polygon> { polygon }, new List<Polygon>());
+        }
+
+        /// <summary>
+        /// Divide polygons and holes into triangles.
+        /// </summary>
+        /// <param name="polygons">List of polygons to fill.</param>
+        /// <param name="holes">Empty spaces within polygons that should
+        /// not be filled. It is assumed holes are contained entirely inside
+        /// polygons.</param>
+        public static List<Triangle> Triangulate(List<Polygon> polygons, List<Polygon> holes)
+        {
+            return GetYMonotonePolygons(polygons, holes)
+                .SelectMany(polygon => polygon.MonotoneTriangulate())
+                .ToList();
+        }
+
+        /// <summary>
         /// Divide a polygon into y-monotone polygons.
         /// </summary>
         /// <param name="polygons">List of polygons to fill.</param>
@@ -112,7 +135,7 @@ namespace PolygonDraw
                             // Remove vertices with a 180-degree angle
                             int prevIndex = (i + yMonotoneVertices.Count() - 1) % yMonotoneVertices.Count();
                             Vector2 prevDir = yMonotoneVertices[prevIndex].vertex - v;
-                            
+
                             int nextIndex = (i + 1) % yMonotoneVertices.Count();
                             Vector2 nextDir = yMonotoneVertices[nextIndex].vertex - v;
 
