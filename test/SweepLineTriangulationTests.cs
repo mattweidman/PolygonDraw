@@ -526,7 +526,6 @@ namespace PolygonDrawTests
                 new Vector2(0, 2),
                 new Vector2(5, 2),
                 new Vector2(5, 1),
-                new Vector2(8, 1),
                 new Vector2(4, 0),
                 new Vector2(4, 1),
                 new Vector2(1, 1),
@@ -536,7 +535,7 @@ namespace PolygonDrawTests
             {
                 new Triangle(new Vector2(0, 2), new Vector2(5, 1), new Vector2(1, 1)),
                 new Triangle(new Vector2(0, 2), new Vector2(5, 2), new Vector2(5, 1)),
-                new Triangle(new Vector2(4, 0), new Vector2(4, 1), new Vector2(8, 1)),
+                new Triangle(new Vector2(4, 0), new Vector2(4, 1), new Vector2(5, 1)),
             };
 
             List<Triangle> observed = polygon.MonotoneTriangulate();

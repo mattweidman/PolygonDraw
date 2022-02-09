@@ -63,7 +63,7 @@ namespace PolygonDraw
 
         public override string ToString()
         {
-            return this.isHole ? $"hole({this.vertex})" : $"polygon({this.vertex})";
+            return this.isHole ? $"hv({this.vertex})" : $"pv({this.vertex})";
         }
 
         public override int GetHashCode()

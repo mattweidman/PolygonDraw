@@ -195,8 +195,9 @@ namespace PolygonDraw
         public static List<PolygonEdge> GetYMonotonePolygonDivisions(
             List<Polygon> polygons, List<Polygon> holes)
         {
-            IEnumerable<PolygonVertex> allVertices = PolygonsToPolygonVertices(polygons, false)
-                .Concat(PolygonsToPolygonVertices(holes, true));
+            List<PolygonVertex> allVertices = PolygonsToPolygonVertices(polygons, false)
+                .Concat(PolygonsToPolygonVertices(holes, true))
+                .ToList();
             
             // Sort by descending y, then increasing x
             float xDiff = allVertices.Max(v => v.x) - allVertices.Min(v => v.x);
@@ -213,8 +214,24 @@ namespace PolygonDraw
             // Output edges
             var divisions = new List<PolygonEdge>();
 
+            // Track line segments to remove from the tree so that we can remove
+            // horizontal line segments at the same y-coordinate at once.
+            float previousY = allVertices[0].y + 1;
+            List<PolygonVertex> lineSegmentsToRemove = new List<PolygonVertex>();
+
             foreach (PolygonVertex vertex in allVertices)
             {
+                if (!FloatHelpers.Eq(vertex.y, previousY))
+                {
+                    foreach (PolygonVertex pv in lineSegmentsToRemove)
+                    {
+                        lineSegmentTree.Remove(new LineSegment(pv.vertex, pv.nextVertex));
+                        helperMap.Remove(pv);
+                    }
+
+                    lineSegmentsToRemove.Clear();
+                }
+
                 PolygonVertex.VertexType vertexType = vertex.GetVertexType();
                 if (vertexType == PolygonVertex.VertexType.START)
                 {
@@ -240,8 +257,7 @@ namespace PolygonDraw
                         }
 
                         // Remove line segment from status.
-                        LineSegment lineSegment = new LineSegment(vertex.vertex, vertex.nextVertex);
-                        lineSegmentTree.Remove(lineSegment);
+                        lineSegmentTree.Remove(nextLine);
                         helperMap.Remove(vertex);
                     }
                 }
@@ -262,8 +278,7 @@ namespace PolygonDraw
                     if (!prevLine.IsHorizontal())
                     {
                         // Insert into status and record helper.
-                        LineSegment newLine = new LineSegment(vertex.prevVertex, vertex.vertex);
-                        lineSegmentTree.Insert(newLine, vertex.prevPolygonVertex);
+                        lineSegmentTree.Insert(prevLine, vertex.prevPolygonVertex);
                         helperMap[vertex.prevPolygonVertex] = vertex;
                     }
                 }
@@ -279,10 +294,9 @@ namespace PolygonDraw
                             divisions.Add(new PolygonEdge(vertex, nextEdgeHelper));
                         }
 
-                        // Remove next edge from the status.
-                        LineSegment nextEdge = new LineSegment(vertex.vertex, vertex.nextVertex);
-                        lineSegmentTree.Remove(nextEdge);
-                        helperMap.Remove(vertex);
+                        // Temporarily remove the line segment from the status so that we can
+                        // search for vertex in the tree.
+                        lineSegmentTree.Remove(nextLine);
                     }
 
                     LineSegment prevLine = new LineSegment(vertex.prevVertex, vertex.vertex);
@@ -298,8 +312,17 @@ namespace PolygonDraw
                         }
 
                         // Update the helper of the edge to the left.
-                        helperMap[lsData.metadata] = nextLine.IsHorizontal()
-                            ? vertex.nextPolygonVertex : vertex;
+                        helperMap[lsData.metadata] = vertex;
+                    }
+
+                    if (!nextLine.IsHorizontal())
+                    {
+                        // Re-add the next edge to the status in case any vertices on the same
+                        // y-coordinate need to connect to it. Remove it once we move on to other
+                        // y-coordinates.
+                        lineSegmentTree.Insert(nextLine, vertex);
+                        lineSegmentsToRemove.Add(vertex);
+                        helperMap[vertex] = vertex;
                     }
                 }
                 else if (vertexType == PolygonVertex.VertexType.EXTERIOR_LEFT)
@@ -335,6 +358,8 @@ namespace PolygonDraw
                     // Change the helper we used.
                     helperMap[lsData.metadata] = vertex;
                 }
+
+                previousY = vertex.y;
             }
 
             return divisions;

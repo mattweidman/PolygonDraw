@@ -66,6 +66,7 @@ namespace PolygonDrawTests
 
                     if (!found)
                     {
+                        Console.Error.WriteLine($"{expectedObj} not found in observed list.");
                         areEqual = false;
                         break;
                     }
