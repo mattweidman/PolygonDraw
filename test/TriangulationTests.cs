@@ -1614,6 +1614,69 @@ namespace PolygonDrawTests
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
+        [Test]
+        public void Triangulate_StairsUpRight()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(-3, 0),
+                new Vector2(-3, 1),
+                new Vector2(-2, 1),
+                new Vector2(-2, 2),
+                new Vector2(-1, 2),
+                new Vector2(-1, 3),
+                new Vector2(0, 3),
+                new Vector2(0, 0),
+            });
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(-1, 2), new Vector2(-1, 3), new Vector2(0, 3)),
+                new Triangle(new Vector2(-2, 1), new Vector2(-2, 2), new Vector2(-1, 2)),
+                new Triangle(new Vector2(0, 0), new Vector2(-2, 1), new Vector2(0, 3)),
+                new Triangle(new Vector2(-3, 0), new Vector2(-3, 1), new Vector2(0, 0)),
+                new Triangle(new Vector2(0, 0), new Vector2(-3, 1), new Vector2(-2, 1)),
+            };
+            List<Triangle> observed = Triangulation.Triangulate(polygon);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void Triangulate_Plus()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(1, 1),
+                new Vector2(2, 1),
+                new Vector2(2, -1),
+                new Vector2(1, -1),
+                new Vector2(1, -2),
+                new Vector2(-1, -2),
+                new Vector2(-1, -1),
+                new Vector2(-2, -1),
+                new Vector2(-2, 1),
+                new Vector2(-1, 1),
+                new Vector2(-1, 2),
+                new Vector2(1, 2),
+            });
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(-1, 1), new Vector2(-1, 2), new Vector2(1, 2)),
+                new Triangle(new Vector2(1, 1), new Vector2(-1, 1), new Vector2(1, 2)),
+
+                new Triangle(new Vector2(1, -2), new Vector2(-1, -2), new Vector2(1, -1)),
+                new Triangle(new Vector2(1, -1), new Vector2(-1, -2), new Vector2(-1, -1)),
+
+                new Triangle(new Vector2(-2, -1), new Vector2(-2, 1), new Vector2(2, 1)),
+                new Triangle(new Vector2(2, 1), new Vector2(2, -1), new Vector2(-2, -1)),
+            };
+            List<Triangle> observed = Triangulation.Triangulate(polygon);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
         #endregion
     }
 }
