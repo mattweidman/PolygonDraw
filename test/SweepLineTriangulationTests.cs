@@ -519,7 +519,7 @@ namespace PolygonDrawTests
         }
 
         [Test]
-        public void DivideIntoTriangles_BottomAndTopCrenelsSubshape()
+        public void DivideIntoTriangles_Plateau1()
         {
             Polygon polygon = new Polygon(new List<Vector2>()
             {
@@ -536,6 +536,58 @@ namespace PolygonDrawTests
                 new Triangle(new Vector2(0, 2), new Vector2(5, 1), new Vector2(1, 1)),
                 new Triangle(new Vector2(0, 2), new Vector2(5, 2), new Vector2(5, 1)),
                 new Triangle(new Vector2(4, 0), new Vector2(4, 1), new Vector2(5, 1)),
+            };
+
+            List<Triangle> observed = polygon.MonotoneTriangulate();
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void DivideIntoTriangles_Plateau2()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 2),
+                new Vector2(5, 2),
+                new Vector2(5, 0.5f),
+                new Vector2(4, 0),
+                new Vector2(4, 1),
+                new Vector2(1, 1),
+            });
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 2), new Vector2(5, 2), new Vector2(1, 1)),
+                new Triangle(new Vector2(4, 1), new Vector2(1, 1), new Vector2(5, 2)),
+                new Triangle(new Vector2(5, 0.5f), new Vector2(4, 1), new Vector2(5, 2)),
+                new Triangle(new Vector2(5, 0.5f), new Vector2(4, 0), new Vector2(4, 1)),
+            };
+
+            List<Triangle> observed = polygon.MonotoneTriangulate();
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void DivideIntoTriangles_Plateau3()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 2),
+                new Vector2(5, 2),
+                new Vector2(5, 1.5f),
+                new Vector2(4, 0),
+                new Vector2(4, 1),
+                new Vector2(1, 1),
+            });
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 2), new Vector2(5, 2), new Vector2(5, 1.5f)),
+                new Triangle(new Vector2(1, 1), new Vector2(0, 2), new Vector2(5, 1.5f)),
+                new Triangle(new Vector2(1, 1), new Vector2(5, 1.5f), new Vector2(4, 1)),
+                new Triangle(new Vector2(4, 1), new Vector2(5, 1.5f), new Vector2(4, 0)),
             };
 
             List<Triangle> observed = polygon.MonotoneTriangulate();

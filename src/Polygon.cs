@@ -286,8 +286,15 @@ namespace PolygonDraw
                             break;
                         }
 
+                        Triangle newTriangle = GenerateTriangle(currentVertex, previousVertex, higherVertex);
+
+                        // Don't add a triangle if its vertices are co-linear.
+                        if (newTriangle.IsValidTriangle())
+                        {
+                            triangles.Add(newTriangle);
+                        }
+
                         stack.Pop();
-                        triangles.Add(GenerateTriangle(currentVertex, previousVertex, higherVertex));
                         previousVertex = higherVertex;
                     }
 
@@ -338,11 +345,11 @@ namespace PolygonDraw
 
             if (p1.position == MonotoneChain.LeftChain)
             {
-                return FloatHelpers.Lt(angle, MathF.PI);
+                return FloatHelpers.Lte(angle, MathF.PI);
             }
             else
             {
-                return FloatHelpers.Gt(angle, MathF.PI);
+                return FloatHelpers.Gte(angle, MathF.PI);
             }
         }
 

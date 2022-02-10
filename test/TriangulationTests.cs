@@ -1067,11 +1067,8 @@ namespace PolygonDrawTests
                     new Vector2(0, 5),
                     new Vector2(3.5f, 5),
                     new Vector2(3, 4),
-                    new Vector2(6, 4),
                     new Vector2(2, 3),
                     new Vector2(2, 1),
-                    new Vector2(9, 1),
-                    new Vector2(8, 0),
                 }),
                 new Polygon(new List<Vector2>()
                 {
@@ -1083,6 +1080,7 @@ namespace PolygonDrawTests
                     new Vector2(7, 1),
                     new Vector2(7, 3),
                     new Vector2(2, 3),
+                    new Vector2(3, 4),
                     new Vector2(6, 4),
                     new Vector2(5.5f, 5),
                 }),
@@ -1106,6 +1104,13 @@ namespace PolygonDrawTests
                     new Vector2(3.5f, 5),
                     new Vector2(5.5f, 5),
                     new Vector2(5, 4),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(1, 0),
+                    new Vector2(2, 1),
+                    new Vector2(9, 1),
+                    new Vector2(8, 0),
                 }),
             };
             List<Polygon> observed = Triangulation.GetYMonotonePolygons(polygons, holes);
@@ -1198,11 +1203,11 @@ namespace PolygonDrawTests
                     new Vector2(0, 9),
                     new Vector2(1, 8),
                     new Vector2(1, 1),
-                    new Vector2(8, 1),
                 }),
                 new Polygon(new List<Vector2>()
                 {
                     new Vector2(0, 0),
+                    new Vector2(1, 1),
                     new Vector2(8, 1),
                     new Vector2(8, 8),
                     new Vector2(1, 8),
@@ -1216,11 +1221,11 @@ namespace PolygonDrawTests
                     new Vector2(2, 7),
                     new Vector2(3, 6),
                     new Vector2(3, 3),
-                    new Vector2(6, 3),
                 }),
                 new Polygon(new List<Vector2>()
                 {
                     new Vector2(2, 2),
+                    new Vector2(3, 3),
                     new Vector2(6, 3),
                     new Vector2(6, 6),
                     new Vector2(3, 6),
@@ -1436,19 +1441,19 @@ namespace PolygonDrawTests
 
             List<Triangle> expected = new List<Triangle>()
             {
-                new Triangle(new Vector2(0, 0), new Vector2(1, 1), new Vector2(1, 0)),
-                new Triangle(new Vector2(0, 0), new Vector2(0, 2), new Vector2(1, 1)),
-                new Triangle(new Vector2(0, 2), new Vector2(5, 2), new Vector2(1, 1)),
-                new Triangle(new Vector2(1, 1), new Vector2(5, 2), new Vector2(5, 1)),
-                new Triangle(new Vector2(2, 0), new Vector2(2, 1), new Vector2(3, 1)),
-                new Triangle(new Vector2(2, 0), new Vector2(3, 1), new Vector2(3, 0)),
-                new Triangle(new Vector2(4, 0), new Vector2(4, 1), new Vector2(5, 1)),
-                new Triangle(new Vector2(6, 1), new Vector2(6, 2), new Vector2(7, 1)),
-                new Triangle(new Vector2(6, 2), new Vector2(7, 2), new Vector2(7, 1)),
-                new Triangle(new Vector2(4, 0), new Vector2(5, 1), new Vector2(8, 1)),
-                new Triangle(new Vector2(4, 0), new Vector2(8, 1), new Vector2(9, 0)),
-                new Triangle(new Vector2(9, 0), new Vector2(8, 1), new Vector2(9, 2)),
-                new Triangle(new Vector2(8, 1), new Vector2(8, 2), new Vector2(9, 2)),
+                new Triangle(new Vector2(0, 0), new Vector2(1, 1), new Vector2(1, 0)), //
+                new Triangle(new Vector2(0, 0), new Vector2(0, 2), new Vector2(1, 1)), //
+                new Triangle(new Vector2(0, 2), new Vector2(5, 2), new Vector2(5, 1)), //
+                new Triangle(new Vector2(1, 1), new Vector2(0, 2), new Vector2(5, 1)), //
+                new Triangle(new Vector2(2, 0), new Vector2(2, 1), new Vector2(3, 1)), //
+                new Triangle(new Vector2(2, 0), new Vector2(3, 1), new Vector2(3, 0)), //
+                new Triangle(new Vector2(4, 0), new Vector2(4, 1), new Vector2(5, 1)), //
+                new Triangle(new Vector2(6, 1), new Vector2(6, 2), new Vector2(7, 1)), //
+                new Triangle(new Vector2(6, 2), new Vector2(7, 2), new Vector2(7, 1)), //
+                new Triangle(new Vector2(4, 0), new Vector2(5, 1), new Vector2(9, 0)), //
+                new Triangle(new Vector2(5, 1), new Vector2(8, 1), new Vector2(9, 0)), //
+                new Triangle(new Vector2(9, 0), new Vector2(8, 1), new Vector2(9, 2)), //
+                new Triangle(new Vector2(8, 1), new Vector2(8, 2), new Vector2(9, 2)), //
             };
             List<Triangle> observed = Triangulation.Triangulate(polygon);
 

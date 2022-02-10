@@ -616,5 +616,37 @@ namespace PolygonDrawTests
         }
 
         #endregion
+
+        #region IsValidTriangle
+
+        [Test]
+        public void IsValidTriangle_Valid()
+        {
+            Triangle tri = new Triangle(new Vector2(0, 0), new Vector2(1, 0.01f), new Vector2(2, 0));
+            Assert.IsTrue(tri.IsValidTriangle());
+        }
+
+        [Test]
+        public void IsValidTriangle_Invalid_StartLeft()
+        {
+            Triangle tri = new Triangle(new Vector2(0, 0), new Vector2(1, 0), new Vector2(2, 0));
+            Assert.IsFalse(tri.IsValidTriangle());
+        }
+
+        [Test]
+        public void IsValidTriangle_Invalid_StartInMiddle()
+        {
+            Triangle tri = new Triangle(new Vector2(1, 0), new Vector2(0, 0), new Vector2(2, 0));
+            Assert.IsFalse(tri.IsValidTriangle());
+        }
+
+        [Test]
+        public void IsValidTriangle_Invalid_StartRight()
+        {
+            Triangle tri = new Triangle(new Vector2(2, 0), new Vector2(0, 0), new Vector2(1, 0));
+            Assert.IsFalse(tri.IsValidTriangle());
+        }
+
+        #endregion
     }
 }

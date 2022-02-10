@@ -325,5 +325,17 @@ namespace PolygonDraw
                 return baseNext != null && maskNext != null;
             }
         }
+
+        /// <summary>
+        /// Returns false if there is any vertex with a zero-degree angle.
+        /// </summary>
+        public bool IsValidTriangle()
+        {
+            Vector2 dir1 = this.vertices[1] - this.vertices[0];
+            Vector2 dir2 = this.vertices[2] - this.vertices[0];
+            float angle = dir1.Angle(dir2);
+
+            return !(FloatHelpers.Eq(angle, 0) || FloatHelpers.Eq(angle, MathF.PI));
+        }
     }
 }
