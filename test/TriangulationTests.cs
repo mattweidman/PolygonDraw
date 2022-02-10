@@ -1540,6 +1540,80 @@ namespace PolygonDrawTests
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
+        [Test]
+        public void Triangulate_IslandWithinAnIsland()
+        {
+            List<Polygon> polygons = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0),
+                    new Vector2(0, 9),
+                    new Vector2(9, 9),
+                    new Vector2(9, 0),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(2, 2),
+                    new Vector2(2, 7),
+                    new Vector2(7, 7),
+                    new Vector2(7, 2),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(4, 4),
+                    new Vector2(4, 5),
+                    new Vector2(5, 5),
+                    new Vector2(5, 4),
+                }),
+            };
+
+            List<Polygon> holes = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(1, 1),
+                    new Vector2(1, 8),
+                    new Vector2(8, 8),
+                    new Vector2(8, 1),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(3, 3),
+                    new Vector2(3, 6),
+                    new Vector2(6, 6),
+                    new Vector2(6, 3),
+                }),
+            };
+
+            List<Triangle> expected = new List<Triangle>()
+            {
+                new Triangle(new Vector2(0, 0), new Vector2(0, 9), new Vector2(1, 1)),
+                new Triangle(new Vector2(0, 9), new Vector2(1, 8), new Vector2(1, 1)),
+                new Triangle(new Vector2(0, 9), new Vector2(9, 9), new Vector2(1, 8)),
+                new Triangle(new Vector2(1, 8), new Vector2(9, 9), new Vector2(8, 8)),
+                new Triangle(new Vector2(8, 1), new Vector2(8, 8), new Vector2(9, 9)),
+                new Triangle(new Vector2(9, 0), new Vector2(8, 1), new Vector2(9, 9)),
+                new Triangle(new Vector2(9, 0), new Vector2(1, 1), new Vector2(8, 1)),
+                new Triangle(new Vector2(0, 0), new Vector2(1, 1), new Vector2(9, 0)),
+
+                new Triangle(new Vector2(2, 2), new Vector2(2, 7), new Vector2(3, 3)),
+                new Triangle(new Vector2(3, 3), new Vector2(2, 7), new Vector2(3, 6)),
+                new Triangle(new Vector2(3, 6), new Vector2(2, 7), new Vector2(7, 7)),
+                new Triangle(new Vector2(6, 6), new Vector2(3, 6), new Vector2(7, 7)),
+                new Triangle(new Vector2(6, 3), new Vector2(6, 6), new Vector2(7, 7)),
+                new Triangle(new Vector2(7, 2), new Vector2(6, 3), new Vector2(7, 7)),
+                new Triangle(new Vector2(2, 2), new Vector2(3, 3), new Vector2(7, 2)),
+                new Triangle(new Vector2(3, 3), new Vector2(6, 3), new Vector2(7, 2)),
+
+                new Triangle(new Vector2(4, 4), new Vector2(4, 5), new Vector2(5, 4)),
+                new Triangle(new Vector2(5, 5), new Vector2(5, 4), new Vector2(4, 5)),
+            };
+            List<Triangle> observed = Triangulation.Triangulate(polygons, holes);
+
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
         #endregion
     }
 }
