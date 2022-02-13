@@ -86,5 +86,40 @@ namespace PolygonDrawTests
             Assert.IsFalse(new Vector2(-1, 100).IsBetween(d1, d2));
             Assert.IsFalse(new Vector2(1, 100).IsBetween(d1, d2));
         }
+
+        [Test]
+        public void Colinear_Diagonal()
+        {
+            Assert.IsTrue(Vector2.Colinear(
+                new Vector2(-1, 1), new Vector2(5, 4), new Vector2(-2, 0.5f)));
+        }
+
+        [Test]
+        public void Colinear_Horizontal()
+        {
+            Assert.IsTrue(Vector2.Colinear(
+                new Vector2(0, 0), new Vector2(-1, 0), new Vector2(-10, 0), new Vector2(3, 0)));
+        }
+
+        [Test]
+        public void Colinear_Vertical()
+        {
+            Assert.IsTrue(Vector2.Colinear(
+                new Vector2(1, 2), new Vector2(1, 4), new Vector2(1, 3), new Vector2(1, 0)));
+        }
+
+        [Test]
+        public void Colinear_False_3Vertices()
+        {
+            Assert.IsFalse(Vector2.Colinear(
+                new Vector2(1, 2), new Vector2(2, 3), new Vector2(2, 4)));
+        }
+
+        [Test]
+        public void Colinear_False_4Vertices()
+        {
+            Assert.IsFalse(Vector2.Colinear(
+                new Vector2(5, 5), new Vector2(3, 3), new Vector2(4, 4), new Vector2(1, 0)));
+        }
     }
 }

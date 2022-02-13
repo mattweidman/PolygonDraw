@@ -100,5 +100,28 @@ namespace PolygonDraw
         {
             return this.x * other.x + this.y * other.y;
         }
+
+        /// <summary>
+        /// Whether all points are on the same line.
+        /// </summary>
+        public static bool Colinear(params Vector2[] points)
+        {
+            Vector2 lineDir = (points[1] - points[0]);
+            Vector2 unitDir = lineDir / lineDir.Magnitude();
+
+            for (int i = 2; i < points.Length; i++)
+            {
+                float projectionLength = (points[i] - points[0]).Dot(unitDir);
+                Vector2 projectionPoint = points[0] + projectionLength * unitDir;
+                float perpendicularDist = (points[i] - projectionPoint).Magnitude();
+
+                if (!FloatHelpers.Eq(perpendicularDist, 0))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }
