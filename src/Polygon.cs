@@ -20,6 +20,8 @@ namespace PolygonDraw
             this.vertices = vertices;
         }
 
+        #region Brute-Force Triangulation
+
         /// <summary>
         /// If any edge of this polygon blocks the straight line from 
         /// vertices[vIndex1] to vertices[vIndex2] return false. Else, return true.
@@ -149,6 +151,17 @@ namespace PolygonDraw
 
             throw new ArgumentException("Polygon could not be divided into triangles.");
         }
+
+        /// <summary>
+        /// Whether the indices of two vertices in this polygon are next to each other.
+        /// </summary>
+        private bool AreAdjacent(int vIndex1, int vIndex2)
+        {
+            int absDiff = Math.Abs(vIndex1 - vIndex2);
+            return absDiff <= 1 || absDiff == this.vertices.Count - 1;
+        }
+
+        #endregion
 
         public override bool Equals(object otherObj)
         {
@@ -381,13 +394,21 @@ namespace PolygonDraw
 
         #endregion
 
+        #region Clipping
+
         /// <summary>
-        /// Whether the indices of two vertices in this polygon are next to each other.
+        /// Find all intersections of this polygon with an infinite line. The infinite
+        /// line is given as a line segment. A list of distances from the first point
+        /// in the line segment is returned. Distances are given in units of lineSegment
+        /// lengths. A distance of 0 means an intersection is directly on lineSegment.p1.
+        /// A distance of 1 means an intersection is on lineSegment.p2. All intersections
+        /// with the line and polygon are returned, even those outside of the range [0, 1].
         /// </summary>
-        private bool AreAdjacent(int vIndex1, int vIndex2)
-        {
-            int absDiff = Math.Abs(vIndex1 - vIndex2);
-            return absDiff <= 1 || absDiff == this.vertices.Count - 1;
-        }
+        // public List<float> GetIntersectionDistancesForLine(LineSegment lineSegment)
+        // {
+            
+        // }
+
+        #endregion
     }
 }

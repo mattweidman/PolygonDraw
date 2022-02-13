@@ -394,5 +394,53 @@ namespace PolygonDrawTests
         }
 
         #endregion
+
+        [Test]
+        public void GetLineIntersectionDistances_Negatives()
+        {
+            LineSegment l1 = new LineSegment(new Vector2(4, 0), new Vector2(6, 0));
+            LineSegment l2 = new LineSegment(new Vector2(0, 4), new Vector2(0, 6));
+            (float, float)? expected = (-2, -2);
+            Assert.AreEqual(expected, l1.GetLineIntersectionDistances(l2));
+            Assert.AreEqual(expected, l2.GetLineIntersectionDistances(l1));
+        }
+
+        [Test]
+        public void GetLineIntersectionDistances_HighPositives()
+        {
+            LineSegment l1 = new LineSegment(new Vector2(-2, 2), new Vector2(-1, 1));
+            LineSegment l2 = new LineSegment(new Vector2(2, 2), new Vector2(1, 1));
+            (float, float)? expected = (2, 2);
+            Assert.AreEqual(expected, l1.GetLineIntersectionDistances(l2));
+            Assert.AreEqual(expected, l2.GetLineIntersectionDistances(l1));
+        }
+
+        [Test]
+        public void GetLineIntersectionDistances_Intersecting()
+        {
+            LineSegment l1 = new LineSegment(new Vector2(0, 0), new Vector2(4, 2));
+            LineSegment l2 = new LineSegment(new Vector2(0, 2), new Vector2(4, 0));
+            (float, float)? expected = (0.5f, 0.5f);
+            Assert.AreEqual(expected, l1.GetLineIntersectionDistances(l2));
+            Assert.AreEqual(expected, l2.GetLineIntersectionDistances(l1));
+        }
+
+        [Test]
+        public void GetLineIntersectionDistances_Connected()
+        {
+            LineSegment l1 = new LineSegment(new Vector2(0, 0), new Vector2(1, 0));
+            LineSegment l2 = new LineSegment(new Vector2(1, 0), new Vector2(-1, 3));
+            Assert.AreEqual((1, 0), l1.GetLineIntersectionDistances(l2));
+            Assert.AreEqual((0, 1), l2.GetLineIntersectionDistances(l1));
+        }
+
+        [Test]
+        public void GetLineIntersectionDistances_Parallel()
+        {
+            LineSegment l1 = new LineSegment(new Vector2(0, 0), new Vector2(1, 0));
+            LineSegment l2 = new LineSegment(new Vector2(1, 1), new Vector2(0, 1));
+            Assert.IsNull(l1.GetLineIntersectionDistances(l2));
+            Assert.IsNull(l2.GetLineIntersectionDistances(l1));
+        }
     }
 }

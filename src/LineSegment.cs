@@ -20,6 +20,44 @@ namespace PolygonDraw
         /// </summary>
         public Vector2 GetIntersection(LineSegment otherLine, bool includeEndpoints = false)
         {
+            (float, float)? distances = this.GetLineIntersectionDistances(otherLine);
+            
+            if (!distances.HasValue)
+            {
+                return null;
+            }
+
+            (float t1, float t2) = distances.Value;
+
+            bool intersects;
+            if (includeEndpoints)
+            {
+                intersects = FloatHelpers.Gte(t1, 0) && FloatHelpers.Lte(t1, 1)
+                    && FloatHelpers.Gte(t2, 0) && FloatHelpers.Lte(t2, 1);
+            }
+            else
+            {
+                intersects = FloatHelpers.Gt(t1, 0) && FloatHelpers.Lt(t1, 1)
+                    && FloatHelpers.Gt(t2, 0) && FloatHelpers.Lt(t2, 1);
+            }
+
+            return intersects ? (1 - t1) * this.p1 + t1 * this.p2 : null;
+        }
+
+        /// <summary>
+        /// Find the intersection of two infinite lines. If there is
+        /// no intersection (parallel), return null. If includeEndpoints is true,
+        /// return an intersection if it is at an endpoint. Returns a (float, float)
+        /// tuple, where the first element is the number of this LineSegment's lengths
+        /// away the intersection is from this.p1. The second element is the number
+        /// of otherLine's lengths away from otherLine.p1.
+        /// </summary>
+        /// <param name="otherLine">Other line.</param>
+        /// <returns>A (float, float) tuple, where item1 is the number of this LineSegment's
+        /// lengths away the intersection is from this.p1, and item2 is the number of otherLine
+        /// lengths the intersection is from otherLine.p1. Return null if parallel.</returns>
+        public (float, float)? GetLineIntersectionDistances(LineSegment otherLine)
+        {
             Vector2 d1 = this.p2 - this.p1;
             Vector2 d2 = otherLine.p2 - otherLine.p1;
             Matrix2 dMat = new Matrix2(d1.x, -d2.x, d1.y, -d2.y);
@@ -35,19 +73,7 @@ namespace PolygonDraw
             float t1 = tParam.x;
             float t2 = tParam.y;
 
-            bool intersects;
-            if (includeEndpoints)
-            {
-                intersects = FloatHelpers.Gte(t1, 0) && FloatHelpers.Lte(t1, 1)
-                    && FloatHelpers.Gte(t2, 0) && FloatHelpers.Lte(t2, 1);
-            }
-            else
-            {
-                intersects = FloatHelpers.Gt(t1, 0) && FloatHelpers.Lt(t1, 1)
-                    && FloatHelpers.Gt(t2, 0) && FloatHelpers.Lt(t2, 1);
-            }
-
-            return intersects ? (1 - t1) * this.p1 + t1 * this.p2 : null;
+            return (tParam.x, tParam.y);
         }
 
         /// <summary>
