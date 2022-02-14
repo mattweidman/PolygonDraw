@@ -398,16 +398,50 @@ namespace PolygonDraw
 
         /// <summary>
         /// Find all intersections of this polygon with an infinite line. The infinite
-        /// line is given as a line segment. A list of distances from the first point
-        /// in the line segment is returned. Distances are given in units of lineSegment
-        /// lengths. A distance of 0 means an intersection is directly on lineSegment.p1.
-        /// A distance of 1 means an intersection is on lineSegment.p2. All intersections
-        /// with the line and polygon are returned, even those outside of the range [0, 1].
+        /// line is given as a line segment. A list of intersections from the first point
+        /// in the line segment is returned.
         /// </summary>
-        // public List<float> GetIntersectionDistancesForLine(LineSegment lineSegment)
-        // {
-            
-        // }
+        /// <param name="lineSegment">Line segment representing infinite line.</param>
+        /// <param name="otherPolygon">Other polygon.
+        /// Used for populating IntersectionData with indices from both polygons.</param>
+        /// <param name="otherEdgeIndex">Index of polygon in which lineSegment appears.
+        /// Used for populating IntersectionData with indices from both polygons.</param>
+        public List<IntersectionData> GetIntersectionDistancesForLine(
+            LineSegment lineSegment, Polygon otherPolygon = null, int otherEdgeIndex = -1)
+        {
+            List<IntersectionData> intersectionDatas = new List<IntersectionData>();
+
+            for (int i = 0; i < this.vertices.Count(); i++)
+            {
+                int nextVertexIndex = (i + 1) % this.vertices.Count();
+                LineSegment polygonEdge = new LineSegment(this.vertices[i], this.vertices[nextVertexIndex]);
+                (float, float)? distances = lineSegment.GetLineIntersectionDistances(polygonEdge);
+
+                if (!distances.HasValue)
+                {
+                    continue;
+                }
+
+                (float lineSegmentDist, float edgeDist) = distances.Value;
+
+                // Only include intersections with polygon edge.
+                if (FloatHelpers.Lt(edgeDist, 0) || FloatHelpers.Gte(edgeDist, 1))
+                {
+                    continue;
+                }
+
+                intersectionDatas.Add(new IntersectionData(
+                    polygon1: otherPolygon,
+                    poly1EdgeIndex: otherEdgeIndex,
+                    poly1Dist: lineSegmentDist,
+                    polygon2: this,
+                    poly2EdgeIndex: i,
+                    poly2Dist: edgeDist
+                ));
+            }
+
+            return intersectionDatas;
+        }
 
         #endregion
     }
