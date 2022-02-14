@@ -320,6 +320,56 @@ namespace PolygonDrawTests
             AssertContainsIntersectionType(poly1, poly2, intersect);
         }
 
+        [Test]
+        public void GetIntersectionType_SharedEdge_VertexEdge_Contains()
+        {
+            Polygon poly1 = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0),
+                new Vector2(0, 4),
+                new Vector2(2, 2),
+            });
+
+            Polygon poly2 = new Polygon(new List<Vector2>()
+            {
+                new Vector2(2, 2),
+                new Vector2(0, 2),
+                new Vector2(0, 4),
+            });
+
+            IntersectionData intersect = new IntersectionData(poly1, 0, 0.5f, poly2, 1, 0);
+
+            AssertContainsIntersectionType(poly1, poly2, intersect);
+        }
+
+        [Test]
+        public void GetIntersectionType_SharedEdge_VertexVertex_Overlapping()
+        {
+            Polygon poly1 = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0),
+                new Vector2(2, -2),
+                new Vector2(-2, -2),
+                new Vector2(-2, 2),
+                new Vector2(0, 2),
+            });
+
+            Polygon poly2 = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0),
+                new Vector2(0, 2),
+                new Vector2(2, 2),
+                new Vector2(2, -2),
+                new Vector2(-2, -2),
+            });
+
+            IntersectionData intersect = new IntersectionData(poly1, 0, 0, poly2, 0, 0);
+
+            AssertIntersectionPointsMatch(intersect);
+            PolygonDrawAssert.AreEqual(
+                IntersectionData.IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
+        }
+
         private void AssertIntersectionPointsMatch(IntersectionData intersect)
         {
             PolygonDrawAssert.AreEqual(intersect.poly1.intersectionPoint, intersect.poly2.intersectionPoint);

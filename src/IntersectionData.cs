@@ -66,27 +66,27 @@ namespace PolygonDraw
             bool p2D1BetweenP1 = poly2Dir1.IsBetween(poly1Dir2, poly1Dir1);
             bool p2D2BetweenP1 = poly2Dir2.IsBetween(poly1Dir2, poly1Dir1);
 
-            if (p1D1BetweenP2 != p1D2BetweenP2 || p2D1BetweenP1 != p2D2BetweenP1)
-            {
-                return IntersectionType.OVERLAPPING;
-            }
-
-            if (!p1D1BetweenP2 && !p2D1BetweenP1)
+            if (!p1D1BetweenP2 && !p1D2BetweenP2 && !p2D1BetweenP1 && !p2D2BetweenP1)
             {
                 return IntersectionType.OUTER;
             }
 
-            if (!p1D1BetweenP2 && p2D1BetweenP1)
+            if (!p1D1BetweenP2 && !p1D2BetweenP2)
             {
                 return IntersectionType.POLY1_CONTAINS_POLY2;
             }
 
-            if (p1D1BetweenP2 && !p2D1BetweenP1)
+            if (!p2D1BetweenP1 && !p2D2BetweenP1)
             {
                 return IntersectionType.POLY2_CONTAINS_POLY1;
             }
 
-            return IntersectionType.SPLIT;
+            if (p1D1BetweenP2 && p1D2BetweenP2 && p2D1BetweenP1 && p2D2BetweenP1)
+            {
+                return IntersectionType.SPLIT;
+            }
+
+            return IntersectionType.OVERLAPPING;
         }
 
         /// <summary>
