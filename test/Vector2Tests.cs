@@ -121,5 +121,26 @@ namespace PolygonDrawTests
             Assert.IsFalse(Vector2.Colinear(
                 new Vector2(5, 5), new Vector2(3, 3), new Vector2(4, 4), new Vector2(1, 0)));
         }
+
+        [Test]
+        public void ColinearLengths_Horizontal()
+        {
+            Assert.AreEqual(3, Vector2.ColinearLengths(
+                new Vector2(1, 0), new Vector2(7, 0), new Vector2(2, 0)));
+        }
+
+        [Test]
+        public void ColinearLengths_Vertical()
+        {
+            Assert.AreEqual(12, Vector2.ColinearLengths(
+                new Vector2(0, -1), new Vector2(0, 5), new Vector2(0, 0.5f)));
+        }
+
+        [Test]
+        public void ColinearLengths_Diagonal()
+        {
+            Assert.AreEqual(0.5f, Vector2.ColinearLengths(
+                new Vector2(1, 1), new Vector2(3, 3), new Vector2(4, 4)));
+        }
     }
 }

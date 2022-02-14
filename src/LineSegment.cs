@@ -244,5 +244,10 @@ namespace PolygonDraw
         {
             return FloatHelpers.Eq(this.p1.y, this.p2.y);
         }
+
+        public bool Colinear(LineSegment other)
+        {
+            return Vector2.Colinear(this.p1, this.p2, other.p1, other.p2);
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace PolygonDrawTests
 
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
+                IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace PolygonDrawTests
 
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.OUTER, intersect.GetIntersectionType());
+                IntersectionType.OUTER, intersect.GetIntersectionType());
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace PolygonDrawTests
 
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.OUTER, intersect.GetIntersectionType());
+                IntersectionType.OUTER, intersect.GetIntersectionType());
         }
 
         [Test]
@@ -171,7 +171,7 @@ namespace PolygonDrawTests
 
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.SPLIT, intersect.GetIntersectionType());
+                IntersectionType.SPLIT, intersect.GetIntersectionType());
         }
 
         [Test]
@@ -199,7 +199,7 @@ namespace PolygonDrawTests
 
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.SPLIT, intersect.GetIntersectionType());
+                IntersectionType.SPLIT, intersect.GetIntersectionType());
         }
 
         [Test]
@@ -223,7 +223,7 @@ namespace PolygonDrawTests
 
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
+                IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
         }
 
         [Test]
@@ -247,7 +247,7 @@ namespace PolygonDrawTests
 
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
+                IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
         }
 
         [Test]
@@ -271,7 +271,7 @@ namespace PolygonDrawTests
 
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.OUTER, intersect.GetIntersectionType());
+                IntersectionType.OUTER, intersect.GetIntersectionType());
         }
 
         [Test]
@@ -295,7 +295,7 @@ namespace PolygonDrawTests
 
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.OUTER, intersect.GetIntersectionType());
+                IntersectionType.OUTER, intersect.GetIntersectionType());
         }
 
         [Test]
@@ -367,7 +367,7 @@ namespace PolygonDrawTests
 
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
+                IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
         }
 
         private void AssertIntersectionPointsMatch(IntersectionData intersect)
@@ -379,7 +379,7 @@ namespace PolygonDrawTests
         {
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.POLY1_CONTAINS_POLY2, intersect.GetIntersectionType());
+                IntersectionType.POLY1_CONTAINS_POLY2, intersect.GetIntersectionType());
             
             IntersectionData intersect2 = new IntersectionData(
                 intersect.poly2.polygon,
@@ -390,7 +390,7 @@ namespace PolygonDrawTests
                 intersect.poly1.distanceAlongEdge);
 
             PolygonDrawAssert.AreEqual(
-                IntersectionData.IntersectionType.POLY2_CONTAINS_POLY1, intersect2.GetIntersectionType());
+                IntersectionType.POLY2_CONTAINS_POLY1, intersect2.GetIntersectionType());
         }
     }
 }

@@ -460,5 +460,73 @@ namespace PolygonDrawTests
         }
 
         #endregion
+
+        [Test]
+        public void ContainsPoint_Square()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 2), new Vector2(2, 2), new Vector2(2, 0),
+            });
+
+            // Right
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(3, 1)));
+            // Left
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(-1, 1)));
+            // Inside
+            Assert.AreEqual(ContainmentType.INSIDE, polygon.ContainsPoint(new Vector2(1, 1)));
+            // To the left aligned with bottom edge
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(-1, 0)));
+            // To the left aligned with top edge
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(-1, 2)));
+
+            // Edges
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(1, 0)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(2, 1)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(0, 1)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(1, 2)));
+
+            // Corners
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(0, 0)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(0, 2)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(2, 2)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(2, 0)));
+        }
+
+        [Test]
+        public void ContainsPoint_Diamond()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(2, 0), new Vector2(0, 2), new Vector2(2, 4), new Vector2(4, 2),
+            });
+
+            // Right
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(3, 0)));
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(4, 1)));
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(5, 2)));
+            // Left
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(-1, 2)));
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(0, 1)));
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(0.5f, 1)));
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(1, 0)));
+            Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(1.5f, 0)));
+            // Inside
+            Assert.AreEqual(ContainmentType.INSIDE, polygon.ContainsPoint(new Vector2(2, 2)));
+            Assert.AreEqual(ContainmentType.INSIDE, polygon.ContainsPoint(new Vector2(2, 1)));
+            Assert.AreEqual(ContainmentType.INSIDE, polygon.ContainsPoint(new Vector2(1, 2)));
+
+            // Edges
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(1, 3)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(3, 3)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(3, 1)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(1, 1)));
+
+            // Corners
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(2, 0)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(0, 2)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(2, 4)));
+            Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(4, 2)));
+        }
     }
 }
