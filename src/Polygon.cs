@@ -407,11 +407,8 @@ namespace PolygonDraw
         /// <param name="otherEdgeIndex">Index of polygon in which lineSegment appears.
         /// Used for populating IntersectionData with indices from both polygons.</param>
         private List<IntersectionData> GetIntersectionDatasForLine(
-            Polygon otherPolygon, int otherEdgeIndex)
+            LineSegment lineSegment, Polygon otherPolygon = null, int otherEdgeIndex = -1)
         {
-            LineSegment lineSegment = new LineSegment(
-                otherPolygon.vertices[otherEdgeIndex],
-                otherPolygon.vertices[(otherEdgeIndex + 1) % otherPolygon.vertices.Count]);
             List<IntersectionData> intersectionDatas = new List<IntersectionData>();
 
             for (int i = 0; i < this.vertices.Count(); i++)
@@ -472,31 +469,26 @@ namespace PolygonDraw
         /// </summary>
         public ContainmentType ContainsPoint(Vector2 point)
         {
-            // TODO: do this without a fake polygon
-            Polygon fakePolygon = new Polygon(new List<Vector2>()
-            {
-                point, new Vector2(point.x + 1, point.y), new Vector2(point.x + 2, point.y),
-            });
-            List<IntersectionData> datas = this.GetIntersectionDatasForLine(fakePolygon, 0);
+            List<IntersectionData> datas = this.GetIntersectionDatasForLine(
+                new LineSegment(point, new Vector2(point.x + 1, point.y)));
             
-            return this.ContainsPoint(datas);
+            return this.ContainsPoint(point, datas);
         }
 
         /// <summary>
         /// Based on the intersectionDatas from a certain point, compute whether
         /// the point was inside this polygon.
         /// </summary>
-        private ContainmentType ContainsPoint(List<IntersectionData> intersectionDatas)
+        private ContainmentType ContainsPoint(Vector2 point, List<IntersectionData> intersectionDatas)
         {
             if (intersectionDatas.Any(data => FloatHelpers.Eq(data.poly1.distanceAlongEdge, 0)))
             {
                 return ContainmentType.BOUNDARY;
             }
 
-            IEnumerable<IntersectionData> relevantDatas = intersectionDatas.Where(data =>
-                // TODO: Shouldn't use GetIntersectionType() for this
-                data.GetIntersectionType() == IntersectionType.OVERLAPPING &&
-                FloatHelpers.Gte(data.poly1.distanceAlongEdge, 0));
+            IEnumerable<IntersectionData> relevantDatas = intersectionDatas
+                .Where(data => FloatHelpers.Gte(data.poly1.distanceAlongEdge, 0))
+                .Where(data => data.GetIntersectionType(point) == IntersectionType.OVERLAPPING);
             
             return relevantDatas.Count() % 2 == 0 ? ContainmentType.OUTSIDE : ContainmentType.INSIDE;
         }
