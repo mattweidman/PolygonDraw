@@ -406,7 +406,7 @@ namespace PolygonDraw
         /// Used for populating IntersectionData with indices from both polygons.</param>
         /// <param name="otherEdgeIndex">Index of polygon in which lineSegment appears.
         /// Used for populating IntersectionData with indices from both polygons.</param>
-        public List<IntersectionData> GetIntersectionDistancesForLine(
+        private List<IntersectionData> GetIntersectionDatasForLine(
             LineSegment lineSegment, Polygon otherPolygon = null, int otherEdgeIndex = -1)
         {
             List<IntersectionData> intersectionDatas = new List<IntersectionData>();
@@ -419,7 +419,28 @@ namespace PolygonDraw
 
                 if (!distances.HasValue)
                 {
-                    continue;
+                    if (lineSegment.Colinear(polygonEdge))
+                    {
+                        // If lines are parallel and colinear, still register an intersection
+                        if (polygonEdge.IntersectsPoint(lineSegment.p1))
+                        {
+                            // If lineSegment.p1 is on polygonEdge, use lineSegment.p1
+                            float dist = Vector2.ColinearLengths(
+                                polygonEdge.p1, lineSegment.p1, polygonEdge.p2 - polygonEdge.p1);
+                            distances = (0, dist);
+                        }
+                        else
+                        {
+                            // Otherwise, use polygonEdge.p1
+                            float dist = Vector2.ColinearLengths(
+                                lineSegment.p1, polygonEdge.p1, lineSegment.p2 - lineSegment.p1);
+                            distances = (dist, 0);
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
 
                 (float lineSegmentDist, float edgeDist) = distances.Value;
@@ -441,6 +462,35 @@ namespace PolygonDraw
             }
 
             return intersectionDatas;
+        }
+
+        /// <summary>
+        /// Whether a point was inside this polygon.
+        /// </summary>
+        public ContainmentType ContainsPoint(Vector2 point)
+        {
+            List<IntersectionData> datas = this.GetIntersectionDatasForLine(
+                new LineSegment(point, new Vector2(point.x + 1, point.y)));
+            
+            return this.ContainsPoint(point, datas);
+        }
+
+        /// <summary>
+        /// Based on the intersectionDatas from a certain point, compute whether
+        /// the point was inside this polygon.
+        /// </summary>
+        private ContainmentType ContainsPoint(Vector2 point, List<IntersectionData> intersectionDatas)
+        {
+            if (intersectionDatas.Any(data => FloatHelpers.Eq(data.poly1.distanceAlongEdge, 0)))
+            {
+                return ContainmentType.BOUNDARY;
+            }
+
+            IEnumerable<IntersectionData> relevantDatas = intersectionDatas
+                .Where(data => FloatHelpers.Gte(data.poly1.distanceAlongEdge, 0))
+                .Where(data => data.GetIntersectionType(point) == IntersectionType.OVERLAPPING);
+            
+            return relevantDatas.Count() % 2 == 0 ? ContainmentType.OUTSIDE : ContainmentType.INSIDE;
         }
 
         #endregion

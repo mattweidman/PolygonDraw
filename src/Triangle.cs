@@ -302,31 +302,6 @@ namespace PolygonDraw
         }
 
         /// <summary>
-        /// Describes a node in a graph produced by intersecting two triangles.
-        /// </summary>
-        public class IntersectionGraphNode
-        {
-            public Vector2 point;
-
-            public bool isStarter = false;
-
-            public IntersectionGraphNode baseNext = null;
-
-            public IntersectionGraphNode maskNext = null;
-
-            public IntersectionGraphNode(Vector2 point, bool isStarter = false)
-            {
-                this.point = point;
-                this.isStarter = isStarter;
-            }
-
-            public bool IsSwappable()
-            {
-                return baseNext != null && maskNext != null;
-            }
-        }
-
-        /// <summary>
         /// Returns false if there is any vertex with a zero-degree angle.
         /// </summary>
         public bool IsValidTriangle()

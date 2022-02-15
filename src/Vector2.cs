@@ -123,5 +123,22 @@ namespace PolygonDraw
 
             return true;
         }
+
+        /// <summary>
+        /// Assume v and u are colinear with (v+d). Solve for t in v + td = u.
+        /// Can return negative if d and (u-v) are opposite directions.
+        /// </summary>
+        /// <returns>The number of lengths of d it takes to get from v to u.</returns>
+        public static float ColinearLengths(Vector2 v, Vector2 u, Vector2 d)
+        {
+            if (FloatHelpers.Gt(MathF.Abs(d.x), MathF.Abs(d.y)))
+            {
+                return (u.x - v.x) / d.x;
+            }
+            else
+            {
+                return (u.y - v.y) / d.y;
+            }
+        }
     }
 }
