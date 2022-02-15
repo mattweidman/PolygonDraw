@@ -108,6 +108,18 @@ namespace PolygonDraw
             Vector2 poly2Dir1 = p21 - center;
             Vector2 poly2Dir2 = p22 - center;
 
+            if (FloatHelpers.Eq(poly1Dir1.Angle(poly2Dir1), 0) &&
+                FloatHelpers.Eq(poly1Dir2.Angle(poly2Dir2), 0))
+            {
+                return IntersectionType.POLY2_CONTAINS_POLY1;
+            }
+
+            if (FloatHelpers.Eq(poly1Dir1.Angle(poly2Dir1), 0) ||
+                FloatHelpers.Eq(poly1Dir2.Angle(poly2Dir2), 0))
+            {
+                return IntersectionType.OVERLAPPING;
+            }
+
             bool p1D1BetweenP2 = poly1Dir1.IsBetween(poly2Dir2, poly2Dir1);
             bool p1D2BetweenP2 = poly1Dir2.IsBetween(poly2Dir2, poly2Dir1);
             bool p2D1BetweenP1 = poly2Dir1.IsBetween(poly1Dir2, poly1Dir1);
@@ -134,6 +146,45 @@ namespace PolygonDraw
             }
 
             return IntersectionType.OVERLAPPING;
+        }
+
+        /// <summary>
+        /// Whether this intersection could be a starting node in a new polygon.
+        /// We assume poly1 is the subject polygon and poly2 is the clip polygon.
+        /// </summary>
+        public bool IsStarter()
+        {
+            IntersectionType intersectionType = this.GetIntersectionType();
+
+            if (intersectionType == IntersectionType.POLY2_CONTAINS_POLY1)
+            {
+                // Subject completely hidden. Don't start a polygon here.
+                return false;
+            }
+            else if (intersectionType == IntersectionType.POLY1_CONTAINS_POLY2)
+            {
+                // Clip is inside the subject. Can start a polygon here.
+                return true;
+            }
+            else if (intersectionType == IntersectionType.SPLIT)
+            {
+                // If there is a split vertex, there must be at least two overlapping
+                // vertices on the same poygon, so let one of them be the starter instead.
+                return false;
+            }
+            else if (intersectionType == IntersectionType.OUTER)
+            {
+                // For outer, return true if the vertex is part of the subject.
+                return FloatHelpers.Eq(this.poly1.distanceAlongEdge, 0);
+            }
+
+            // Overlapping vertices are starters if the edge from poly2 is entering poly1.
+            Vector2 center = this.GetIntersectionPoint();
+            Vector2 dir11 = this.poly1.p1 - center;
+            Vector2 dir12 = this.poly1.p2 - center;
+            Vector2 dir22 = this.poly2.p2 - center;
+
+            return dir22.IsBetween(dir12, dir11);
         }
 
         /// <summary>

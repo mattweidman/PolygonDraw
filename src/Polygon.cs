@@ -397,6 +397,35 @@ namespace PolygonDraw
         #region Clipping
 
         /// <summary>
+        /// Construct a graph describing for each point of interest (vertices and intersection
+        /// points) what point would come next clockwise if part of a polygon. Used for
+        /// ClipToPolygon().
+        /// </summary>
+        private List<IntersectionGraphNode> ClipToIntersectionGraph(Polygon clip)
+        {
+            List<IntersectionGraphNode> graphNodes = new List<IntersectionGraphNode>();
+            List<IntersectionData> intersections = new List<IntersectionData>();
+
+            for (int i = 0; i < clip.vertices.Count; i++)
+            {
+                int j = (i + 1) % clip.vertices.Count;
+                LineSegment lineSegment = new LineSegment(clip.vertices[i], clip.vertices[j]);
+                List<IntersectionData> intersectionDatas =
+                    this.GetIntersectionDatasForLine(lineSegment, clip, i);
+                intersections.AddRange(intersectionDatas
+                    .Where(data => FloatHelpers.Lt(data.poly1.distanceAlongEdge, 1)));
+            }
+
+            // Base intersections
+            List<IntersectionData> baseIntersections = intersections
+                .OrderBy(data => data.poly1.edgeIndex + data.poly1.distanceAlongEdge)
+                .Where(data => data.GetIntersectionType() == IntersectionType.OVERLAPPING)
+                .ToList();
+            
+            return graphNodes;
+        }
+
+        /// <summary>
         /// Find all intersections of this polygon with an infinite line. The infinite
         /// line is given as a line segment. A list of intersections from the first point
         /// in the line segment is returned.
