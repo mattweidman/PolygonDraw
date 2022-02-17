@@ -11,11 +11,13 @@ namespace PolygonDraw
 
         public PolygonData poly2;
 
+        private IntersectionType? cachedIntersectionType;
+
         public IntersectionData(Polygon polygon1, int poly1EdgeIndex, float poly1Dist,
             Polygon polygon2, int poly2EdgeIndex, float poly2Dist)
         {
-            this.poly1 = new PolygonData(polygon1, poly1EdgeIndex, poly1Dist);
-            this.poly2 = new PolygonData(polygon2, poly2EdgeIndex, poly2Dist);
+            this.poly1 = new PolygonData(polygon1, poly1EdgeIndex, poly1Dist, false);
+            this.poly2 = new PolygonData(polygon2, poly2EdgeIndex, poly2Dist, true);
         }
 
         public override bool Equals(object obj)
@@ -48,21 +50,25 @@ namespace PolygonDraw
         /// </summary>
         public IntersectionType GetIntersectionType()
         {
-            bool poly1IsVertex = FloatHelpers.Eq(this.poly1.distanceAlongEdge, 0);
-            bool poly2IsVertex = FloatHelpers.Eq(this.poly2.distanceAlongEdge, 0);
+            if (this.cachedIntersectionType.HasValue)
+            {
+                return this.cachedIntersectionType.Value;
+            }
             
             // Edge-edge intersections are always overlapping.
-            if (!poly1IsVertex && !poly2IsVertex)
+            if (!this.poly1.isVertex && !this.poly2.isVertex)
             {
-                return IntersectionType.OVERLAPPING;
+                this.cachedIntersectionType = IntersectionType.OVERLAPPING;
+                return this.cachedIntersectionType.Value;
             }
 
-            return this.GetIntersectionTypeInternal(
+            this.cachedIntersectionType = this.GetIntersectionTypeInternal(
                 center: this.GetIntersectionPoint(),
-                p11: poly1IsVertex ? this.poly1.pPrev : this.poly1.p1,
-                p12: this.poly1.p2,
-                p21: poly2IsVertex ? this.poly2.pPrev : this.poly2.p1,
-                p22: this.poly2.p2);
+                p11: this.poly1.prevPoint,
+                p12: this.poly1.nextPoint,
+                p21: this.poly2.prevPoint,
+                p22: this.poly2.nextPoint);
+            return this.cachedIntersectionType.Value;
         }
 
         /// <summary>
@@ -73,22 +79,21 @@ namespace PolygonDraw
         /// the intersection point and a vector opposite it at the intersection point.</param>
         public IntersectionType GetIntersectionType(Vector2 poly1SubIn)
         {
-            bool poly1IsVertex = FloatHelpers.Eq(this.poly1.distanceAlongEdge, 0);
-            bool poly2IsVertex = FloatHelpers.Eq(this.poly2.distanceAlongEdge, 0);
-            
             // Edge-edge intersections are always overlapping.
-            if (!poly1IsVertex && !poly2IsVertex)
+            if (!this.poly1.isVertex && !this.poly2.isVertex)
             {
-                return IntersectionType.OVERLAPPING;
+                this.cachedIntersectionType = IntersectionType.OVERLAPPING;
+                return this.cachedIntersectionType.Value;
             }
 
             Vector2 center = this.GetIntersectionPoint();
-            return this.GetIntersectionTypeInternal(
+            this.cachedIntersectionType = this.GetIntersectionTypeInternal(
                 center,
                 p11: poly1SubIn,
                 p12: poly1SubIn + (center - poly1SubIn) * 2,
-                p21: poly2IsVertex ? this.poly2.pPrev : this.poly2.p1,
-                p22: this.poly2.p2);
+                p21: this.poly2.prevPoint,
+                p22: this.poly2.nextPoint);
+            return this.cachedIntersectionType.Value;
         }
 
         /// <summary>
@@ -180,11 +185,28 @@ namespace PolygonDraw
 
             // Overlapping vertices are starters if the edge from poly2 is entering poly1.
             Vector2 center = this.GetIntersectionPoint();
-            Vector2 dir11 = this.poly1.p1 - center;
-            Vector2 dir12 = this.poly1.p2 - center;
-            Vector2 dir22 = this.poly2.p2 - center;
+            Vector2 dir11 = this.poly1.prevPoint - center;
+            Vector2 dir12 = this.poly1.nextPoint - center;
+            Vector2 dir22 = this.poly2.nextPoint - center;
 
             return dir22.IsBetween(dir12, dir11);
+        }
+
+        /// <summary>
+        /// Returns true if the next edge in polygon 2 goes within the bounds of polygon 1.
+        /// </summary>
+        public bool NextPoly2EdgeInsidePoly1()
+        {
+            Vector2 center = this.GetIntersectionPoint();
+            Vector2 poly2Next = this.poly2.nextPoint - center;
+            Vector2 poly1Prev = this.poly1.prevPoint - center;
+            Vector2 poly1Next = this.poly1.nextPoint - center;
+            return poly2Next.IsBetween(poly1Next, poly1Prev);
+        }
+
+        public override string ToString()
+        {
+            return this.GetIntersectionPoint().ToString();
         }
 
         /// <summary>
@@ -205,25 +227,55 @@ namespace PolygonDraw
             /// </summary>
             public float distanceAlongEdge;
 
+            private bool isReversed;
+
             /// <summary>First endpoint of edge.</summary>
-            public Vector2 p1 => this.polygon.vertices[this.edgeIndex];
+            private Vector2 p1 => this.polygon.vertices[this.edgeIndex];
 
             /// <summary>Second endpoint of edge.</summary>
-            public Vector2 p2 => this.polygon.vertices[
+            private Vector2 p2 => this.polygon.vertices[
                 (this.edgeIndex + 1) % this.polygon.vertices.Count];
 
             /// <summary>Point that appears before p1.</summary>
-            public Vector2 pPrev => this.polygon.vertices[
+            private Vector2 pPrev => this.polygon.vertices[
                 (this.edgeIndex + this.polygon.vertices.Count - 1) % this.polygon.vertices.Count];
 
             /// <summary>Location of intersection point.</summary>
             public Vector2 intersectionPoint => this.p1 + (this.p2 - this.p1) * this.distanceAlongEdge;
 
-            public PolygonData(Polygon polygon, int edgeIndex, float distanceAlongEdge)
+            /// <summary>Whether this point is on a vertex.</summary>
+            public bool isVertex => FloatHelpers.Eq(this.distanceAlongEdge, 0);
+
+            /// <summary>The next point in the polygon.</summary>
+            public Vector2 nextPoint {
+                get {
+                    if (this.isReversed)
+                    {
+                        return this.isVertex ? this.pPrev : this.p1;
+                    }
+
+                    return this.p2;
+                }
+            }
+
+            /// <summary>The previous point in the polygon.</summary>
+            public Vector2 prevPoint {
+                get {
+                    if (this.isReversed)
+                    {
+                        return this.p2;
+                    }
+
+                    return this.isVertex ? this.pPrev : this.p1;
+                }
+            }
+
+            public PolygonData(Polygon polygon, int edgeIndex, float distanceAlongEdge, bool isReversed)
             {
                 this.polygon = polygon;
                 this.edgeIndex = edgeIndex;
                 this.distanceAlongEdge = distanceAlongEdge;
+                this.isReversed = isReversed;
             }
 
             public override bool Equals(object obj)

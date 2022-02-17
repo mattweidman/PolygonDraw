@@ -397,32 +397,142 @@ namespace PolygonDraw
         #region Clipping
 
         /// <summary>
-        /// Construct a graph describing for each point of interest (vertices and intersection
-        /// points) what point would come next clockwise if part of a polygon. Used for
-        /// ClipToPolygon().
+        /// Cover this polygon by a clip polygon. Return polygons that cover the
+        /// area of this polygon that are not covered by the clip.
         /// </summary>
-        private List<IntersectionGraphNode> ClipToIntersectionGraph(Polygon clip)
+        public List<Polygon> ClipToPolygons(Polygon clip)
         {
-            List<IntersectionGraphNode> graphNodes = new List<IntersectionGraphNode>();
-            List<IntersectionData> intersections = new List<IntersectionData>();
+            List<IntersectionOrVertexNode> starterNodes = this.ClipToIntersectionGraph(clip);
 
-            for (int i = 0; i < clip.vertices.Count; i++)
+            List<Polygon> polygons = new List<Polygon>();
+
+            HashSet<IntersectionOrVertexNode> visited = new HashSet<IntersectionOrVertexNode>();
+
+            int maxIterations = (clip.vertices.Count + this.vertices.Count) * 2;
+            int iterations = 0;
+
+            foreach (IntersectionOrVertexNode starterNode in starterNodes)
             {
-                int j = (i + 1) % clip.vertices.Count;
-                LineSegment lineSegment = new LineSegment(clip.vertices[i], clip.vertices[j]);
-                List<IntersectionData> intersectionDatas =
-                    this.GetIntersectionDatasForLine(lineSegment, clip, i);
-                intersections.AddRange(intersectionDatas
-                    .Where(data => FloatHelpers.Lt(data.poly1.distanceAlongEdge, 1)));
+                // Skip if already visited this point
+                if (visited.Contains(starterNode))
+                {
+                    continue;
+                }
+
+                // DFS to create polygon
+                List<Vector2> vertices = new List<Vector2>() { starterNode.point };
+                IntersectionOrVertexNode currentNode = starterNode.NextNode(null);
+                IntersectionOrVertexNode prevNode = starterNode;
+                while (currentNode != starterNode)
+                {
+                    vertices.Add(currentNode.point);
+
+                    if (currentNode.isStarter)
+                    {
+                        visited.Add(currentNode);
+                    }
+
+                    IntersectionOrVertexNode temp = currentNode;
+                    currentNode = currentNode.NextNode(prevNode);
+                    prevNode = temp;
+
+                    iterations++;
+                    if (iterations > maxIterations)
+                    {
+                        throw new InvalidOperationException("Iterated in ClipToPolygons too many times.");
+                    }
+                }
+
+                polygons.Add(new Polygon(vertices));
             }
 
-            // Base intersections
-            List<IntersectionData> baseIntersections = intersections
-                .OrderBy(data => data.poly1.edgeIndex + data.poly1.distanceAlongEdge)
-                .Where(data => data.GetIntersectionType() == IntersectionType.OVERLAPPING)
+            return polygons;
+        }
+
+        /// <summary>
+        /// Construct a graph describing for each point of interest (vertices and intersection
+        /// points) what point would come next clockwise if part of a polygon. Used for
+        /// ClipToPolygons().
+        /// </summary>
+        private List<IntersectionOrVertexNode> ClipToIntersectionGraph(Polygon clip)
+        {
+            List<IntersectionOrVertexNode> vertexNodes = new List<IntersectionOrVertexNode>();
+            List<IntersectionOrVertexNode> intersectNodes = new List<IntersectionOrVertexNode>();
+
+            for (int i = 0; i < this.vertices.Count; i++)
+            {
+                int j = (i + 1) % this.vertices.Count;
+                LineSegment lineSegment = new LineSegment(this.vertices[i], this.vertices[j]);
+
+                List<IntersectionData> intersectionDatas =
+                    clip.GetIntersectionDatasForLine(lineSegment, this, i);
+                
+                // Add vertex if it isn't an intersection point (avoiding duplicates)
+                if (intersectionDatas.All(data => !FloatHelpers.Eq(data.poly1.distanceAlongEdge, 0)))
+                {
+                    ContainmentType containmentType = this.ContainsPoint(
+                        this.vertices[i],
+                        intersectionDatas);
+                    IntersectionOrVertexNode vertexNode = new IntersectionOrVertexNode(
+                        new PolygonVertex(this, i),
+                        containmentType != ContainmentType.OUTSIDE);
+                    vertexNodes.Add(vertexNode);
+                }
+                
+                IEnumerable<IntersectionOrVertexNode> newIntersectNodes = intersectionDatas
+                    .Where(data => FloatHelpers.Lt(data.poly1.distanceAlongEdge, 1))
+                    .Select(data => new IntersectionOrVertexNode(data));
+
+                // Add intersection points along edge
+                intersectNodes.AddRange(newIntersectNodes);
+            }
+
+            List<IntersectionOrVertexNode> subjectNodes = intersectNodes
+                .Concat(vertexNodes).ToList()
+                .OrderBy(data => data.subjectPriority)
                 .ToList();
             
-            return graphNodes;
+            // Create edges around subject polygon
+            for (int i = 0; i < subjectNodes.Count; i++)
+            {
+                subjectNodes[i].AddSubjectEdge(subjectNodes[(i + 1) % subjectNodes.Count]);
+            }
+
+            List<IntersectionOrVertexNode> clipNodesPreliminary = intersectNodes
+                .Concat(clip.vertices.Select((v, i) =>
+                    new IntersectionOrVertexNode(new PolygonVertex(clip, i, true), false)))
+                .OrderBy(data => data.clipPriority)
+                .ToList();
+            
+            // Remove duplicate vertices
+            List<IntersectionOrVertexNode> clipNodes = new List<IntersectionOrVertexNode>();
+            for (int i = 0; i < clipNodesPreliminary.Count; i++)
+            {
+                IntersectionOrVertexNode node = clipNodesPreliminary[i];
+                if (clipNodesPreliminary[i].isIntersection)
+                {
+                    clipNodes.Add(node);
+                }
+                else
+                {
+                    // Only include vertex nodes if they don't match the next or previous node.
+                    int prevI = (i + clipNodesPreliminary.Count - 1) % clipNodesPreliminary.Count;
+                    int nextI = (i + 1) % clipNodesPreliminary.Count;
+                    if (!(FloatHelpers.Eq(clipNodesPreliminary[prevI].clipPriority, node.clipPriority) ||
+                        FloatHelpers.Eq(clipNodesPreliminary[nextI].clipPriority, node.clipPriority)))
+                    {
+                        clipNodes.Add(node);
+                    }
+                }
+            }
+            
+            // Create edges around clip polygon
+            for (int i = 0; i < clipNodes.Count; i++)
+            {
+                clipNodes[i].AddClipEdge(clipNodes[(i + clipNodes.Count - 1) % clipNodes.Count]);
+            }
+            
+            return clipNodes.Concat(vertexNodes).Where(node => node.isStarter).ToList();
         }
 
         /// <summary>
@@ -492,6 +602,31 @@ namespace PolygonDraw
 
             return intersectionDatas;
         }
+
+        /// <summary>
+        /// If clip is entirely contained inside subject, combine them into one polygon.
+        /// </summary>
+        // private Polygon CreateInnerMaskPolygon(Polygon clip)
+        // {
+        //     // Find which vertex of clip is closest to first vertex in subject.
+        //     int closestMaskIndex = clip.vertices
+        //         .Select((v, i) => (v, i))
+        //         .OrderBy(pair => (pair.v - this.vertices[0]).Magnitude())
+        //         .First().i;
+            
+        //     // Construct list of vertices.
+        //     List<Vector2> polygonVertices = new List<Vector2>();
+        //     polygonVertices.AddRange(this.vertices);
+        //     polygonVertices.Add(this.vertices[0]);
+
+        //     for (int i = 0; i < 3; i++)
+        //     {
+        //         polygonVertices.Add(clip.vertices[(3 - i + closestMaskIndex) % 3]);
+        //     }
+        //     polygonVertices.Add(clip.vertices[closestMaskIndex]);
+
+        //     return new Polygon(polygonVertices);
+        // }
 
         /// <summary>
         /// Whether a point was inside this polygon.
