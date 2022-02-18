@@ -95,7 +95,8 @@ namespace PolygonDraw
                 }
                 else
                 {
-                    return prevNode == this.clipPrev ? this.clipNext : this.subjectNext;
+                    return (prevNode == this.subjectPrev || prevNode == null)
+                        ? this.subjectNext : this.clipNext;
                 }
             }
             else
