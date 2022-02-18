@@ -477,7 +477,8 @@ namespace PolygonDraw
                 
                 IEnumerable<IntersectionOrVertexNode> newIntersectNodes = intersectionDatas
                     .Where(data => FloatHelpers.Lt(data.poly1.distanceAlongEdge, 1) &&
-                        FloatHelpers.Gte(data.poly1.distanceAlongEdge, 0))
+                        FloatHelpers.Gte(data.poly1.distanceAlongEdge, 0) &&
+                        !data.IsRemovable())
                     .Select(data => new IntersectionOrVertexNode(data));
 
                 // Add intersection points along edge

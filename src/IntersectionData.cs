@@ -211,6 +211,13 @@ namespace PolygonDraw
             return this.GetIntersectionPoint().ToString();
         }
 
+        public bool IsRemovable()
+        {
+            // We can remove outer-type intersections that aren't on a subject vertex
+            return this.GetIntersectionType() == IntersectionType.OUTER &&
+                !FloatHelpers.Eq(this.poly1.distanceAlongEdge, 0);
+        }
+
         /// <summary>
         /// Intersection data for one polygon.
         /// </summary>
