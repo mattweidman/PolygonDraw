@@ -110,8 +110,10 @@ namespace PolygonDraw
         {
             Vector2 poly1Dir1 = p11 - center;
             Vector2 poly1Dir2 = p12 - center;
-            Vector2 poly2Dir1 = p21 - center;
-            Vector2 poly2Dir2 = p22 - center;
+
+            // Flip edges on clip polygon because its vertices are in reverse order
+            Vector2 poly2Dir1 = p22 - center;
+            Vector2 poly2Dir2 = p21 - center;
 
             if (FloatHelpers.Eq(poly1Dir1.Angle(poly2Dir1), 0) &&
                 FloatHelpers.Eq(poly1Dir2.Angle(poly2Dir2), 0))

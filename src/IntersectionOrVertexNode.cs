@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace PolygonDraw
 {
     /// <summary>
@@ -11,6 +13,17 @@ namespace PolygonDraw
         private PolygonVertex polygonVertex;
 
         private bool isHidden;
+
+        // private int maxVisits => 
+        //     (isIntersection &&
+        //         intersectionData.GetIntersectionType() == IntersectionType.POLY1_CONTAINS_POLY2)
+        //     ? 2 : 1;
+        
+        // private int visits = 0;
+
+        // private int lastPolygonVisited = -1;
+
+        private bool visitedViaSubject = false, visitedViaClip = false;
 
         public IntersectionOrVertexNode subjectNext, subjectPrev, clipNext, clipPrev;
 
@@ -82,7 +95,7 @@ namespace PolygonDraw
                 }
                 else
                 {
-                    return prevNode == this.subjectPrev ? this.subjectNext : this.clipNext;
+                    return prevNode == this.clipPrev ? this.clipNext : this.subjectNext;
                 }
             }
             else
@@ -94,6 +107,33 @@ namespace PolygonDraw
         public override string ToString()
         {
             return this.point.ToString();
+        }
+
+        public void Visit(IntersectionOrVertexNode previous)
+        {
+            if (previous == this.subjectPrev)
+            {
+                this.visitedViaSubject = true;
+            }
+            else
+            {
+                this.visitedViaClip = true;
+            }
+        }
+
+        public bool VisitableFrom(IntersectionOrVertexNode previous)
+        {
+            if (previous == this.subjectPrev)
+            {
+                return !this.visitedViaSubject;
+            }
+            
+            return !this.visitedViaClip;
+        }
+
+        public bool WasEverVisited()
+        {
+            return this.visitedViaSubject || this.visitedViaClip;
         }
     }
 }

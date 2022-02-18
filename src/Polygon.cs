@@ -406,31 +406,27 @@ namespace PolygonDraw
 
             List<Polygon> polygons = new List<Polygon>();
 
-            HashSet<IntersectionOrVertexNode> visited = new HashSet<IntersectionOrVertexNode>();
-
             int maxIterations = (clip.vertices.Count + this.vertices.Count) * 2;
             int iterations = 0;
 
             foreach (IntersectionOrVertexNode starterNode in starterNodes)
             {
                 // Skip if already visited this point
-                if (visited.Contains(starterNode))
+                if (starterNode.WasEverVisited())
                 {
                     continue;
                 }
 
                 // DFS to create polygon
-                List<Vector2> vertices = new List<Vector2>() { starterNode.point };
-                IntersectionOrVertexNode currentNode = starterNode.NextNode(null);
+                List<Vector2> vertices = new List<Vector2>();
+
+                IntersectionOrVertexNode currentNode = starterNode.NextNode();
                 IntersectionOrVertexNode prevNode = starterNode;
-                while (currentNode != starterNode)
+                while (currentNode.VisitableFrom(prevNode))
                 {
                     vertices.Add(currentNode.point);
 
-                    if (currentNode.isStarter)
-                    {
-                        visited.Add(currentNode);
-                    }
+                    currentNode.Visit(prevNode);
 
                     IntersectionOrVertexNode temp = currentNode;
                     currentNode = currentNode.NextNode(prevNode);
@@ -480,7 +476,8 @@ namespace PolygonDraw
                 }
                 
                 IEnumerable<IntersectionOrVertexNode> newIntersectNodes = intersectionDatas
-                    .Where(data => FloatHelpers.Lt(data.poly1.distanceAlongEdge, 1))
+                    .Where(data => FloatHelpers.Lt(data.poly1.distanceAlongEdge, 1) &&
+                        FloatHelpers.Gte(data.poly1.distanceAlongEdge, 0))
                     .Select(data => new IntersectionOrVertexNode(data));
 
                 // Add intersection points along edge
@@ -488,7 +485,7 @@ namespace PolygonDraw
             }
 
             List<IntersectionOrVertexNode> subjectNodes = intersectNodes
-                .Concat(vertexNodes).ToList()
+                .Concat(vertexNodes)
                 .OrderBy(data => data.subjectPriority)
                 .ToList();
             
