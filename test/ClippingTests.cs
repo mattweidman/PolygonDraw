@@ -4,109 +4,12 @@ using System.Collections.Generic;
 
 namespace PolygonDrawTests
 {
-    public class TriangleTests
+    public class ClippingTests
     {
-        #region ContainsPoint
+        #region Triangle clipping
 
         [Test]
-        public void ContainsPoint_RightTriangle_BottomLeftCorner()
-        {
-            Triangle t = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
-
-            Assert.IsTrue(t.ContainsPoint(new Vector2(1, 1)));
-            Assert.IsTrue(t.ContainsPoint(new Vector2(1, 1), true));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(3, 3)));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(-1, -1), true));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(0, 2)));
-            Assert.IsTrue(t.ContainsPoint(new Vector2(0, 2), true));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(3, 1)));
-            Assert.IsTrue(t.ContainsPoint(new Vector2(3, 1), true));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(0, 5)));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(0, 5), true));
-        }
-
-        [Test]
-        public void ContainsPoint_RightTriangle_TopRightCorner()
-        {
-            Triangle t = new Triangle(new Vector2(0, 4), new Vector2(4, 4), new Vector2(4, 0));
-
-            Assert.IsTrue(t.ContainsPoint(new Vector2(3, 3)));
-            Assert.IsTrue(t.ContainsPoint(new Vector2(3, 3), true));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(5, -1)));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(5, 2), true));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(4, 4)));
-            Assert.IsTrue(t.ContainsPoint(new Vector2(4, 4), true));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(2, 2)));
-            Assert.IsTrue(t.ContainsPoint(new Vector2(2, 2), true));
-        }
-
-        [Test]
-        public void ContainsPoint_NonRightTriangle()
-        {
-            Triangle t = new Triangle(new Vector2(0, 1), new Vector2(3, 0), new Vector2(-2, -2));
-
-            Assert.IsTrue(t.ContainsPoint(new Vector2(0, 0)));
-            Assert.IsTrue(t.ContainsPoint(new Vector2(1, 0), true));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(1, -2)));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(-1, 0), true));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(3, 0)));
-            Assert.IsTrue(t.ContainsPoint(new Vector2(0, 1), true));
-            Assert.IsFalse(t.ContainsPoint(new Vector2(0, -1.2f)));
-            Assert.IsTrue(t.ContainsPoint(new Vector2(0, -1.2f), true));
-        }
-
-        #endregion
-
-        #region ContainsTriangle
-
-        [Test]
-        public void ContainsTriangle()
-        {
-            Triangle t = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
-
-            // All inside
-            Assert.IsTrue(t.ContainsTriangle(
-                new Triangle(new Vector2(1, 1), new Vector2(1, 2), new Vector2(2, 1))));
-
-            // All or some outside
-            Assert.IsFalse(t.ContainsTriangle(
-                new Triangle(new Vector2(4, 4), new Vector2(4, 3), new Vector2(3, 4))));
-            Assert.IsFalse(t.ContainsTriangle(
-                new Triangle(new Vector2(1, 1), new Vector2(1, 4), new Vector2(2, 1))));
-            Assert.IsFalse(t.ContainsTriangle(
-                new Triangle(new Vector2(1, 3), new Vector2(4, 4), new Vector2(2, 2))));
-            Assert.IsFalse(t.ContainsTriangle(
-                new Triangle(new Vector2(1, 3), new Vector2(4, 4), new Vector2(2, 2)), true));
-            
-            // On vertex
-            Assert.IsFalse(t.ContainsTriangle(
-                new Triangle(new Vector2(0, 0), new Vector2(1, 2), new Vector2(2, 1))));
-            Assert.IsTrue(t.ContainsTriangle(
-                new Triangle(new Vector2(0, 0), new Vector2(1, 2), new Vector2(2, 1)), true));
-            
-            // On edge - don't include edges
-            Assert.IsFalse(t.ContainsTriangle(
-                new Triangle(new Vector2(0, 1), new Vector2(1, 2), new Vector2(2, 1))));
-            Assert.IsFalse(t.ContainsTriangle(
-                new Triangle(new Vector2(1, 0), new Vector2(0, 1), new Vector2(2, 2))));
-            Assert.IsFalse(t.ContainsTriangle(
-                new Triangle(new Vector2(1, 1), new Vector2(1, 3), new Vector2(2, 2))));
-            
-            // On edge - include edges
-            Assert.IsTrue(t.ContainsTriangle(
-                new Triangle(new Vector2(0, 1), new Vector2(1, 2), new Vector2(2, 1)), true));
-            Assert.IsTrue(t.ContainsTriangle(
-                new Triangle(new Vector2(1, 0), new Vector2(0, 1), new Vector2(2, 2)), true));
-            Assert.IsTrue(t.ContainsTriangle(
-                new Triangle(new Vector2(1, 1), new Vector2(1, 3), new Vector2(2, 2)), true));
-        }
-
-        #endregion
-
-        #region MaskToPolygons
-
-        [Test]
-        public void MaskToPolygons_NoIntersections()
+        public void ClipToPolygons_NoIntersections()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(5, 0), new Vector2(5, 4), new Vector2(9, 0));
@@ -116,13 +19,11 @@ namespace PolygonDrawTests
                 new Polygon(new List<Vector2>() {new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0)})
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_TwoIntersections()
+        public void ClipToPolygons_TwoIntersections()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(1, 1), new Vector2(5, 5), new Vector2(5, 1));
@@ -140,13 +41,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_CoverOneVertex()
+        public void ClipToPolygons_CoverOneVertex()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(2, 2), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(0, 3), new Vector2(4, 3), new Vector2(2, 1));
@@ -163,13 +62,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_FourIntersections()
+        public void ClipToPolygons_FourIntersections()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(6, 4), new Vector2(1, -1), new Vector2(1, 4));
@@ -191,13 +88,11 @@ namespace PolygonDrawTests
                 }),
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_SixIntersections()
+        public void ClipToPolygons_SixIntersections()
         {
             Triangle t1 = new Triangle(new Vector2(0, 1), new Vector2(1, 3), new Vector2(2, 1));
             Triangle t2 = new Triangle(new Vector2(0, 2), new Vector2(2, 2), new Vector2(1, 0));
@@ -224,13 +119,11 @@ namespace PolygonDrawTests
                 }),
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_OneIntersectionOnEdge()
+        public void ClipToPolygons_OneIntersectionOnEdge()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(2, 2), new Vector2(3, 3), new Vector2(3, 2));
@@ -243,13 +136,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_OneIntersectionOnCorner()
+        public void ClipToPolygons_OneIntersectionOnCorner()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(4, 0), new Vector2(5, 1), new Vector2(5, 0));
@@ -262,13 +153,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_ThreeIntersections()
+        public void ClipToPolygons_ThreeIntersections()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(2, 0), new Vector2(2, 4), new Vector2(6, 4));
@@ -285,13 +174,11 @@ namespace PolygonDrawTests
                 }),
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_SharedEdge()
+        public void ClipToPolygons_SharedEdge()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(0, 0), new Vector2(4, 4), new Vector2(4, 0));
@@ -304,13 +191,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_PartialSharedEdge()
+        public void ClipToPolygons_PartialSharedEdge()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(2, 0), new Vector2(6, 4), new Vector2(6, 0));
@@ -323,39 +208,33 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_BaseCovered()
+        public void ClipToPolygons_SubjectCovered()
         {
             Triangle t1 = new Triangle(new Vector2(1, 1), new Vector2(1, 2), new Vector2(2, 1));
             Triangle t2 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
 
             List<Polygon> expected = new List<Polygon>() {};
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_IdenticalTriangles()
+        public void ClipToPolygons_IdenticalTriangles()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
 
             List<Polygon> expected = new List<Polygon>() {};
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_ScaledTriangles()
+        public void ClipToPolygons_ScaledTriangles()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(0, 0), new Vector2(0, 2), new Vector2(2, 0));
@@ -368,13 +247,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_EdgesTouchButNoOverlap()
+        public void ClipToPolygons_EdgesTouchButNoOverlap()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(0, 0), new Vector2(-4, 0), new Vector2(0, 4));
@@ -387,13 +264,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_TouchingCorners()
+        public void ClipToPolygons_TouchingCorners()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(4, 0), new Vector2(8, 4), new Vector2(8, 0));
@@ -406,13 +281,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_OppositeQuadrants()
+        public void ClipToPolygons_OppositeQuadrants()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(0, 0), new Vector2(0, -4), new Vector2(-4, 0));
@@ -425,13 +298,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_Cut45()
+        public void ClipToPolygons_Cut45()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(0, 0), new Vector2(-4, 4), new Vector2(4, 4));
@@ -444,13 +315,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_HoleTouchesEachEdge()
+        public void ClipToPolygons_HoleTouchesEachEdge()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(2, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(1, 2), new Vector2(3, 2), new Vector2(2, 0));
@@ -471,13 +340,11 @@ namespace PolygonDrawTests
                 }),
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_HoleTouchesOneEdge()
+        public void ClipToPolygons_HoleTouchesOneEdge()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(4, 4), new Vector2(8, 0));
             Triangle t2 = new Triangle(new Vector2(3, 2), new Vector2(5, 2), new Vector2(4, 0));
@@ -491,13 +358,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_HoleTouchesOneVertex()
+        public void ClipToPolygons_HoleTouchesOneVertex()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(0, 0), new Vector2(1, 2), new Vector2(2, 1));
@@ -511,13 +376,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_SmallMaskOnOneEdge()
+        public void ClipToPolygons_SmallClipOnOneEdge()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(1, 0), new Vector2(2, 1), new Vector2(3, 0));
@@ -531,13 +394,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_SmallMaskOpposingOneEdge()
+        public void ClipToPolygons_SmallClipOpposingOneEdge()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(1, 3), new Vector2(4, 4), new Vector2(3, 1));
@@ -550,13 +411,11 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_SmallMaskStraddlingOneEdge()
+        public void ClipToPolygons_SmallClipStraddlingOneEdge()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(1, 3), new Vector2(4, 4), new Vector2(1, 1));
@@ -570,83 +429,258 @@ namespace PolygonDrawTests
                 })
             };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsSimple(t1, t2, expected);
         }
 
         [Test]
-        public void MaskToPolygons_RightTriangleContainsMask()
+        public void ClipToPolygons_RightTriangleContainsClip()
         {
             Triangle t1 = new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0));
             Triangle t2 = new Triangle(new Vector2(1, 1), new Vector2(1, 2), new Vector2(2, 1));
 
-            List<Polygon> expected = new List<Polygon>()
-            {
-                new Polygon(new List<Vector2>()
-                {
-                    new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 0), new Vector2(0, 0),
-                    new Vector2(1, 1), new Vector2(2, 1), new Vector2(1, 2), new Vector2(1, 1)
-                })
-            };
+            List<Polygon> expectedPolygons = new List<Polygon>() { t1 };
+            List<Polygon> expectedHoles = new List<Polygon>() { t2 };
 
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
-            PolygonDrawAssert.ListsContainSame(expected, observed);
+            TestClipToPolygonsWithHoles(t1, t2, expectedPolygons, expectedHoles);
         }
 
         [Test]
-        public void MaskToPolygons_InnerTriangleFirstVertexHidden()
+        public void ClipToPolygons_InnerTriangleFirstVertexHidden()
         {
             Triangle t1 = new Triangle(new Vector2(4, 4), new Vector2(8, 0), new Vector2(0, 0));
             Triangle t2 = new Triangle(new Vector2(4, 1), new Vector2(3, 2), new Vector2(5, 2));
 
+            List<Polygon> expectedPolygons = new List<Polygon>() { t1 };
+            List<Polygon> expectedHoles = new List<Polygon>() { t2 };
+
+            TestClipToPolygonsWithHoles(t1, t2, expectedPolygons, expectedHoles);
+        }
+
+        #endregion
+
+        [Test]
+        public void ClipToPolygons_SquaresOverlap()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 2), new Vector2(2, 2), new Vector2(2, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(1, 1), new Vector2(1, 3), new Vector2(3, 3), new Vector2(3, 1),
+            });
             List<Polygon> expected = new List<Polygon>()
             {
                 new Polygon(new List<Vector2>()
                 {
-                    new Vector2(4, 4), new Vector2(8, 0), new Vector2(0, 0), new Vector2(4, 4),
-                    new Vector2(3, 2), new Vector2(4, 1), new Vector2(5, 2), new Vector2(3, 2)
-                })
+                    new Vector2(0, 0), new Vector2(0, 2), new Vector2(1, 2), new Vector2(1, 1),
+                    new Vector2(2, 1), new Vector2(2, 0),
+                }),
             };
-
-            List<Polygon> observed = t1.MaskToPolygons(t2);
-
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
-        #endregion
-
-        #region IsValidTriangle
-
         [Test]
-        public void IsValidTriangle_Valid()
+        public void ClipToPolygons_UCross()
         {
-            Triangle tri = new Triangle(new Vector2(0, 0), new Vector2(1, 0.01f), new Vector2(2, 0));
-            Assert.IsTrue(tri.IsValidTriangle());
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 8), new Vector2(2, 8), new Vector2(2, 2),
+                new Vector2(4, 2), new Vector2(4, 8), new Vector2(6, 8), new Vector2(6, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(-1, 3), new Vector2(-1, 5), new Vector2(7, 5), new Vector2(7, 7),
+                new Vector2(-1, 7), new Vector2(-1, 9), new Vector2(7, 9), new Vector2(7, 3),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(0, 3), new Vector2(2, 3), new Vector2(2, 2),
+                    new Vector2(4, 2), new Vector2(4, 3), new Vector2(6, 3), new Vector2(6, 0),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 5), new Vector2(0, 7), new Vector2(2, 7), new Vector2(2, 5),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(4, 5), new Vector2(4, 7), new Vector2(6, 7), new Vector2(6, 5),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
         [Test]
-        public void IsValidTriangle_Invalid_StartLeft()
+        public void ClipToPolygons_SplitVertices()
         {
-            Triangle tri = new Triangle(new Vector2(0, 0), new Vector2(1, 0), new Vector2(2, 0));
-            Assert.IsFalse(tri.IsValidTriangle());
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 8), new Vector2(8, 8), new Vector2(4, 4),
+                new Vector2(8, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(4, 4), new Vector2(2, 6), new Vector2(6, 6), new Vector2(6, 2),
+                new Vector2(2, 2),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(0, 8), new Vector2(8, 8), new Vector2(6, 6),
+                    new Vector2(2, 6), new Vector2(4, 4), new Vector2(2, 2), new Vector2(6, 2),
+                    new Vector2(8, 0),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
         [Test]
-        public void IsValidTriangle_Invalid_StartInMiddle()
+        public void ClipToPolygons_AllCornersCovered()
         {
-            Triangle tri = new Triangle(new Vector2(1, 0), new Vector2(0, 0), new Vector2(2, 0));
-            Assert.IsFalse(tri.IsValidTriangle());
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(4, 4), new Vector2(8, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(5, 3), new Vector2(2, 3), new Vector2(2, -1), new Vector2(7, -1),
+                new Vector2(7, 3), new Vector2(8, 3), new Vector2(8, -2), new Vector2(-1, -2),
+                new Vector2(-1, 6), new Vector2(5, 6),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(5, 3), new Vector2(7, 1), new Vector2(7, 0), new Vector2(2, 0),
+                    new Vector2(2, 2), new Vector2(3, 3),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
         [Test]
-        public void IsValidTriangle_Invalid_StartRight()
+        public void ClipToPolygons_AllContainsVertices()
         {
-            Triangle tri = new Triangle(new Vector2(2, 0), new Vector2(0, 0), new Vector2(1, 0));
-            Assert.IsFalse(tri.IsValidTriangle());
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(4, 4), new Vector2(8, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(3, 2), new Vector2(4, 4), new Vector2(5, 2),
+                new Vector2(8, 0), new Vector2(4, 1),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(4, 4), new Vector2(3, 2),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(4, 4), new Vector2(8, 0), new Vector2(5, 2),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(8, 0), new Vector2(0, 0), new Vector2(4, 1)
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
-        #endregion
+        [Test]
+        public void ClipToPolygons_ConcaveConnection()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(2, 2), new Vector2(0, 4), new Vector2(4, 4),
+                new Vector2(4, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(2, 2), new Vector2(4, 4), new Vector2(4, 0),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(2, 2), new Vector2(4, 0),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 4), new Vector2(4, 4), new Vector2(2, 2),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void ClipToPolygons_AlignedSquares()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 4), new Vector2(4, 0)
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(2, 2), new Vector2(2, 4), new Vector2(4, 4), new Vector2(4, 2),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(0, 4), new Vector2(2, 4), new Vector2(2, 2),
+                    new Vector2(4, 2), new Vector2(4, 0),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void ClipToPolygons_ShrinkSquare()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 4), new Vector2(4, 0)
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 4), new Vector2(2, 4), new Vector2(2, 2),
+                new Vector2(4, 2), new Vector2(4, 0),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(2, 2), new Vector2(2, 4), new Vector2(4, 4), new Vector2(4, 2),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        private void TestClipToPolygonsSimple(Polygon subject, Polygon clip, List<Polygon> expected)
+        {
+            PolygonArrangement observedArrangement = subject.ClipToPolygons(clip);
+            PolygonDrawAssert.ListsContainSame(expected, observedArrangement.polygons);
+        }
+
+        private void TestClipToPolygonsWithHoles(
+            Polygon subject, Polygon clip, List<Polygon> expectedPolygons, List<Polygon> expectedHoles)
+        {
+            PolygonArrangement observedArrangement = subject.ClipToPolygons(clip);
+            PolygonDrawAssert.ListsContainSame(expectedPolygons, observedArrangement.polygons);
+            PolygonDrawAssert.ListsContainSame(expectedHoles, observedArrangement.holes);
+        }
     }
 }

@@ -20,149 +20,6 @@ namespace PolygonDraw
             this.vertices = vertices;
         }
 
-        #region Brute-Force Triangulation
-
-        /// <summary>
-        /// If any edge of this polygon blocks the straight line from 
-        /// vertices[vIndex1] to vertices[vIndex2] return false. Else, return true.
-        /// </summary>
-        public bool InViewOf(int vIndex1, int vIndex2)
-        {
-            // Not in view if vertices are the same or their segment already forms an edge.
-            if (this.AreAdjacent(vIndex1, vIndex2))
-            {
-                return false;
-            }
-
-            // Not in view if segment goes outside of polygon.
-            if (this.BeginsOutside(vIndex1, this.vertices[vIndex2]) 
-                || this.BeginsOutside(vIndex2, this.vertices[vIndex1]))
-            {
-                return false;
-            }
-
-            LineSegment segment = new LineSegment(vertices[vIndex1], vertices[vIndex2]);
-
-            for (int i = 0; i < this.vertices.Count; i++)
-            {
-                int j = (i+1) % vertices.Count;
-
-                // Don't count any edges that are connected to segment by an endpoint.
-                if (i == vIndex1 || j == vIndex1 || i == vIndex2 || j == vIndex2)
-                {
-                    continue;
-                }
-
-                Vector2 vertex1 = this.vertices[i];
-                Vector2 vertex2 = this.vertices[(i+1) % vertices.Count];
-                LineSegment edge = new LineSegment(vertex1, vertex2);
-                
-                Vector2 intersection = segment.GetIntersection(edge, true);
-                if (intersection != null)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Returns whether the line from this.vertices[vIndex] to point begins
-        /// outside of the polygon.
-        /// </summary>
-        public bool BeginsOutside(int vIndex, Vector2 point)
-        {
-            Vector2 vertex = this.vertices[vIndex];
-            Vector2 pointDir = point - vertex;
-            Vector2 d1 = this.vertices[(vIndex + 1) % this.vertices.Count] - vertex;
-            Vector2 d2 = this.vertices[(vIndex + this.vertices.Count - 1) % this.vertices.Count] - vertex;
-
-            return !pointDir.IsBetween(d1, d2);
-        }
-
-        /// <summary>
-        /// Splits this polygon into two along the line from this.vertices[vIndex1]
-        /// to this.vertices[vIndex2]. Precondition: vIndex1 and vIndex2 may not be
-        /// next to each other.
-        /// </summary>
-        public (Polygon, Polygon) Split(int vIndex1, int vIndex2)
-        {
-            if (this.AreAdjacent(vIndex1, vIndex2))
-            {
-                throw new ArgumentException($"Split indices cannot be adjacent: {vIndex1}, {vIndex2}");
-            }
-
-            List<Vector2> poly1 = new List<Vector2>();
-            List<Vector2> poly2 = new List<Vector2>();
-            bool onPoly1 = true;
-
-            for (int i = 0; i < this.vertices.Count; i++)
-            {
-                if (i == vIndex1 || i == vIndex2)
-                {
-                    onPoly1 = !onPoly1;
-                    poly1.Add(this.vertices[i]);
-                    poly2.Add(this.vertices[i]);
-                }
-                else if (onPoly1)
-                {
-                    poly1.Add(this.vertices[i]);
-                }
-                else
-                {
-                    poly2.Add(this.vertices[i]);
-                }
-            }
-
-            return (new Polygon(poly1), new Polygon(poly2));
-        }
-
-        /// <summary>
-        /// Divide this polygon into triangles that cover the same area.
-        /// </summary>
-        public List<Triangle> DivideIntoTriangles()
-        {
-            // If this polygon is a triangle, return it.
-            if (this.vertices.Count == 3)
-            {
-                Triangle triangle = new Triangle(this.vertices[0], this.vertices[1], this.vertices[2]);
-                return new List<Triangle>() { triangle };
-            }
-
-            // If not a triangle, find one way to split the polygon and recurse for each polygon.
-            for (int i = 0; i < this.vertices.Count; i++)
-            {
-                int jMax = i == 0 ? this.vertices.Count - 1 : this.vertices.Count;
-                for (int j = i + 2; j < jMax; j++)
-                {
-                    if (this.InViewOf(i, j))
-                    {
-                        (Polygon poly1, Polygon poly2) = this.Split(i, j);
-                        
-                        List<Triangle> triangles = new List<Triangle>();
-                        triangles.AddRange(poly1.DivideIntoTriangles());
-                        triangles.AddRange(poly2.DivideIntoTriangles());
-
-                        return triangles;
-                    }
-                }
-            }
-
-            throw new ArgumentException("Polygon could not be divided into triangles.");
-        }
-
-        /// <summary>
-        /// Whether the indices of two vertices in this polygon are next to each other.
-        /// </summary>
-        private bool AreAdjacent(int vIndex1, int vIndex2)
-        {
-            int absDiff = Math.Abs(vIndex1 - vIndex2);
-            return absDiff <= 1 || absDiff == this.vertices.Count - 1;
-        }
-
-        #endregion
-
         public override bool Equals(object otherObj)
         {
             if (!(otherObj is Polygon other))
@@ -299,12 +156,11 @@ namespace PolygonDraw
                             break;
                         }
 
-                        Triangle newTriangle = GenerateTriangle(currentVertex, previousVertex, higherVertex);
-
                         // Don't add a triangle if its vertices are co-linear.
-                        if (newTriangle.IsValidTriangle())
+                        if (!Vector2.Colinear(
+                            currentVertex.point, previousVertex.point, higherVertex.point))
                         {
-                            triangles.Add(newTriangle);
+                            triangles.Add(GenerateTriangle(currentVertex, previousVertex, higherVertex));
                         }
 
                         stack.Pop();
@@ -397,32 +253,179 @@ namespace PolygonDraw
         #region Clipping
 
         /// <summary>
-        /// Construct a graph describing for each point of interest (vertices and intersection
-        /// points) what point would come next clockwise if part of a polygon. Used for
-        /// ClipToPolygon().
+        /// Cover this polygon by a clip polygon. Return polygons that cover the
+        /// area of this polygon that are not covered by the clip.
         /// </summary>
-        private List<IntersectionGraphNode> ClipToIntersectionGraph(Polygon clip)
+        public PolygonArrangement ClipToPolygons(Polygon clip)
         {
-            List<IntersectionGraphNode> graphNodes = new List<IntersectionGraphNode>();
-            List<IntersectionData> intersections = new List<IntersectionData>();
+            List<IntersectionOrVertexNode> starterNodes = this.ClipToIntersectionGraph(
+                clip, out PolygonOverlapType overlapType);
 
-            for (int i = 0; i < clip.vertices.Count; i++)
+            // Return early if no intersections
+            if (overlapType == PolygonOverlapType.NO_OVERLAP)
             {
-                int j = (i + 1) % clip.vertices.Count;
-                LineSegment lineSegment = new LineSegment(clip.vertices[i], clip.vertices[j]);
-                List<IntersectionData> intersectionDatas =
-                    this.GetIntersectionDatasForLine(lineSegment, clip, i);
-                intersections.AddRange(intersectionDatas
-                    .Where(data => FloatHelpers.Lt(data.poly1.distanceAlongEdge, 1)));
+                return new PolygonArrangement(new List<Polygon>() {this});
+            }
+            else if (overlapType == PolygonOverlapType.SUBJECT_CONTAINS_HOLE)
+            {
+                return new PolygonArrangement(new List<Polygon>() {this}, new List<Polygon> {clip});
+            }
+            else if (overlapType == PolygonOverlapType.HOLE_CONTAINS_SUBJECT)
+            {
+                return new PolygonArrangement();
             }
 
-            // Base intersections
-            List<IntersectionData> baseIntersections = intersections
-                .OrderBy(data => data.poly1.edgeIndex + data.poly1.distanceAlongEdge)
-                .Where(data => data.GetIntersectionType() == IntersectionType.OVERLAPPING)
+            List<Polygon> polygons = new List<Polygon>();
+
+            int maxIterations = (clip.vertices.Count + this.vertices.Count) * 2;
+            int iterations = 0;
+
+            foreach (IntersectionOrVertexNode starterNode in starterNodes)
+            {
+                // Skip if already visited this point
+                if (!starterNode.CanStart())
+                {
+                    continue;
+                }
+
+                // DFS to create polygon
+                List<Vector2> vertices = new List<Vector2>();
+
+                IntersectionOrVertexNode currentNode = starterNode.NextNode();
+                IntersectionOrVertexNode prevNode = starterNode;
+                while (currentNode.VisitableFrom(prevNode))
+                {
+                    vertices.Add(currentNode.point);
+
+                    currentNode.Visit(prevNode);
+
+                    IntersectionOrVertexNode temp = currentNode;
+                    currentNode = currentNode.NextNode(prevNode);
+                    prevNode = temp;
+
+                    iterations++;
+                    if (iterations > maxIterations)
+                    {
+                        throw new InvalidOperationException("Iterated in ClipToPolygons too many times.");
+                    }
+                }
+
+                polygons.Add(new Polygon(vertices));
+            }
+
+            return new PolygonArrangement(polygons);
+        }
+
+        /// <summary>
+        /// Construct a graph describing for each point of interest (vertices and intersection
+        /// points) what point would come next clockwise if part of a polygon. Used for
+        /// ClipToPolygons().
+        /// </summary>
+        /// <param name="clip">Clipping polygon.</param>
+        /// <param name="overlapType">Output of the type of overlap that was found.</param>
+        private List<IntersectionOrVertexNode> ClipToIntersectionGraph(
+            Polygon clip, out PolygonOverlapType overlapType)
+        {
+            List<IntersectionOrVertexNode> vertexNodes = new List<IntersectionOrVertexNode>();
+            List<IntersectionOrVertexNode> intersectNodes = new List<IntersectionOrVertexNode>();
+
+            for (int i = 0; i < this.vertices.Count; i++)
+            {
+                int j = (i + 1) % this.vertices.Count;
+                LineSegment lineSegment = new LineSegment(this.vertices[i], this.vertices[j]);
+
+                List<IntersectionData> intersectionDatas =
+                    clip.GetIntersectionDatasForLine(lineSegment, this, i);
+                
+                // Add vertex if it isn't an intersection point (avoiding duplicates)
+                if (intersectionDatas.All(data => !FloatHelpers.Eq(data.poly1.distanceAlongEdge, 0)))
+                {
+                    ContainmentType containmentType = this.ContainsPoint(
+                        this.vertices[i],
+                        intersectionDatas);
+                    IntersectionOrVertexNode vertexNode = new IntersectionOrVertexNode(
+                        new PolygonVertex(this, i),
+                        containmentType != ContainmentType.OUTSIDE);
+                    vertexNodes.Add(vertexNode);
+                }
+                
+                IEnumerable<IntersectionOrVertexNode> newIntersectNodes = intersectionDatas
+                    .Where(data => FloatHelpers.Lt(data.poly1.distanceAlongEdge, 1) &&
+                        FloatHelpers.Gte(data.poly1.distanceAlongEdge, 0) &&
+                        !data.IsRemovable())
+                    .Select(data => new IntersectionOrVertexNode(data));
+
+                // Add intersection points along edge
+                intersectNodes.AddRange(newIntersectNodes);
+            }
+
+            // Choose overlap type based on intersections
+            if (intersectNodes.Count > 0)
+            {
+                overlapType = PolygonOverlapType.INTERSECTING;
+            }
+            else if (vertexNodes[0].isHidden)
+            {
+                overlapType = PolygonOverlapType.HOLE_CONTAINS_SUBJECT;
+                return new List<IntersectionOrVertexNode>();
+            }
+            else if (this.ContainsPoint(clip.vertices[0]) == ContainmentType.INSIDE)
+            {
+                overlapType = PolygonOverlapType.SUBJECT_CONTAINS_HOLE;
+                return vertexNodes;
+            }
+            else
+            {
+                overlapType = PolygonOverlapType.NO_OVERLAP;
+                return vertexNodes;
+            }
+
+            List<IntersectionOrVertexNode> subjectNodes = intersectNodes
+                .Concat(vertexNodes)
+                .OrderBy(data => data.subjectPriority)
                 .ToList();
             
-            return graphNodes;
+            // Create edges around subject polygon
+            for (int i = 0; i < subjectNodes.Count; i++)
+            {
+                subjectNodes[i].AddSubjectEdge(subjectNodes[(i + 1) % subjectNodes.Count]);
+            }
+
+            List<IntersectionOrVertexNode> clipNodesPreliminary = intersectNodes
+                .Concat(clip.vertices.Select((v, i) =>
+                    new IntersectionOrVertexNode(new PolygonVertex(clip, i, true), false)))
+                .OrderBy(data => data.clipPriority)
+                .ToList();
+            
+            // Remove duplicate vertices
+            List<IntersectionOrVertexNode> clipNodes = new List<IntersectionOrVertexNode>();
+            for (int i = 0; i < clipNodesPreliminary.Count; i++)
+            {
+                IntersectionOrVertexNode node = clipNodesPreliminary[i];
+                if (clipNodesPreliminary[i].isIntersection)
+                {
+                    clipNodes.Add(node);
+                }
+                else
+                {
+                    // Only include vertex nodes if they don't match the next or previous node.
+                    int prevI = (i + clipNodesPreliminary.Count - 1) % clipNodesPreliminary.Count;
+                    int nextI = (i + 1) % clipNodesPreliminary.Count;
+                    if (!(FloatHelpers.Eq(clipNodesPreliminary[prevI].clipPriority, node.clipPriority) ||
+                        FloatHelpers.Eq(clipNodesPreliminary[nextI].clipPriority, node.clipPriority)))
+                    {
+                        clipNodes.Add(node);
+                    }
+                }
+            }
+            
+            // Create edges around clip polygon
+            for (int i = 0; i < clipNodes.Count; i++)
+            {
+                clipNodes[i].AddClipEdge(clipNodes[(i + clipNodes.Count - 1) % clipNodes.Count]);
+            }
+            
+            return clipNodes.Concat(vertexNodes).Where(node => node.isStarter).ToList();
         }
 
         /// <summary>
@@ -520,6 +523,14 @@ namespace PolygonDraw
                 .Where(data => data.GetIntersectionType(point) == IntersectionType.OVERLAPPING);
             
             return relevantDatas.Count() % 2 == 0 ? ContainmentType.OUTSIDE : ContainmentType.INSIDE;
+        }
+
+        private enum PolygonOverlapType
+        {
+            INTERSECTING,
+            NO_OVERLAP,
+            SUBJECT_CONTAINS_HOLE,
+            HOLE_CONTAINS_SUBJECT,
         }
 
         #endregion

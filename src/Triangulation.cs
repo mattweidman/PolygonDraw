@@ -21,6 +21,15 @@ namespace PolygonDraw
         }
 
         /// <summary>
+        /// Divide a polygon into triangles.
+        /// </summary>
+        /// <param name="arrangement">Arrangement of polygons and holes.</param>
+        public static List<Triangle> Triangulate(PolygonArrangement arrangement)
+        {
+            return Triangulate(arrangement.polygons, arrangement.holes);
+        }
+
+        /// <summary>
         /// Divide polygons and holes into triangles.
         /// </summary>
         /// <param name="polygons">List of polygons to fill.</param>

@@ -28,7 +28,7 @@ namespace PolygonDrawTests
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
                 IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
-            Assert.IsTrue(intersect.IsStarter());
+            Assert.IsFalse(intersect.IsStarter());
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace PolygonDrawTests
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
                 IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
-            Assert.IsFalse(intersect.IsStarter());
+            Assert.IsTrue(intersect.IsStarter());
         }
 
         [Test]
@@ -279,7 +279,7 @@ namespace PolygonDrawTests
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
                 IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
-            Assert.IsTrue(intersect.IsStarter());
+            Assert.IsFalse(intersect.IsStarter());
         }
 
         [Test]
@@ -304,7 +304,7 @@ namespace PolygonDrawTests
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
                 IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
-            Assert.IsTrue(intersect.IsStarter());
+            Assert.IsFalse(intersect.IsStarter());
         }
 
         [Test]
@@ -379,7 +379,7 @@ namespace PolygonDrawTests
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
                 IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
-            Assert.IsTrue(intersect.IsStarter());
+            Assert.IsFalse(intersect.IsStarter());
         }
 
         [Test]
@@ -404,7 +404,7 @@ namespace PolygonDrawTests
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
                 IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
-            Assert.IsFalse(intersect.IsStarter());
+            Assert.IsTrue(intersect.IsStarter());
         }
 
         [Test]
@@ -429,7 +429,7 @@ namespace PolygonDrawTests
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
                 IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
-            Assert.IsFalse(intersect.IsStarter());
+            Assert.IsTrue(intersect.IsStarter());
         }
 
         [Test]
@@ -458,7 +458,7 @@ namespace PolygonDrawTests
             AssertIntersectionPointsMatch(intersect);
             PolygonDrawAssert.AreEqual(
                 IntersectionType.OVERLAPPING, intersect.GetIntersectionType());
-            Assert.IsFalse(intersect.IsStarter());
+            Assert.IsTrue(intersect.IsStarter());
         }
 
         [Test]
