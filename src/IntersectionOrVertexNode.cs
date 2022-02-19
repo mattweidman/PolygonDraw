@@ -12,16 +12,7 @@ namespace PolygonDraw
 
         private PolygonVertex polygonVertex;
 
-        private bool isHidden;
-
-        // private int maxVisits => 
-        //     (isIntersection &&
-        //         intersectionData.GetIntersectionType() == IntersectionType.POLY1_CONTAINS_POLY2)
-        //     ? 2 : 1;
-        
-        // private int visits = 0;
-
-        // private int lastPolygonVisited = -1;
+        public bool isHidden { get; }
 
         private bool visitedViaSubject = false, visitedViaClip = false;
 

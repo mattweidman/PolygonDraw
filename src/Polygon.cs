@@ -400,9 +400,24 @@ namespace PolygonDraw
         /// Cover this polygon by a clip polygon. Return polygons that cover the
         /// area of this polygon that are not covered by the clip.
         /// </summary>
-        public List<Polygon> ClipToPolygons(Polygon clip)
+        public PolygonArrangement ClipToPolygons(Polygon clip)
         {
-            List<IntersectionOrVertexNode> starterNodes = this.ClipToIntersectionGraph(clip);
+            List<IntersectionOrVertexNode> starterNodes = this.ClipToIntersectionGraph(
+                clip, out PolygonOverlapType overlapType);
+
+            // Return early if no intersections
+            if (overlapType == PolygonOverlapType.NO_OVERLAP)
+            {
+                return new PolygonArrangement(new List<Polygon>() {this});
+            }
+            else if (overlapType == PolygonOverlapType.SUBJECT_CONTAINS_HOLE)
+            {
+                return new PolygonArrangement(new List<Polygon>() {this}, new List<Polygon> {clip});
+            }
+            else if (overlapType == PolygonOverlapType.HOLE_CONTAINS_SUBJECT)
+            {
+                return new PolygonArrangement();
+            }
 
             List<Polygon> polygons = new List<Polygon>();
 
@@ -442,7 +457,7 @@ namespace PolygonDraw
                 polygons.Add(new Polygon(vertices));
             }
 
-            return polygons;
+            return new PolygonArrangement(polygons);
         }
 
         /// <summary>
@@ -450,7 +465,10 @@ namespace PolygonDraw
         /// points) what point would come next clockwise if part of a polygon. Used for
         /// ClipToPolygons().
         /// </summary>
-        private List<IntersectionOrVertexNode> ClipToIntersectionGraph(Polygon clip)
+        /// <param name="clip">Clipping polygon.</param>
+        /// <param name="overlapType">Output of the type of overlap that was found.</param>
+        private List<IntersectionOrVertexNode> ClipToIntersectionGraph(
+            Polygon clip, out PolygonOverlapType overlapType)
         {
             List<IntersectionOrVertexNode> vertexNodes = new List<IntersectionOrVertexNode>();
             List<IntersectionOrVertexNode> intersectNodes = new List<IntersectionOrVertexNode>();
@@ -483,6 +501,27 @@ namespace PolygonDraw
 
                 // Add intersection points along edge
                 intersectNodes.AddRange(newIntersectNodes);
+            }
+
+            // Choose overlap type based on intersections
+            if (intersectNodes.Count > 0)
+            {
+                overlapType = PolygonOverlapType.INTERSECTING;
+            }
+            else if (vertexNodes[0].isHidden)
+            {
+                overlapType = PolygonOverlapType.HOLE_CONTAINS_SUBJECT;
+                return new List<IntersectionOrVertexNode>();
+            }
+            else if (this.ContainsPoint(clip.vertices[0]) == ContainmentType.INSIDE)
+            {
+                overlapType = PolygonOverlapType.SUBJECT_CONTAINS_HOLE;
+                return vertexNodes;
+            }
+            else
+            {
+                overlapType = PolygonOverlapType.NO_OVERLAP;
+                return vertexNodes;
             }
 
             List<IntersectionOrVertexNode> subjectNodes = intersectNodes
@@ -602,31 +641,6 @@ namespace PolygonDraw
         }
 
         /// <summary>
-        /// If clip is entirely contained inside subject, combine them into one polygon.
-        /// </summary>
-        // private Polygon CreateInnerMaskPolygon(Polygon clip)
-        // {
-        //     // Find which vertex of clip is closest to first vertex in subject.
-        //     int closestMaskIndex = clip.vertices
-        //         .Select((v, i) => (v, i))
-        //         .OrderBy(pair => (pair.v - this.vertices[0]).Magnitude())
-        //         .First().i;
-            
-        //     // Construct list of vertices.
-        //     List<Vector2> polygonVertices = new List<Vector2>();
-        //     polygonVertices.AddRange(this.vertices);
-        //     polygonVertices.Add(this.vertices[0]);
-
-        //     for (int i = 0; i < 3; i++)
-        //     {
-        //         polygonVertices.Add(clip.vertices[(3 - i + closestMaskIndex) % 3]);
-        //     }
-        //     polygonVertices.Add(clip.vertices[closestMaskIndex]);
-
-        //     return new Polygon(polygonVertices);
-        // }
-
-        /// <summary>
         /// Whether a point was inside this polygon.
         /// </summary>
         public ContainmentType ContainsPoint(Vector2 point)
@@ -653,6 +667,14 @@ namespace PolygonDraw
                 .Where(data => data.GetIntersectionType(point) == IntersectionType.OVERLAPPING);
             
             return relevantDatas.Count() % 2 == 0 ? ContainmentType.OUTSIDE : ContainmentType.INSIDE;
+        }
+
+        private enum PolygonOverlapType
+        {
+            INTERSECTING,
+            NO_OVERLAP,
+            SUBJECT_CONTAINS_HOLE,
+            HOLE_CONTAINS_SUBJECT,
         }
 
         #endregion
