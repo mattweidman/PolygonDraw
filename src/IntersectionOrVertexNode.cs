@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 
 namespace PolygonDraw
 {
@@ -82,12 +82,28 @@ namespace PolygonDraw
                 }
                 else if (intersectionType == IntersectionType.POLY1_CONTAINS_POLY2)
                 {
+                    if (prevNode == null)
+                    {
+                        // For type POLY1_CONTAINS_POLY2, subjectNext and subjectPrev are not connected.
+                        // If we start on this node, and we already visited via subject, then choose the
+                        // edge that hasn't been traversed yet.
+                        return this.visitedViaSubject ? this.subjectNext : this.clipNext;
+                    }
+                    
                     return prevNode == this.subjectPrev ? this.clipNext : this.subjectNext;
+                }
+                else if (intersectionType == IntersectionType.OUTER)
+                {
+                    return this.subjectNext;
+                }
+                else if (intersectionType == IntersectionType.SPLIT)
+                {
+                    return this.clipNext;
                 }
                 else
                 {
-                    return (prevNode == this.subjectPrev || prevNode == null)
-                        ? this.subjectNext : this.clipNext;
+                    throw new InvalidOperationException(
+                        $"Not expected to traverse a vertex of type {intersectionType}.");
                 }
             }
             else
@@ -123,9 +139,16 @@ namespace PolygonDraw
             return !this.visitedViaClip;
         }
 
-        public bool WasEverVisited()
+        public bool CanStart()
         {
-            return this.visitedViaSubject || this.visitedViaClip;
+            // POLY1_CONTAINS_POLY2 is a special case because the vertex has two outgoing edges
+            if (this.isIntersection &&
+                this.intersectionData.GetIntersectionType() == IntersectionType.POLY1_CONTAINS_POLY2)
+            {
+                return !(this.visitedViaSubject && this.visitedViaClip);
+            }
+
+            return !(this.visitedViaSubject || this.visitedViaClip);
         }
     }
 }

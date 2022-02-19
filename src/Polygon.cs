@@ -283,7 +283,7 @@ namespace PolygonDraw
             foreach (IntersectionOrVertexNode starterNode in starterNodes)
             {
                 // Skip if already visited this point
-                if (starterNode.WasEverVisited())
+                if (!starterNode.CanStart())
                 {
                     continue;
                 }

@@ -458,6 +458,217 @@ namespace PolygonDrawTests
 
         #endregion
 
+        [Test]
+        public void ClipToPolygons_SquaresOverlap()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 2), new Vector2(2, 2), new Vector2(2, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(1, 1), new Vector2(1, 3), new Vector2(3, 3), new Vector2(3, 1),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(0, 2), new Vector2(1, 2), new Vector2(1, 1),
+                    new Vector2(2, 1), new Vector2(2, 0),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void ClipToPolygons_UCross()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 8), new Vector2(2, 8), new Vector2(2, 2),
+                new Vector2(4, 2), new Vector2(4, 8), new Vector2(6, 8), new Vector2(6, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(-1, 3), new Vector2(-1, 5), new Vector2(7, 5), new Vector2(7, 7),
+                new Vector2(-1, 7), new Vector2(-1, 9), new Vector2(7, 9), new Vector2(7, 3),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(0, 3), new Vector2(2, 3), new Vector2(2, 2),
+                    new Vector2(4, 2), new Vector2(4, 3), new Vector2(6, 3), new Vector2(6, 0),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 5), new Vector2(0, 7), new Vector2(2, 7), new Vector2(2, 5),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(4, 5), new Vector2(4, 7), new Vector2(6, 7), new Vector2(6, 5),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void ClipToPolygons_SplitVertices()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 8), new Vector2(8, 8), new Vector2(4, 4),
+                new Vector2(8, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(4, 4), new Vector2(2, 6), new Vector2(6, 6), new Vector2(6, 2),
+                new Vector2(2, 2),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(0, 8), new Vector2(8, 8), new Vector2(6, 6),
+                    new Vector2(2, 6), new Vector2(4, 4), new Vector2(2, 2), new Vector2(6, 2),
+                    new Vector2(8, 0),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void ClipToPolygons_AllCornersCovered()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(4, 4), new Vector2(8, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(5, 3), new Vector2(2, 3), new Vector2(2, -1), new Vector2(7, -1),
+                new Vector2(7, 3), new Vector2(8, 3), new Vector2(8, -2), new Vector2(-1, -2),
+                new Vector2(-1, 6), new Vector2(5, 6),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(5, 3), new Vector2(7, 1), new Vector2(7, 0), new Vector2(2, 0),
+                    new Vector2(2, 2), new Vector2(3, 3),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void ClipToPolygons_AllContainsVertices()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(4, 4), new Vector2(8, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(3, 2), new Vector2(4, 4), new Vector2(5, 2),
+                new Vector2(8, 0), new Vector2(4, 1),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(4, 4), new Vector2(3, 2),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(4, 4), new Vector2(8, 0), new Vector2(5, 2),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(8, 0), new Vector2(0, 0), new Vector2(4, 1)
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void ClipToPolygons_ConcaveConnection()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(2, 2), new Vector2(0, 4), new Vector2(4, 4),
+                new Vector2(4, 0),
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(2, 2), new Vector2(4, 4), new Vector2(4, 0),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(2, 2), new Vector2(4, 0),
+                }),
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 4), new Vector2(4, 4), new Vector2(2, 2),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void ClipToPolygons_AlignedSquares()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 4), new Vector2(4, 0)
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(2, 2), new Vector2(2, 4), new Vector2(4, 4), new Vector2(4, 2),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(0, 4), new Vector2(2, 4), new Vector2(2, 2),
+                    new Vector2(4, 2), new Vector2(4, 0),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
+        [Test]
+        public void ClipToPolygons_ShrinkSquare()
+        {
+            Polygon subject = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 4), new Vector2(4, 0)
+            });
+            Polygon clip = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 4), new Vector2(2, 4), new Vector2(2, 2),
+                new Vector2(4, 2), new Vector2(4, 0),
+            });
+            List<Polygon> expected = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(2, 2), new Vector2(2, 4), new Vector2(4, 4), new Vector2(4, 2),
+                }),
+            };
+            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            PolygonDrawAssert.ListsContainSame(expected, observed);
+        }
+
         private void TestClipToPolygonsSimple(Polygon subject, Polygon clip, List<Polygon> expected)
         {
             PolygonArrangement observedArrangement = subject.ClipToPolygons(clip);
