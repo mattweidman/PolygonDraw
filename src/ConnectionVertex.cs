@@ -31,5 +31,11 @@ namespace PolygonDraw
             endCv.otherEndOfLineSegment = startCv;
             return (startCv, endCv);
         }
+
+        public void ConnectToVertexOnOtherLineSegment(ConnectionVertex other)
+        {
+            this.vertexOnOtherLineSegment = other;
+            other.vertexOnOtherLineSegment = this;
+        }
     }
 }

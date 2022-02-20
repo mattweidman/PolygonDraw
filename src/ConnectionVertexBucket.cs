@@ -23,6 +23,9 @@ namespace PolygonDraw
 
         private List<ConnectionVertex> vertices;
 
+        // Precomputed from vertices in Sort()
+        private List<float> yCoords;
+
         /// <param name="firstVertex">First vertex added to this bucket.</param>
         /// <param name="maxSeparation">Max distance between connected points of different
         /// line segments.</param>
@@ -50,7 +53,7 @@ namespace PolygonDraw
             }
             else if (vertex.point.x > maxX)
             {
-                return -1;
+                return 1;
             }
             else
             {
@@ -76,6 +79,24 @@ namespace PolygonDraw
         public void Sort()
         {
             this.vertices = this.vertices.OrderBy(v => v.point.y).ToList();
+            this.yCoords = this.vertices.Select(v => v.point.y).ToList();
+        }
+
+        /// <summary>
+        /// Find the closest vertex in this bucket. Return null if no valid vertices left.
+        /// </summary>
+        public ConnectionVertex FindClosest(ConnectionVertex searchVertex)
+        {
+            int startIndex = SearchHelpers.BinarySearchClosest(
+                list: this.yCoords, searchVal: searchVertex.point.y);
+            
+            int index = SearchHelpers.FindClosestValidIndex(
+                list: this.vertices,
+                startIndex,
+                isValid: v => v.vertexOnOtherLineSegment == null,
+                distance: v => MathF.Abs(v.point.y - searchVertex.point.y));
+            
+            return index == -1 ? null : this.vertices[index];
         }
     }
 }
