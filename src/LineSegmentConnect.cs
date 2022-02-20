@@ -38,7 +38,7 @@ namespace PolygonDraw
                 }
                 else
                 {
-                    buckets.Add(new ConnectionVertexBucket(startVertex, maxSeparation));
+                    buckets.Add(ConnectionVertexBucket.FromFirstVertex(startVertex, maxSeparation));
                 }
             }
 

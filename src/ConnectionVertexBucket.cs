@@ -26,15 +26,47 @@ namespace PolygonDraw
         // Precomputed from vertices in Sort()
         private List<float> yCoords;
 
+        /// <param name="maxSeparation">Max distance between connected points of different
+        /// line segments.</param>
+        /// <param name="minX">Minimum x-coordinate in range.</param>
+        /// <param name="maxX">Maximum x-coordinate in range.</param>
+        private ConnectionVertexBucket(float maxSeparation, float minX, float maxX)
+        {
+            this.maxSeparation = maxSeparation;
+            this.minX = minX;
+            this.maxX = maxX;
+            this.vertices = new List<ConnectionVertex>();
+        }
+
+        /// <summary>
+        /// Initialize a new connection vertex bucket using one vertex.
+        /// </summary>
         /// <param name="firstVertex">First vertex added to this bucket.</param>
         /// <param name="maxSeparation">Max distance between connected points of different
         /// line segments.</param>
-        public ConnectionVertexBucket(ConnectionVertex firstVertex, float maxSeparation)
+        public static ConnectionVertexBucket FromFirstVertex(
+            ConnectionVertex firstVertex, float maxSeparation)
         {
-            this.maxSeparation = maxSeparation;
-            this.vertices = new List<ConnectionVertex>() { firstVertex };
-            this.minX = firstVertex.point.x - maxSeparation;
-            this.maxX = firstVertex.point.x + maxSeparation;
+            ConnectionVertexBucket bucket = new ConnectionVertexBucket(
+                maxSeparation,
+                firstVertex.point.x - maxSeparation,
+                firstVertex.point.x + maxSeparation);
+            
+            bucket.vertices.Add(firstVertex);
+
+            return bucket;
+        }
+
+        /// <summary>
+        /// Initialize a new connection vertex bucket. Only expected to be used in testing.
+        /// </summary>
+        /// <param name="maxSeparation">Max distance between connected points of different
+        /// line segments.</param>
+        /// <param name="minX">Minimum x-coordinate in range.</param>
+        /// <param name="maxX">Maximum x-coordinate in range.</param>
+        public static ConnectionVertexBucket FromMinAndMax(float maxSeparation, float minX, float maxX)
+        {
+            return new ConnectionVertexBucket(maxSeparation, minX, maxX);
         }
 
         /// <summary>
