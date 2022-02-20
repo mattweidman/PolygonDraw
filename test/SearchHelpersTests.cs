@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using PolygonDraw;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -173,6 +174,78 @@ namespace PolygonDrawTests
                 i => buckets[i].maxX);
             
             Assert.AreEqual(0, observed);
+        }
+
+        [Test]
+        public void FindClosestValidIndex_Even_FoundImmediately()
+        {
+            List<float> list = new List<float>() { 1, 3, 5, 6, 7, 9 };
+            int observed = SearchHelpers.FindClosestValidIndex(
+                list,
+                startIndex: 3,
+                isValid: x => x % 2 == 0,
+                distance: x => MathF.Abs(x - 6));
+            Assert.AreEqual(3, observed);
+        }
+
+        [Test]
+        public void FindClosestValidIndex_Even_FoundRight()
+        {
+            List<float> list = new List<float>() { 1, 3, 5, 6, 7, 9 };
+            int observed = SearchHelpers.FindClosestValidIndex(
+                list,
+                startIndex: 1,
+                isValid: x => x % 2 == 0,
+                distance: x => MathF.Abs(x - 6));
+            Assert.AreEqual(3, observed);
+        }
+
+        [Test]
+        public void FindClosestValidIndex_Even_FoundLeft()
+        {
+            List<float> list = new List<float>() { 1, 3, 5, 6, 7, 9 };
+            int observed = SearchHelpers.FindClosestValidIndex(
+                list,
+                startIndex: 4,
+                isValid: x => x % 2 == 0,
+                distance: x => MathF.Abs(x - 6));
+            Assert.AreEqual(3, observed);
+        }
+
+        [Test]
+        public void FindClosestValidIndex_Even_StartOnFirst()
+        {
+            List<float> list = new List<float>() { 1, 3, 5, 6, 7, 9 };
+            int observed = SearchHelpers.FindClosestValidIndex(
+                list,
+                startIndex: 0,
+                isValid: x => x % 2 == 0,
+                distance: x => MathF.Abs(x - 6));
+            Assert.AreEqual(3, observed);
+        }
+
+        [Test]
+        public void FindClosestValidIndex_Even_StartOnLast()
+        {
+            List<float> list = new List<float>() { 1, 3, 5, 6, 7, 9 };
+            int observed = SearchHelpers.FindClosestValidIndex(
+                list,
+                startIndex: 5,
+                isValid: x => x % 2 == 0,
+                distance: x => MathF.Abs(x - 6));
+            Assert.AreEqual(3, observed);
+        }
+
+        [Test]
+        public void FindClosestValidIndex_Even_NotFound()
+        {
+            List<float> list = new List<float>() { 1, 3, 5, 7, 9 };
+            int observed = SearchHelpers.FindClosestValidIndex(
+                list,
+                startIndex: 2,
+                isValid: x => x % 2 == 0,
+                distance: x => MathF.Abs(x - 6));
+            Assert.AreEqual(-1, observed);
         }
     }
 }
