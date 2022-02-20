@@ -37,5 +37,10 @@ namespace PolygonDraw
             this.vertexOnOtherLineSegment = other;
             other.vertexOnOtherLineSegment = this;
         }
+
+        public override string ToString()
+        {
+            return $"({this.point}, {(this.isFirstVertex ? "p1" : "p2")})";
+        }
     }
 }

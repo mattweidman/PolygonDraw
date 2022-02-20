@@ -53,9 +53,60 @@ namespace PolygonDraw
                 startVertex.ConnectToVertexOnOtherLineSegment(endVertex);
             }
 
-            // TODO: Traverse graph to create polygons
+            // Traverse graph to create polygons
+            List<Polygon> allPolygons = GetPolygonsFromConnections(startVertices);
 
-            return new PolygonArrangement();
+            // TODO: separate out into polygons and holes
+
+            return new PolygonArrangement(allPolygons);
+        }
+
+        private static List<Polygon> GetPolygonsFromConnections(List<ConnectionVertex> startVertices)
+        {
+            List<Polygon> allPolygons = new List<Polygon>();
+            HashSet<ConnectionVertex> visited = new HashSet<ConnectionVertex>();
+            foreach (ConnectionVertex startVertex in startVertices)
+            {
+                if (visited.Contains(startVertex))
+                {
+                    continue;
+                }
+
+                List<Vector2> vertices = new List<Vector2>() { startVertex.point };
+                ConnectionVertex currentVertex = startVertex.otherEndOfLineSegment;
+                while (currentVertex != startVertex)
+                {
+                    ConnectionVertex nextVertex;
+                    if (currentVertex.isFirstVertex)
+                    {
+                        vertices.Add(currentVertex.point);
+                        visited.Add(currentVertex);
+                        nextVertex = currentVertex.otherEndOfLineSegment;
+                    }
+                    else
+                    {
+                        nextVertex = currentVertex.vertexOnOtherLineSegment;
+                    }
+
+                    if (nextVertex == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Vertex {currentVertex} wasn't connected to another vertex.");
+                    }
+
+                    if (visited.Contains(nextVertex))
+                    {
+                        throw new InvalidOperationException(
+                            $"More than one incoming edge found for {nextVertex}.");
+                    }
+
+                    currentVertex = nextVertex;
+                }
+
+                allPolygons.Add(new Polygon(vertices));
+            }
+
+            return allPolygons;
         }
 
         /// <summary>
@@ -65,7 +116,7 @@ namespace PolygonDraw
         /// what float value should be used to compare the search value with.</param>
         /// <param name="buckets">List of buckets.</param>
         /// <param name="vertex">Vertex we are searching for.</param>
-        public static ConnectionVertex FindClosestVertex(
+        private static ConnectionVertex FindClosestVertex(
             List<float> bucketDivisions, List<ConnectionVertexBucket> buckets, ConnectionVertex vertex)
         {
             int startIndex = FindBucket(bucketDivisions, buckets, vertex);
@@ -104,7 +155,7 @@ namespace PolygonDraw
         /// what float value should be used to compare the search value with.</param>
         /// <param name="buckets">List of buckets.</param>
         /// <param name="vertex">Vertex we are searching for.</param>
-        public static int FindBucket(
+        private static int FindBucket(
             List<float> bucketDivisions, List<ConnectionVertexBucket> buckets, ConnectionVertex vertex)
         {
             return SearchHelpers.BinarySearchClosest(
