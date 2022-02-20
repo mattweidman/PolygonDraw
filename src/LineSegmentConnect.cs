@@ -69,11 +69,15 @@ namespace PolygonDraw
             List<float> bucketDivisions, List<ConnectionVertexBucket> buckets, ConnectionVertex vertex)
         {
             int startIndex = FindBucket(bucketDivisions, buckets, vertex);
+            ConnectionVertex closestVertex = null;
 
             int index = SearchHelpers.FindClosestValidIndex(
                 list: buckets,
                 startIndex,
-                isValid: bucket => bucket.FindClosest(vertex) != null,
+                isValid: bucket => {
+                    closestVertex = bucket.FindClosest(vertex);
+                    return closestVertex != null;
+                },
                 distance: bucket => {
                     int rangeIndicator = bucket.WithinRange(vertex);
                     if (rangeIndicator == 0)
@@ -90,7 +94,7 @@ namespace PolygonDraw
                     }
                 });
             
-            return buckets[index].FindClosest(vertex); // TODO: don't duplicate effort
+            return index == -1 ? null : closestVertex;
         }
 
         /// <summary>
