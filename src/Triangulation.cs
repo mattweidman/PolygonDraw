@@ -186,7 +186,7 @@ namespace PolygonDraw
         /// to produce y-monotone polygons.
         /// </summary>
         /// <param name="polygons">Polygon to fill.</param>
-        public static List<PolygonEdge> GetYMonotonePolygonDivisions(Polygon polygon)
+        internal static List<PolygonEdge> GetYMonotonePolygonDivisions(Polygon polygon)
         {
             return GetYMonotonePolygonDivisions(new List<Polygon>() { polygon }, new List<Polygon>());
         }
@@ -201,7 +201,7 @@ namespace PolygonDraw
         /// <param name="holes">Empty spaces within polygons that should
         /// not be filled. It is assumed holes are contained entirely inside
         /// polygons.</param>
-        public static List<PolygonEdge> GetYMonotonePolygonDivisions(
+        internal static List<PolygonEdge> GetYMonotonePolygonDivisions(
             List<Polygon> polygons, List<Polygon> holes)
         {
             List<PolygonVertex> allVertices = PolygonsToPolygonVertices(polygons, false)

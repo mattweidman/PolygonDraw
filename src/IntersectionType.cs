@@ -5,7 +5,7 @@ namespace PolygonDraw
     /// an intersection: 2 from one polygon, and 2 from the other polygon. This enum
     /// categorizes intersections based on the positions of these 4 edges.
     /// </summary>
-    public enum IntersectionType
+    enum IntersectionType
     {
         ///<summary>
         /// Most basic intersection type. Applies to all edge-edge intersections.

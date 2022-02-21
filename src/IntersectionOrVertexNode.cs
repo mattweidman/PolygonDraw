@@ -6,7 +6,7 @@ namespace PolygonDraw
     /// Describes a node in a graph produced by intersecting two polygons.
     /// Can represent an intersection or a vertex.
     /// </summary>
-    public class IntersectionOrVertexNode
+    class IntersectionOrVertexNode
     {
         private IntersectionData intersectionData;
 

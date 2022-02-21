@@ -9,7 +9,7 @@ namespace PolygonDraw
     /// and https://www.cs.cornell.edu/courses/cs312/2004fa/lectures/lecture11.htm#deletion
     /// </summary>
     /// <typeparam name="TMetadata">Type of metadata to associate with line segments.</typeparam>
-    public class LineSegmentTree<TMetadata>
+    class LineSegmentTree<TMetadata>
     {
         private Node root;
         

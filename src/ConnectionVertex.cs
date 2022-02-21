@@ -4,7 +4,7 @@ namespace PolygonDraw
     /// Represents a vertex on a line segment where a connection to another
     /// line segment is being made.
     /// </summary>
-    public class ConnectionVertex
+    class ConnectionVertex
     {
         public readonly Vector2 point;
 

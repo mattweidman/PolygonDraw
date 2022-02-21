@@ -3,7 +3,7 @@ namespace PolygonDraw
     /// <summary>
     /// Describes an edge between vertices in polygons.
     /// </summary>
-    public class PolygonEdge
+    class PolygonEdge
     {
         public readonly PolygonVertex vertex1, vertex2;
 

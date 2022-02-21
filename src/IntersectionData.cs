@@ -5,7 +5,7 @@ namespace PolygonDraw
     /// coordinates, IntersectionData stores the indices of the edges that intersect
     /// and the proportion along those edges where the intersection happens.
     /// </summary>
-    public class IntersectionData
+    class IntersectionData
     {
         public PolygonData poly1;
 

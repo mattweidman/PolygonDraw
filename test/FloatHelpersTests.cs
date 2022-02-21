@@ -2,7 +2,7 @@ using NUnit.Framework;
 using PolygonDraw;
 using System.Collections.Generic;
 
-namespace PolygonDrawTests
+namespace PolygonDraw.Tests
 {
     public class FloatHelpersTests
     {

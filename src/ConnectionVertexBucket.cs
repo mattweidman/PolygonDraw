@@ -7,7 +7,7 @@ namespace PolygonDraw
     /// <summary>
     /// Bucket of ConnectionVertex objects.
     /// </summary>
-    public class ConnectionVertexBucket
+    class ConnectionVertexBucket
     {
         public float minX {
             get;

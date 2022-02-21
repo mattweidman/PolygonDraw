@@ -2,7 +2,7 @@ using System;
 
 namespace PolygonDraw
 {
-    public class Matrix2
+    class Matrix2
     {
         public float f1, f2, f3, f4;
 

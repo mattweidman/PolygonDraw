@@ -2,7 +2,7 @@ using NUnit.Framework;
 using PolygonDraw;
 using System;
 
-namespace PolygonDrawTests
+namespace PolygonDraw.Tests
 {
     public class Vector2Tests
     {

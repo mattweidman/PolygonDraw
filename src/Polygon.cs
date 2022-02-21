@@ -499,7 +499,7 @@ namespace PolygonDraw
         /// <summary>
         /// Whether a point was inside this polygon.
         /// </summary>
-        public ContainmentType ContainsPoint(Vector2 point)
+        internal ContainmentType ContainsPoint(Vector2 point)
         {
             List<IntersectionData> datas = this.GetIntersectionDatasForLine(
                 new LineSegment(point, new Vector2(point.x + 1, point.y)));

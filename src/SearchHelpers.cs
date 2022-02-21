@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PolygonDraw
 {
-    public static class SearchHelpers
+    static class SearchHelpers
     {
         /// <summary>
         /// Find the index of the closest value in a list.

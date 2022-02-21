@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using PolygonDraw;
 
-namespace PolygonDrawTests
+namespace PolygonDraw.Tests
 {
     public class MatrixTests
     {

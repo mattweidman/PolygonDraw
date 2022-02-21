@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PolygonDrawTests
+namespace PolygonDraw.Tests
 {
     public class LineSegmentTreeTests
     {

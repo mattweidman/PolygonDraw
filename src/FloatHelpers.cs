@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PolygonDraw
 {
-    public static class FloatHelpers
+    static class FloatHelpers
     {
         public static readonly float EPSILON = 0.00001f;
 

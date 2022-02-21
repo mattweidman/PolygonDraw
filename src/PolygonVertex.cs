@@ -9,7 +9,7 @@ namespace PolygonDraw
     /// is a hole. PolygonVertex objects are hashed and compared only using the polygon
     /// reference and the vertex index.
     /// </summary>
-    public class PolygonVertex
+    class PolygonVertex
     {
         public readonly Polygon polygon;
 
