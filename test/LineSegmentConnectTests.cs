@@ -99,5 +99,44 @@ namespace PolygonDrawTests
             
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
+
+        [Test]
+        public void ConnectLineSegments_Hole()
+        {
+            float maxSeparation = 0.01f;
+
+            List<LineSegment> lineSegments = new List<LineSegment>()
+            {
+                new LineSegment(new Vector2(0, 0), new Vector2(0, 3)),
+                new LineSegment(new Vector2(0, 3), new Vector2(3, 3)),
+                new LineSegment(new Vector2(3, 3), new Vector2(3, 0)),
+                new LineSegment(new Vector2(3, 0), new Vector2(0, 0)),
+
+                new LineSegment(new Vector2(1, 1), new Vector2(2, 1)),
+                new LineSegment(new Vector2(2, 1), new Vector2(2, 2)),
+                new LineSegment(new Vector2(2, 2), new Vector2(1, 2)),
+                new LineSegment(new Vector2(1, 2), new Vector2(1, 1)),
+            };
+
+            List<Polygon> expectedPolygons = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(0, 3), new Vector2(3, 3), new Vector2(3, 0),
+                }),
+            };
+            List<Polygon> expectedHoles = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(1, 1), new Vector2(1, 2), new Vector2(2, 2), new Vector2(2, 1),
+                }),
+            };
+
+            PolygonArrangement observed =
+                LineSegmentConnect.ConnectLineSegments(lineSegments, maxSeparation);
+            PolygonDrawAssert.ListsContainSame(expectedPolygons, observed.polygons);
+            PolygonDrawAssert.ListsContainSame(expectedHoles, observed.holes);
+        }
     }
 }

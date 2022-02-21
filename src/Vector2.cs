@@ -48,6 +48,11 @@ namespace PolygonDraw
             return MathF.Sqrt(this.x * this.x + this.y * this.y);
         }
 
+        public Vector2 ToUnit()
+        {
+            return this / this.Magnitude();
+        }
+
         public override bool Equals(object otherObj)
         {
             if (!(otherObj is Vector2 other))
@@ -102,12 +107,29 @@ namespace PolygonDraw
         }
 
         /// <summary>
+        /// Returns the unit vector that bisects this vector and another one, assuming
+        /// other comes after this in the clockwise direction.
+        /// </summary>
+        public Vector2 Bisect(Vector2 other)
+        {
+            float angle = this.Angle(other) / 2;
+
+            Matrix2 rotationMatrix = new Matrix2(
+                MathF.Cos(angle),
+                MathF.Sin(angle),
+                -MathF.Sin(angle),
+                MathF.Cos(angle));
+            
+            return rotationMatrix.Dot(this).ToUnit();
+        }
+
+        /// <summary>
         /// Whether all points are on the same line.
         /// </summary>
         public static bool Colinear(params Vector2[] points)
         {
             Vector2 lineDir = (points[1] - points[0]);
-            Vector2 unitDir = lineDir / lineDir.Magnitude();
+            Vector2 unitDir = lineDir.ToUnit();
 
             for (int i = 2; i < points.Length; i++)
             {

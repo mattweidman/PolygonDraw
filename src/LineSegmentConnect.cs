@@ -56,9 +56,16 @@ namespace PolygonDraw
             // Traverse graph to create polygons
             List<Polygon> allPolygons = GetPolygonsFromConnections(startVertices);
 
-            // TODO: separate out into polygons and holes
+            // Separate out into polygons and holes
+            ILookup<bool, Polygon> polygonLookup = allPolygons
+                .ToLookup(polygon => polygon.IsClockwise());
+            
+            List<Polygon> clockwisePolygons = polygonLookup[true].ToList();
+            List<Polygon> holePolygons = polygonLookup[false]
+                .Select(polygon => new Polygon(Enumerable.Reverse(polygon.vertices).ToList()))
+                .ToList();
 
-            return new PolygonArrangement(allPolygons);
+            return new PolygonArrangement(clockwisePolygons, holePolygons);
         }
 
         private static List<Polygon> GetPolygonsFromConnections(List<ConnectionVertex> startVertices)

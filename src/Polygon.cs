@@ -525,6 +525,23 @@ namespace PolygonDraw
             return relevantDatas.Count() % 2 == 0 ? ContainmentType.OUTSIDE : ContainmentType.INSIDE;
         }
 
+        /// <summary>
+        /// Whether the points in this polygon are in a clockwise direction.
+        /// </summary>
+        public bool IsClockwise()
+        {
+            Vector2 bisectDir = (this.vertices[2] - this.vertices[1])
+                .Bisect(this.vertices[0] - this.vertices[1]);
+            LineSegment bisectSeg = new LineSegment(this.vertices[1], this.vertices[1] + bisectDir);
+
+            IEnumerable<IntersectionData> datas = this.GetIntersectionDatasForLine(bisectSeg)
+                .Where(data => FloatHelpers.Gt(data.poly1.distanceAlongEdge, 0))
+                .Where(data => data.GetIntersectionType(this.vertices[1] - bisectDir)
+                    == IntersectionType.OVERLAPPING);
+            
+            return datas.Count() % 2 == 1;
+        }
+
         private enum PolygonOverlapType
         {
             INTERSECTING,

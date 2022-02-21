@@ -142,5 +142,41 @@ namespace PolygonDrawTests
             Assert.AreEqual(0.5f, Vector2.ColinearLengths(
                 new Vector2(1, 1), new Vector2(3, 3), new Vector2(4, 4)));
         }
+
+        [Test]
+        public void Bisect_RightAngle()
+        {
+            Vector2 v1 = new Vector2(0, 5);
+            Vector2 v2 = new Vector2(2, 0);
+            Vector2 expected = new Vector2(1/MathF.Sqrt(2), 1/MathF.Sqrt(2));
+            PolygonDrawAssert.AreEqual(expected, v1.Bisect(v2));
+        }
+
+        [Test]
+        public void Bisect_RightAngle_Wide()
+        {
+            Vector2 v1 = new Vector2(2, 0);
+            Vector2 v2 = new Vector2(0, 5);
+            Vector2 expected = new Vector2(-1/MathF.Sqrt(2), -1/MathF.Sqrt(2));
+            PolygonDrawAssert.AreEqual(expected, v1.Bisect(v2));
+        }
+
+        [Test]
+        public void Bisect_AroundXAxis()
+        {
+            Vector2 v1 = new Vector2(2, 1);
+            Vector2 v2 = new Vector2(4, -2);
+            Vector2 expected = new Vector2(1, 0);
+            PolygonDrawAssert.AreEqual(expected, v1.Bisect(v2));
+        }
+
+        [Test]
+        public void Bisect_AroundXAxis_Wide()
+        {
+            Vector2 v1 = new Vector2(4, -2);
+            Vector2 v2 = new Vector2(2, 1);
+            Vector2 expected = new Vector2(-1, 0);
+            PolygonDrawAssert.AreEqual(expected, v1.Bisect(v2));
+        }
     }
 }

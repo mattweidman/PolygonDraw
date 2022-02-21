@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using PolygonDraw;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PolygonDrawTests
 {
@@ -143,6 +144,45 @@ namespace PolygonDrawTests
             Assert.AreEqual(ContainmentType.BOUNDARY, polygon.ContainsPoint(new Vector2(4.5f, 0)));
             Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(5.5f, 0)));
             Assert.AreEqual(ContainmentType.OUTSIDE, polygon.ContainsPoint(new Vector2(6.5f, 0)));
+        }
+
+        [Test]
+        public void IsClockwise_Triangle()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(2, 2), new Vector2(4, 0),
+            });
+            TestIsClockwise(polygon);
+        }
+
+        [Test]
+        public void IsClockwise_Square()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 2), new Vector2(2, 2), new Vector2(2, 0),
+            });
+            TestIsClockwise(polygon);
+        }
+
+        [Test]
+        public void IsClockwise_BisectCrossesLine()
+        {
+            Polygon polygon = new Polygon(new List<Vector2>()
+            {
+                new Vector2(0, 0), new Vector2(0, 2), new Vector2(2, 2), new Vector2(2, 0),
+                new Vector2(1, 1), new Vector2(1, 0),
+            });
+            TestIsClockwise(polygon);
+        }
+
+        private void TestIsClockwise(Polygon clockwisePolygon)
+        {
+            Assert.IsTrue(clockwisePolygon.IsClockwise());
+            Polygon counterclockwisePolygon = new Polygon(
+                Enumerable.Reverse(clockwisePolygon.vertices).ToList());
+            Assert.IsFalse(counterclockwisePolygon.IsClockwise());
         }
     }
 }
