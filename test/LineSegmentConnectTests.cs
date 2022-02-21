@@ -138,5 +138,56 @@ namespace PolygonDrawTests
             PolygonDrawAssert.ListsContainSame(expectedPolygons, observed.polygons);
             PolygonDrawAssert.ListsContainSame(expectedHoles, observed.holes);
         }
+
+        [Test]
+        public void ConnectLineSegments_EdgesSlightlyOff()
+        {
+            float maxSeparation = 0.01f;
+
+            List<LineSegment> lineSegments = new List<LineSegment>()
+            {
+                new LineSegment(new Vector2(0, 0), new Vector2(0, 1.991f)),
+                new LineSegment(new Vector2(0, 2), new Vector2(1.1991f, 2)),
+                new LineSegment(new Vector2(2, 2), new Vector2(0.009f, 0.009f)),
+            };
+
+            List<Polygon> expectedPolygons = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(0, 2), new Vector2(2, 2),
+                }),
+            };
+
+            PolygonArrangement observed =
+                LineSegmentConnect.ConnectLineSegments(lineSegments, maxSeparation);
+            PolygonDrawAssert.ListsContainSame(expectedPolygons, observed.polygons);
+        }
+
+        [Test]
+        public void ConnectLineSegments_DriftingBucket()
+        {
+            float maxSeparation = 0.01f;
+
+            List<LineSegment> lineSegments = new List<LineSegment>()
+            {
+                new LineSegment(new Vector2(2, 0), new Vector2(0, 0)),
+                new LineSegment(new Vector2(0, 0), new Vector2(1, 2)),
+                new LineSegment(new Vector2(1.016f, 1), new Vector2(2, 0)),
+                new LineSegment(new Vector2(1, 1.991f), new Vector2(1.009f, 1)),
+            };
+
+            List<Polygon> expectedPolygons = new List<Polygon>()
+            {
+                new Polygon(new List<Vector2>()
+                {
+                    new Vector2(0, 0), new Vector2(1, 1.991f), new Vector2(1.016f, 1), new Vector2(2, 0),
+                }),
+            };
+
+            PolygonArrangement observed =
+                LineSegmentConnect.ConnectLineSegments(lineSegments, maxSeparation);
+            PolygonDrawAssert.ListsContainSame(expectedPolygons, observed.polygons);
+        }
     }
 }
