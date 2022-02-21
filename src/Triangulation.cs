@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace PolygonDraw
@@ -15,7 +16,7 @@ namespace PolygonDraw
         /// Divide a polygon into triangles.
         /// </summary>
         /// <param name="polygons">List of polygons to fill.</param>
-        public static List<Triangle> Triangulate(Polygon polygon)
+        public static ImmutableList<Triangle> Triangulate(Polygon polygon)
         {
             return Triangulate(new List<Polygon> { polygon }, new List<Polygon>());
         }
@@ -24,7 +25,7 @@ namespace PolygonDraw
         /// Divide a polygon into triangles.
         /// </summary>
         /// <param name="arrangement">Arrangement of polygons and holes.</param>
-        public static List<Triangle> Triangulate(PolygonArrangement arrangement)
+        public static ImmutableList<Triangle> Triangulate(PolygonArrangement arrangement)
         {
             return Triangulate(arrangement.polygons, arrangement.holes);
         }
@@ -36,18 +37,19 @@ namespace PolygonDraw
         /// <param name="holes">Empty spaces within polygons that should
         /// not be filled. It is assumed holes are contained entirely inside
         /// polygons.</param>
-        public static List<Triangle> Triangulate(List<Polygon> polygons, List<Polygon> holes)
+        public static ImmutableList<Triangle> Triangulate(
+            IEnumerable<Polygon> polygons, IEnumerable<Polygon> holes)
         {
             return GetYMonotonePolygons(polygons, holes)
                 .SelectMany(polygon => polygon.MonotoneTriangulate())
-                .ToList();
+                .ToImmutableList();
         }
 
         /// <summary>
         /// Divide a polygon into y-monotone polygons.
         /// </summary>
         /// <param name="polygons">List of polygons to fill.</param>
-        public static List<Polygon> GetYMonotonePolygons(Polygon polygon)
+        internal static List<Polygon> GetYMonotonePolygons(Polygon polygon)
         {
             return GetYMonotonePolygons(new List<Polygon> { polygon }, new List<Polygon>());
         }
@@ -59,9 +61,8 @@ namespace PolygonDraw
         /// <param name="holes">Empty spaces within polygons that should
         /// not be filled. It is assumed holes are contained entirely inside
         /// polygons.</param>
-        public static List<Polygon> GetYMonotonePolygons(
-            List<Polygon> polygons,
-            List<Polygon> holes)
+        internal static List<Polygon> GetYMonotonePolygons(
+            IEnumerable<Polygon> polygons, IEnumerable<Polygon> holes)
         {
             List<PolygonEdge> divisions = GetYMonotonePolygonDivisions(polygons, holes);
             List<PolygonVertex> allVertices = PolygonsToPolygonVertices(polygons, false)
@@ -162,7 +163,7 @@ namespace PolygonDraw
         /// Create adjacency map for polygon edges.
         /// </summary>
         private static Dictionary<PolygonVertex, List<PolygonVertex>> GetDivisionsMap(
-            List<PolygonEdge> divisions, List<PolygonVertex> allVertices)
+            IEnumerable<PolygonEdge> divisions, IEnumerable<PolygonVertex> allVertices)
         {
             var adjMap = new Dictionary<PolygonVertex, List<PolygonVertex>>();
 
@@ -202,7 +203,7 @@ namespace PolygonDraw
         /// not be filled. It is assumed holes are contained entirely inside
         /// polygons.</param>
         internal static List<PolygonEdge> GetYMonotonePolygonDivisions(
-            List<Polygon> polygons, List<Polygon> holes)
+            IEnumerable<Polygon> polygons, IEnumerable<Polygon> holes)
         {
             List<PolygonVertex> allVertices = PolygonsToPolygonVertices(polygons, false)
                 .Concat(PolygonsToPolygonVertices(holes, true))
@@ -375,7 +376,7 @@ namespace PolygonDraw
         }
 
         private static IEnumerable<PolygonVertex> PolygonsToPolygonVertices(
-            List<Polygon> polygons, bool isHole)
+            IEnumerable<Polygon> polygons, bool isHole)
         {
             return polygons
                 .SelectMany(polygon => polygon.vertices

@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace PolygonDraw.Tests
 {
@@ -476,7 +477,7 @@ namespace PolygonDraw.Tests
                     new Vector2(2, 1), new Vector2(2, 0),
                 }),
             };
-            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            ImmutableList<Polygon> observed = subject.ClipToPolygons(clip).polygons;
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
@@ -509,7 +510,7 @@ namespace PolygonDraw.Tests
                     new Vector2(4, 5), new Vector2(4, 7), new Vector2(6, 7), new Vector2(6, 5),
                 }),
             };
-            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            ImmutableList<Polygon> observed = subject.ClipToPolygons(clip).polygons;
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
@@ -535,7 +536,7 @@ namespace PolygonDraw.Tests
                     new Vector2(8, 0),
                 }),
             };
-            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            ImmutableList<Polygon> observed = subject.ClipToPolygons(clip).polygons;
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
@@ -552,7 +553,7 @@ namespace PolygonDraw.Tests
                 new Vector2(7, 3), new Vector2(8, 3), new Vector2(8, -2), new Vector2(-1, -2),
                 new Vector2(-1, 6), new Vector2(5, 6),
             });
-            List<Polygon> expected = new List<Polygon>()
+            IEnumerable<Polygon> expected = new List<Polygon>()
             {
                 new Polygon(new List<Vector2>()
                 {
@@ -560,7 +561,7 @@ namespace PolygonDraw.Tests
                     new Vector2(2, 2), new Vector2(3, 3),
                 }),
             };
-            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            ImmutableList<Polygon> observed = subject.ClipToPolygons(clip).polygons;
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
@@ -591,7 +592,7 @@ namespace PolygonDraw.Tests
                     new Vector2(8, 0), new Vector2(0, 0), new Vector2(4, 1)
                 }),
             };
-            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            ImmutableList<Polygon> observed = subject.ClipToPolygons(clip).polygons;
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
@@ -618,7 +619,7 @@ namespace PolygonDraw.Tests
                     new Vector2(0, 4), new Vector2(4, 4), new Vector2(2, 2),
                 }),
             };
-            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            ImmutableList<Polygon> observed = subject.ClipToPolygons(clip).polygons;
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
@@ -641,7 +642,7 @@ namespace PolygonDraw.Tests
                     new Vector2(4, 2), new Vector2(4, 0),
                 }),
             };
-            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            ImmutableList<Polygon> observed = subject.ClipToPolygons(clip).polygons;
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 
@@ -664,7 +665,7 @@ namespace PolygonDraw.Tests
                     new Vector2(2, 2), new Vector2(2, 4), new Vector2(4, 4), new Vector2(4, 2),
                 }),
             };
-            List<Polygon> observed = subject.ClipToPolygons(clip).polygons;
+            ImmutableList<Polygon> observed = subject.ClipToPolygons(clip).polygons;
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
 

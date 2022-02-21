@@ -4,7 +4,7 @@ namespace PolygonDraw
 {
     class Matrix2
     {
-        public float f1, f2, f3, f4;
+        public readonly float f1, f2, f3, f4;
 
         /// <summary>
         /// Matrix looks like this:

@@ -4,8 +4,8 @@ namespace PolygonDraw
 {
     public class LineSegment
     {
-        public Vector2 p1;
-        public Vector2 p2;
+        public readonly Vector2 p1;
+        public readonly Vector2 p2;
 
         public LineSegment(Vector2 p1, Vector2 p2)
         {

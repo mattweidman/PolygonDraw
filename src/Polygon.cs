@@ -1,23 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace PolygonDraw
 {
     public class Polygon
     {
-        public List<Vector2> vertices;
+        public readonly ImmutableList<Vector2> vertices;
 
-        public Polygon(List<Vector2> vertices)
+        public Polygon(IEnumerable<Vector2> vertices)
         {
-            if (vertices.Count < 3)
+            if (vertices.Count() < 3)
             {
                 throw new ArgumentException(
                     $"Cannot create a polygon [{string.Join(",", vertices)}] "
                     + "with less than 3 vertices.");
             }
 
-            this.vertices = vertices;
+            this.vertices = vertices.ToImmutableList();
         }
 
         public override bool Equals(object otherObj)
@@ -76,7 +77,7 @@ namespace PolygonDraw
         /// Assuming this polygon is y-monotone, divide it into triangles that cover 
         /// the same area.
         /// </summary>
-        public List<Triangle> MonotoneTriangulate()
+        internal List<Triangle> MonotoneTriangulate()
         {
             int vertexMaxIndex = this.vertices.ArgMax(v => v.y);
             int vertexMinIndex = this.vertices.ArgMin(v => v.y);

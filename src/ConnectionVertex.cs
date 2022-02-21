@@ -15,7 +15,10 @@ namespace PolygonDraw
             private set;
         }
 
-        public ConnectionVertex vertexOnOtherLineSegment;
+        public ConnectionVertex vertexOnOtherLineSegment {
+            get;
+            private set;
+        }
 
         private ConnectionVertex(Vector2 point, bool isFirstVertex)
         {

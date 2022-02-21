@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace PolygonDraw.Tests
 {
@@ -19,7 +20,8 @@ namespace PolygonDraw.Tests
             });
 
             List<PolygonEdge> expected = new List<PolygonEdge>();
-            List<PolygonEdge> observed = Triangulation.GetYMonotonePolygonDivisions(polygon);
+            List<PolygonEdge> observed =
+                Triangulation.GetYMonotonePolygonDivisions(polygon);
             
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1263,7 +1265,7 @@ namespace PolygonDraw.Tests
             {
                 new Triangle(new Vector2(0, 0), new Vector2(0, 4), new Vector2(4, 4))
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygon);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygon);
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1299,7 +1301,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(4, 1), new Vector2(3, 0), new Vector2(2, 1)),
                 new Triangle(new Vector2(0, 2), new Vector2(2, 3), new Vector2(4, 2)),
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1323,7 +1325,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(0, 0), new Vector2(0, 2), new Vector2(2, 0)),
                 new Triangle(new Vector2(2, 2), new Vector2(2, 0), new Vector2(0, 2)),
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1347,7 +1349,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(2, 0), new Vector2(0, 4), new Vector2(1, 3)),
                 new Triangle(new Vector2(2, 0), new Vector2(1, 3), new Vector2(2, 4)),
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1371,7 +1373,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(0, 0), new Vector2(1, 4), new Vector2(1, 1)),
                 new Triangle(new Vector2(2, 0), new Vector2(1, 1), new Vector2(1, 4)),
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygons, new List<Polygon>());
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1406,7 +1408,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(3, 3), new Vector2(5, 4), new Vector2(6, 0)),
                 new Triangle(new Vector2(5, 4), new Vector2(6, 5), new Vector2(6, 0)),
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygon);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygon);
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1454,7 +1456,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(9, 0), new Vector2(8, 1), new Vector2(9, 2)),
                 new Triangle(new Vector2(8, 1), new Vector2(8, 2), new Vector2(9, 2)),
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygon);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygon);
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1534,7 +1536,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(2, 1), new Vector2(9, 1), new Vector2(8, 0)),
                 new Triangle(new Vector2(8, 0), new Vector2(1, 0), new Vector2(2, 1)),
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygons, holes);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygons, holes);
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1608,7 +1610,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(4, 4), new Vector2(4, 5), new Vector2(5, 4)),
                 new Triangle(new Vector2(5, 5), new Vector2(5, 4), new Vector2(4, 5)),
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygons, holes);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygons, holes);
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1636,7 +1638,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(-3, 0), new Vector2(-3, 1), new Vector2(0, 0)),
                 new Triangle(new Vector2(0, 0), new Vector2(-3, 1), new Vector2(-2, 1)),
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygon);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygon);
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1671,7 +1673,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(-2, -1), new Vector2(-2, 1), new Vector2(2, 1)),
                 new Triangle(new Vector2(2, 1), new Vector2(2, -1), new Vector2(-2, -1)),
             };
-            List<Triangle> observed = Triangulation.Triangulate(polygon);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygon);
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
@@ -1691,7 +1693,7 @@ namespace PolygonDraw.Tests
                 new Vector2(5, 0),
             });
 
-            List<Triangle> observed = Triangulation.Triangulate(polygon);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygon);
 
             List<Triangle> expected = new List<Triangle>()
             {
@@ -1715,7 +1717,7 @@ namespace PolygonDraw.Tests
                 new Vector2(5, 2), new Vector2(3, 2), new Vector2(4, 0)
             });
             
-            List<Triangle> observed = Triangulation.Triangulate(polygon);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygon);
 
             List<Triangle> expected = new List<Triangle>()
             {
@@ -1738,7 +1740,7 @@ namespace PolygonDraw.Tests
                 new Vector2(1, 2), new Vector2(0, 0)
             });
             
-            List<Triangle> observed = Triangulation.Triangulate(polygon);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygon);
 
             List<Triangle> expected = new List<Triangle>()
             {
@@ -1760,7 +1762,7 @@ namespace PolygonDraw.Tests
                 new Vector2(2, 1), new Vector2(1, 2)
             });
             
-            List<Triangle> observed = Triangulation.Triangulate(polygon);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygon);
 
             List<Triangle> expected = new List<Triangle>()
             {
@@ -1787,7 +1789,7 @@ namespace PolygonDraw.Tests
                 new Vector2(1, 0)
             });
             
-            List<Triangle> observed = Triangulation.Triangulate(polygon);
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(polygon);
 
             List<Triangle> expected = new List<Triangle>()
             {
@@ -1838,7 +1840,7 @@ namespace PolygonDraw.Tests
                 new Triangle(new Vector2(2, -2), new Vector2(-1, -1), new Vector2(1, -1)),
             };
             
-            List<Triangle> observed = Triangulation.Triangulate(new PolygonArrangement(polygons, holes));
+            ImmutableList<Triangle> observed = Triangulation.Triangulate(new PolygonArrangement(polygons, holes));
 
             PolygonDrawAssert.ListsContainSame(expected, observed);
         }
