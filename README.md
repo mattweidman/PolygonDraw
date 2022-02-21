@@ -55,6 +55,7 @@ The following scenarios are supported:
 ```
 using PolygonDraw;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 // ...
 
@@ -86,6 +87,7 @@ When constructing polygons from line segments, we make the following assumptions
 ```
 using PolygonDraw;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 // ...
 
