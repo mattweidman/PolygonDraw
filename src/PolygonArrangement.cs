@@ -22,5 +22,12 @@ namespace PolygonDraw
 
         public PolygonArrangement() : this(new List<Polygon>())
         {}
+
+        public override string ToString()
+        {
+            string polygonsString = string.Join(",", this.polygons);
+            string holesString = string.Join(",", this.holes);
+            return $"{{polygons:[{polygonsString}], holes:[{holesString}]}}";
+        }
     }
 }

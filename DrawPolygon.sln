@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolygonDraw", "src\PolygonD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolygonDrawTest", "test\PolygonDrawTest.csproj", "{CA67F997-713A-4B50-BC06-BF5142026131}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolygonDrawSample", "sample\PolygonDrawSample.csproj", "{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{CA67F997-713A-4B50-BC06-BF5142026131}.Release|x64.Build.0 = Release|Any CPU
 		{CA67F997-713A-4B50-BC06-BF5142026131}.Release|x86.ActiveCfg = Release|Any CPU
 		{CA67F997-713A-4B50-BC06-BF5142026131}.Release|x86.Build.0 = Release|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Debug|x64.Build.0 = Debug|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Debug|x86.Build.0 = Debug|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Release|x64.ActiveCfg = Release|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Release|x64.Build.0 = Release|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Release|x86.ActiveCfg = Release|Any CPU
+		{1B01B380-2F04-4A8C-A7BA-7F3C404B88D8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

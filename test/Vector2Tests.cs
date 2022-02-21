@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using PolygonDraw;
 using System;
 
 namespace PolygonDraw.Tests
