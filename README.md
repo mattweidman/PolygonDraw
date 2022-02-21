@@ -107,4 +107,6 @@ List<Polygon> holesCreated = arrangement.holes;
 
 ## How to test
 
-`dotnet test`
+Run test cases: `dotnet test`
+
+Run sample project: `dotnet run --project=sample/PolygonDrawSample.csproj`
