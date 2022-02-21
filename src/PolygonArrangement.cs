@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace PolygonDraw
 {
@@ -7,17 +8,17 @@ namespace PolygonDraw
     /// </summary>
     public class PolygonArrangement
     {
-        public List<Polygon> polygons;
+        public readonly ImmutableList<Polygon> polygons;
 
-        public List<Polygon> holes;
+        public readonly ImmutableList<Polygon> holes;
 
-        public PolygonArrangement(List<Polygon> polygons, List<Polygon> holes)
+        public PolygonArrangement(IEnumerable<Polygon> polygons, IEnumerable<Polygon> holes)
         {
-            this.polygons = polygons;
-            this.holes = holes;
+            this.polygons = polygons.ToImmutableList();
+            this.holes = holes.ToImmutableList();
         }
 
-        public PolygonArrangement(List<Polygon> polygons) : this(polygons, new List<Polygon>())
+        public PolygonArrangement(IEnumerable<Polygon> polygons) : this(polygons, new List<Polygon>())
         {}
 
         public PolygonArrangement() : this(new List<Polygon>())

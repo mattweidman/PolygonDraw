@@ -49,11 +49,11 @@ namespace PolygonDraw.Tests
             }
         }
 
-        public static void ListsContainSame<T>(List<T> expected, List<T> observed)
+        public static void ListsContainSame<T>(IEnumerable<T> expected, IEnumerable<T> observed)
         {
             bool areEqual = true;
 
-            if (expected.Count != observed.Count)
+            if (expected.Count() != observed.Count())
             {
                 areEqual = false;
             }
@@ -126,7 +126,7 @@ namespace PolygonDraw.Tests
             }
         }
 
-        private static string ListToString<T>(List<T> objs)
+        private static string ListToString<T>(IEnumerable<T> objs)
         {
             return $"[{string.Join(",", objs)}]";
         }

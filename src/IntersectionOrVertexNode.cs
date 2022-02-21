@@ -8,11 +8,11 @@ namespace PolygonDraw
     /// </summary>
     class IntersectionOrVertexNode
     {
-        private IntersectionData intersectionData;
+        private readonly IntersectionData intersectionData;
 
-        private PolygonVertex polygonVertex;
+        private readonly PolygonVertex polygonVertex;
 
-        public bool isHidden { get; }
+        public readonly bool isHidden;
 
         private bool visitedViaSubject = false, visitedViaClip = false;
 

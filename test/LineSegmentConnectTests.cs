@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace PolygonDraw.Tests
 {
@@ -25,7 +26,7 @@ namespace PolygonDraw.Tests
                 }),
             };
 
-            List<Polygon> observed =
+            ImmutableList<Polygon> observed =
                 LineSegmentConnect.ConnectLineSegments(lineSegments, maxSeparation).polygons;
             
             PolygonDrawAssert.ListsContainSame(expected, observed);
@@ -60,7 +61,7 @@ namespace PolygonDraw.Tests
                 }),
             };
 
-            List<Polygon> observed =
+            ImmutableList<Polygon> observed =
                 LineSegmentConnect.ConnectLineSegments(lineSegments, maxSeparation).polygons;
             
             PolygonDrawAssert.ListsContainSame(expected, observed);
@@ -93,7 +94,7 @@ namespace PolygonDraw.Tests
                 }),
             };
 
-            List<Polygon> observed =
+            ImmutableList<Polygon> observed =
                 LineSegmentConnect.ConnectLineSegments(lineSegments, maxSeparation).polygons;
             
             PolygonDrawAssert.ListsContainSame(expected, observed);

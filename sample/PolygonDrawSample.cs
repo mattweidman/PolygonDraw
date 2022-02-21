@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace PolygonDraw.Sample
 {
@@ -35,7 +36,7 @@ namespace PolygonDraw.Sample
             });
 
             // Divide polygons into triangles.
-            List<Triangle> triangles = Triangulation.Triangulate(
+            ImmutableList<Triangle> triangles = Triangulation.Triangulate(
                 polygons: new List<Polygon>() { bigSquare },
                 holes: new List<Polygon>() { smallSquare });
             

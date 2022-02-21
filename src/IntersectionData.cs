@@ -7,9 +7,9 @@ namespace PolygonDraw
     /// </summary>
     class IntersectionData
     {
-        public PolygonData poly1;
+        public readonly PolygonData poly1;
 
-        public PolygonData poly2;
+        public readonly PolygonData poly2;
 
         private IntersectionType? cachedIntersectionType;
 
@@ -224,19 +224,19 @@ namespace PolygonDraw
         public class PolygonData
         {
             /// <summary>Reference to polygon.</summary>
-            public Polygon polygon;
+            public readonly Polygon polygon;
 
             /// <summary>Index of edge in polygon where intersection happens.</summary>
-            public int edgeIndex;
+            public readonly int edgeIndex;
 
             /// <summary>
             /// Proportion across the edge from polygon where intersection happens.
             /// In the range [0, 1) if between the endpoints of edge. 0 if intersection is at
             /// first endpoint in segment. 1 if intersection is at second endpoint.
             /// </summary>
-            public float distanceAlongEdge;
+            public readonly float distanceAlongEdge;
 
-            private bool isReversed;
+            private readonly bool isReversed;
 
             /// <summary>First endpoint of edge.</summary>
             private Vector2 p1 => this.polygon.vertices[this.edgeIndex];

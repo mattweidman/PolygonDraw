@@ -16,7 +16,7 @@ namespace PolygonDraw
         /// <param name="maxSeparation">Max distance between connected points of different
         /// line segments.</param>
         public static PolygonArrangement ConnectLineSegments(
-            List<LineSegment> lineSegments, float maxSeparation)
+            IEnumerable<LineSegment> lineSegments, float maxSeparation)
         {
             // Create ConnectionVertex nodes
             List<(ConnectionVertex, ConnectionVertex)> connectionTuples = lineSegments
@@ -68,7 +68,7 @@ namespace PolygonDraw
             return new PolygonArrangement(clockwisePolygons, holePolygons);
         }
 
-        private static List<Polygon> GetPolygonsFromConnections(List<ConnectionVertex> startVertices)
+        private static List<Polygon> GetPolygonsFromConnections(IEnumerable<ConnectionVertex> startVertices)
         {
             List<Polygon> allPolygons = new List<Polygon>();
             HashSet<ConnectionVertex> visited = new HashSet<ConnectionVertex>();

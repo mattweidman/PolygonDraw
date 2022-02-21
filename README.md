@@ -21,6 +21,7 @@ The following scenarios are supported:
 ```
 using PolygonDraw;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 // ...
 
@@ -35,7 +36,7 @@ Polygon smallSquare = new Polygon(new List<Vector2>()
 });
 
 // Divide polygons into triangles.
-List<Triangle> triangles = Triangulation.Triangulate(
+ImmutableList<Triangle> triangles = Triangulation.Triangulate(
     polygons: new List<Polygon>() { bigSquare },
     holes: new List<Polygon>() { smallSquare });
 ```
@@ -70,8 +71,8 @@ Polygon overlappingSquare = new Polygon(new List<Vector2>()
 
 // Clip polygons with other polygons to produce smaller pieces.
 PolygonArrangement arrangement = bigSquare.ClipToPolygons(overlappingSquare);
-List<Polygon> polygonsCreated = arrangement.polygons;
-List<Polygon> holesCreated = arrangement.holes;
+ImmutableList<Polygon> polygonsCreated = arrangement.polygons;
+ImmutableList<Polygon> holesCreated = arrangement.holes;
 ```
 
 ## Polygon construction from line segments
@@ -101,8 +102,8 @@ List<LineSegment> lineSegments = new List<LineSegment>()
 // A single quadrilateral is created.
 PolygonArrangement arrangement =
     LineSegmentConnect.ConnectLineSegments(lineSegments, maxSeparation);
-List<Polygon> polygonsCreated = arrangement.polygons;
-List<Polygon> holesCreated = arrangement.holes;
+ImmutableList<Polygon> polygonsCreated = arrangement.polygons;
+ImmutableList<Polygon> holesCreated = arrangement.holes;
 ```
 
 ## How to test
